@@ -85,12 +85,16 @@ describe('design-system rendered contracts', () => {
     expect(statusMarkup).not.toContain('<button');
   });
 
-  it('renders a controlled modal only while open, including its action slot', () => {
+  it('renders a controlled modal on a native <dialog>, closed by default', () => {
+    // Modal is always mounted so `showModal()`/`close()` can be called
+    // imperatively as `open` changes; a dialog with no `open` attribute is
+    // `display: none` (and excluded from the accessibility tree) by the UA
+    // stylesheet, so closed content is inert without a conditional render.
     const closedMarkup = renderToStaticMarkup(
       createElement(designSystem.Modal, {
         open: false,
         title: 'Reject invoice?',
-        children: 'This should not render.',
+        children: 'This should not render while open.',
       }),
     );
     const openMarkup = renderToStaticMarkup(
@@ -103,7 +107,9 @@ describe('design-system rendered contracts', () => {
       }),
     );
 
-    expect(closedMarkup).toBe('');
+    expect(closedMarkup).toContain('<dialog');
+    expect(closedMarkup).not.toMatch(/<dialog[^>]*\sopen(\s|=|>)/);
+    expect(openMarkup).toContain('<dialog');
     expect(openMarkup).toContain('role="dialog"');
     expect(openMarkup).toContain('aria-modal="true"');
     expect(openMarkup).toContain('aria-label="Reject invoice?"');
