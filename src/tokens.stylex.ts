@@ -84,3 +84,12 @@ export const glass = stylex.defineVars({
   border: '1px solid rgba(15,23,42,.08)',
   highlight: 'inset 0 1px 0 rgba(255,255,255,.6)',
 });
+
+/** Durations collapse to 0 under prefers-reduced-motion; components should never hardcode a transition duration. */
+export const motion = stylex.defineVars({
+  durationFast: { default: '120ms', '@media (prefers-reduced-motion: reduce)': '0ms' },
+  durationBase: { default: '200ms', '@media (prefers-reduced-motion: reduce)': '0ms' },
+  durationSlow: { default: '320ms', '@media (prefers-reduced-motion: reduce)': '0ms' },
+  easeStandard: 'cubic-bezier(.2,.8,.2,1)',
+  easeEmphasized: 'cubic-bezier(.32,.72,0,1)',
+});

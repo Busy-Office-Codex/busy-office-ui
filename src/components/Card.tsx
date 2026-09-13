@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import type { HTMLAttributes } from 'react';
-import { color, font, radius, shadow, space } from '../tokens.stylex.js';
+import { color, font, motion, radius, shadow, space } from '../tokens.stylex.js';
 
 const styles = stylex.create({
   base: {
@@ -19,7 +19,8 @@ const styles = stylex.create({
   interactive: {
     cursor: 'pointer',
     transitionProperty: 'box-shadow, border-color',
-    transitionDuration: '150ms',
+    transitionDuration: motion.durationBase,
+    transitionTimingFunction: motion.easeStandard,
     borderColor: {
       default: color.border,
       ':hover': color.borderStrong,

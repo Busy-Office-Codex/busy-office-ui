@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
-import { glass, radius, shadow, space } from '../tokens.stylex.js';
+import { color, font, glass, radius, shadow, space } from '../tokens.stylex.js';
 import { Text } from './Text.js';
 
 const FOCUSABLE_SELECTOR =
@@ -50,6 +50,10 @@ const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     gap: space.space3,
+    fontFamily: font.family,
+    fontSize: font.sizeBody,
+    lineHeight: font.lineHeightBody,
+    color: color.textPrimary,
   },
   actions: {
     display: 'flex',

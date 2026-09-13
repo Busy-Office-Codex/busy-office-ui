@@ -2,6 +2,7 @@
 category: actions
 tests:
   - test/browser/compact-controls.spec.ts
+  - test/browser/design-fidelity-fixes.spec.ts
   - test/components.test.ts
 ---
 

@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import type { ButtonHTMLAttributes } from 'react';
-import { color, font, radius, space } from '../tokens.stylex.js';
+import { color, font, motion, radius, space } from '../tokens.stylex.js';
 
 const styles = stylex.create({
   base: {
@@ -11,6 +11,10 @@ const styles = stylex.create({
     height: '40px',
     paddingInline: space.space5,
     whiteSpace: 'nowrap',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: space.space2,
+    lineHeight: '1',
     borderStyle: 'solid',
     borderWidth: '1px',
     borderColor: 'transparent',
@@ -23,7 +27,8 @@ const styles = stylex.create({
       ':disabled': 0.4,
     },
     transitionProperty: 'background-color, border-color, color',
-    transitionDuration: '150ms',
+    transitionDuration: motion.durationBase,
+    transitionTimingFunction: motion.easeStandard,
     outlineOffset: '2px',
     outlineColor: {
       default: 'transparent',
@@ -52,6 +57,7 @@ const styles = stylex.create({
     backgroundColor: {
       default: color.bgSubtle,
       ':hover': color.border,
+      ':active': color.borderStrong,
     },
     color: color.textPrimary,
   },
