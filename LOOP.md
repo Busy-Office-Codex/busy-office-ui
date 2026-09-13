@@ -4,6 +4,14 @@ The rules one unattended tick obeys in this repository. `AGENTS.md` holds the
 engineering rules and gates; this file adds how a tick batches, parallelises,
 stops and records. Where they overlap, `AGENTS.md` wins.
 
+Solo Flow (trunk-based): one writer, one branch (`main`), local-only work
+branches, CI as the sole independent check. There is no `develop` — every
+commit that lands on `main` has already passed the full gate suite, so there
+is no "unstable" state a second branch would need to shield anyone from. The
+one external consumer (the ERP/core session, issue #1's protocol) pins exact
+commit SHAs, not "whatever's on a branch," so it needs nothing a second branch
+would add.
+
 **Aim: finish the current milestone fast with lean changes.** Work runs in
 parallel; checks and review run once per batch. Simplicity wins every tie: the
 smallest change that meets the Accept, deletion before addition, no new export
@@ -26,10 +34,10 @@ without an agreed request.
 1. **Wake.** Check `.loop/HALT`. Read `.loop/state.json`, the `ROADMAP.md`
    Milestone section and items, open issues in `Busy-Office-Codex/busy-office-ui`
    and `Busy-Office-Codex/busy-office-erp`, and the latest `gates` run on
-   `develop` (`gh run list -w gates -b develop -L 1`). `git fetch`; start from
-   an up-to-date local `develop`.
+   `main` (`gh run list -w gates -b main -L 1`). `git fetch`; start from an
+   up-to-date local `main`.
 2. **Select a batch** of at most 4 items, in this order:
-   0. a failing `gates` run on `develop` → fixing it is the whole batch;
+   0. a failing `gates` run on `main` → fixing it is the whole batch;
    1. fixes requested on anything this loop handed off;
    2. `[ ]` items listed in the **current milestone** whose Accept is stated,
       whose "Needs" is met and whose linked issue (if any) is `agreed`, taking
@@ -37,7 +45,7 @@ without an agreed request.
    Items outside the current milestone are never selected. Skip one-way items
    (see Gate). No selectable item → the milestone check under Stops.
 3. **Build in parallel.** Create the local batch branch `feat/m<N>-batch-<tick>`
-   off `develop`. Split the batch into waves: items that touch no common file
+   off `main`. Split the batch into waves: items that touch no common file
    form one wave; an item sharing a file with another waits for the next wave.
    - Each builder is a subagent in its **own git worktree** (Agent tool
      `isolation: "worktree"`, or `git worktree add ../busy-office-ui-wt/<item>
@@ -49,8 +57,8 @@ without an agreed request.
    - The main session merges each finished builder branch into the batch
      branch with `--no-ff`, resolves conflicts, and starts the next wave from
      the updated batch branch. Remove each worktree after merging it.
-   - Never commit directly to `develop` or `main`; never tag, release or
-     publish; never push work branches or open PRs.
+   - Never commit directly to `main`; never tag, release or publish; never
+     push work branches or open PRs.
 4. **Verify once, for the whole batch,** in the main checkout.
    - Run the full `AGENTS.md` gate suite on the batch head. Skip
      `pnpm security` when `package.json` and `pnpm-lock.yaml` are unchanged.
@@ -66,42 +74,53 @@ without an agreed request.
      message, continue.
    - **One-way** (removing or renaming public props, types or exports, new
      exports, package version, dependencies, behaviour an ERP host relies on,
-     releases or anything touching `main`, editing `intent.md`, the ROADMAP
-     Objective or the Milestone section, closing issues): comment the proposal
-     on a `[UI request]` issue as `proposed` and leave the item out of the
-     batch. Never mark your own proposal `agreed`.
+     tags, releases, publishing, editing `intent.md`, the ROADMAP Objective or
+     the Milestone section, closing issues): comment the proposal on a
+     `[UI request]` issue as `proposed` and leave the item out of the batch.
+     Never mark your own proposal `agreed`.
 6. **Record.** Tick the closed items in `ROADMAP.md` on the batch branch.
-   `git fetch`; rebase the batch branch onto `origin/develop` if it moved;
-   merge it into local `develop` with `--no-ff`; push `develop`; delete the
-   local branches. The merge commit message lists the milestone, items closed,
-   the net line change under `src/`, the two-way decisions taken and, when the
+   `git fetch`; rebase the batch branch onto `origin/main` if it moved; merge
+   it into local `main` with `--no-ff`; push `main`; delete the local
+   branches. The merge commit message lists the milestone, items closed, the
+   net line change under `src/`, the two-way decisions taken and, when the
    release rule holds, a release recommendation. Post one `ready for
    integration` handoff per linked issue citing that merge commit's SHA. Write
    `.loop/state.json` last.
 
 ## Branches and releases
 
-Gitflow. Work branches (`feat/`, `fix/`, `chore/`) are local only: they come
-off `develop` and are merged back into `develop` locally with `--no-ff`; only
-`develop` is pushed. No owner approval is needed to merge into `develop` once
-verify passes. `main` only receives release merges, and the loop never merges
-into `main`, tags or releases — it recommends.
+Solo Flow. Work branches (`feat/`, `fix/`, `chore/`) are local only: they come
+off `main` and are merged back into `main` locally with `--no-ff`; only `main`
+is pushed. No owner approval is needed to merge into `main` once verify
+passes — merges into `main` are the normal outcome of a tick, not a release.
+The loop never tags, releases or publishes — it recommends; the owner
+approves.
 
-**Recommend a release** when the latest `gates` run on `develop` passed and at
+**Recommend a release** when the latest `gates` run on `main` passed and at
 least one holds:
 - the current milestone just became complete;
 - the ERP host needs a version to pin (an issue asks for one, or a handoff is
   `accepted`);
 - a public export, prop or behaviour a host sees has changed since the last tag;
-- 2 weeks have passed with unreleased commits on `develop`.
+- 2 weeks have passed with unreleased commits since the last tag.
 
 Version: patch for fixes only, minor for anything a host can see. A release is
-`release/x.y.z` from `develop` → version bump and notes → merge into `main`
-with the owner's OK → tag `vx.y.z` → merge `main` back into `develop`.
+an annotated tag on the `main` commit to release, pushed, with notes published
+as a GitHub Release — nothing merges between branches to produce it:
+
+```bash
+git tag -a v<x.y.z> -m "<x.y.z>: <one-line summary>"
+git push origin v<x.y.z>
+```
+
+Use the ephemeral `release/x.y.z` branch only when the version bump and notes
+need more than one commit, or the owner wants to review them before they're
+permanent; fast-forward `main` to include it, then tag. Tags are immutable —
+a wrong tag gets a new patch version, never a moved tag.
 
 ## State
 
-`.loop/state.json` is local (gitignored); merge commits on `develop` and issue
+`.loop/state.json` is local (gitignored); merge commits on `main` and issue
 comments are the durable record.
 
 ```json
