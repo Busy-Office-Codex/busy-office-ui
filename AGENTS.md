@@ -19,7 +19,15 @@ ERP services or encode application-specific behavior here.
 
 Before nontrivial work read intent.md, ARCHITECTURE.md, ROADMAP.md and relevant
 UI specifications. Map acceptance to tests before implementation and keep a
-separate reviewer; do not expand the UI/framework boundary.
+separate reviewer; do not expand the UI/framework boundary. New components and
+props must pass the ROADMAP.md Objective tests. Unattended or repeated runs
+follow [LOOP.md](LOOP.md).
+
+Write acceptance as the property a test checks, not the value you expect. A new
+check lands with a red-proof: show it failing on a planted defect in the PR. A
+check that cannot run must fail, not skip. Assert removals on structure (element,
+role, attribute), not on raw text. Every behaviour a `docs/*.md` page claims has
+a test; prop lists come from the built `.d.ts`, not from hand-written tables.
 
 Use [docs/design-conventions.md](docs/design-conventions.md) and the component
 sources before changing UI. Only this repository's writers may change its source

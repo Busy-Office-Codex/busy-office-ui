@@ -1,6 +1,7 @@
 # UI Architecture
 
-`src/` exposes the versioned `@busyoffice/design-system` component API.
+`src/` exposes the versioned `@busyoffice/design-system` component API and the
+reusable application shell at the `./shell` subpath (`src/shell/`).
 `examples/` contains pure React compositions that demonstrate use of those
 exports. `build.mjs` bundles browser ESM and compiles StyleX CSS into `dist/`.
 

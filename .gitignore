@@ -8,6 +8,9 @@ playwright-report/
 *.log
 .env*
 
+# loop machine state (see LOOP.md)
+.loop/
+
 # design-sync machine state
 .ds-sync/
 ds-bundle/
