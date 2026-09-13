@@ -1,8 +1,10 @@
 ---
 category: layout
+tests:
+  - test/browser/shell-focus.spec.ts
 ---
 
-The reusable application shell, exported from `@busyoffice/design-system/shell`: command bar (brand slot, command-palette trigger, account slot), app strip (sibling routes of the active module), content slot, floating dock (launcher + pinned apps) and a launcher/home view. There is no sidebar.
+The reusable application shell, exported from `@busyoffice/design-system/shell`: command bar (brand slot, command-palette trigger, account slot), app strip (sibling routes of the active module), content slot, floating dock (launcher + pinned apps) and a launcher/home view. There is no sidebar. Not for a single standalone page — Shell assumes a multi-route host with an app strip and dock; compose `Card`/`Text`/`Button` directly for a one-off page instead of mounting the whole shell around it.
 
 The host owns the route registry, the active route, page retention, command execution, counts and permissions; the shell owns presentation and transient state — palette open/closed (Ctrl/⌘K, Escape, close button, backdrop; focus returns to the opener; Tab is contained), launcher shown/hidden, `aria-current` on the active strip item, and the `role="status"` message when the registry fails `validateShellNavigation`.
 

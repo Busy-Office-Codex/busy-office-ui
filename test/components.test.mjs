@@ -163,4 +163,18 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('<span');
     expect(markup).toContain('>$1,240.00</span>');
   });
+
+  it('renders each Text variant on its default element, and `as` overrides the element', () => {
+    const heading = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'heading' }, 'Orders'));
+    const caption = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'caption' }, 'Orders'));
+    const overridden = renderToStaticMarkup(
+      createElement(designSystem.Text, { variant: 'heading', as: 'span' }, 'Orders'),
+    );
+
+    expect(heading).toMatch(/^<h2 class="[^"]+">Orders<\/h2>$/);
+    expect(caption).toMatch(/^<span class="[^"]+">Orders<\/span>$/);
+    expect(overridden).toMatch(/^<span class="[^"]+">Orders<\/span>$/);
+    // Different variants carry different size/weight tokens, so their compiled class lists differ.
+    expect(heading).not.toBe(caption);
+  });
 });
