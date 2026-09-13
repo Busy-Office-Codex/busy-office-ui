@@ -106,9 +106,11 @@ export function Chip(props: ChipProps) {
   return (
     <button
       type="button"
+      aria-pressed={selected}
       {...rest}
       {...stylex.props(styles.filterBase, selected && styles.filterSelected)}
     >
+      {selected && <span aria-hidden="true">✓ </span>}
       {children}
       {selected && onRemove && <span aria-hidden="true">×</span>}
     </button>

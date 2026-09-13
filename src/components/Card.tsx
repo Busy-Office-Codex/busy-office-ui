@@ -1,9 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 import type { HTMLAttributes } from 'react';
-import { color, radius, shadow, space } from '../tokens.stylex.js';
+import { color, font, radius, shadow, space } from '../tokens.stylex.js';
 
 const styles = stylex.create({
   base: {
+    position: 'relative',
     borderRadius: radius.md,
     borderStyle: 'solid',
     borderWidth: '1px',
@@ -48,6 +49,19 @@ const styles = stylex.create({
     boxShadow: 'none',
     cursor: 'not-allowed',
   },
+  // Selection also needs a non-colour cue: a checkmark glyph, not just the
+  // accent-coloured border, so it still reads for a viewer who can't
+  // distinguish the border hue from the unselected one.
+  selectedBadge: {
+    position: 'absolute',
+    top: space.space2,
+    right: space.space2,
+    fontFamily: font.family,
+    fontSize: font.sizeCaption,
+    fontWeight: font.weightSemibold,
+    lineHeight: 1,
+    color: color.accent,
+  },
 });
 
 export type CardProps = HTMLAttributes<HTMLDivElement> & {
@@ -59,8 +73,10 @@ export function Card({ selected, disabled, onClick, onKeyDown, children, ...rest
   const interactive = Boolean(onClick) && !disabled;
   return (
     <div
-      role={onClick ? 'button' : undefined}
+      role={interactive ? 'button' : undefined}
       tabIndex={interactive ? 0 : undefined}
+      aria-pressed={interactive && selected !== undefined ? selected : undefined}
+      aria-disabled={disabled || undefined}
       onClick={disabled ? undefined : onClick}
       onKeyDown={(event) => {
         onKeyDown?.(event);
@@ -78,6 +94,11 @@ export function Card({ selected, disabled, onClick, onKeyDown, children, ...rest
       )}
     >
       {children}
+      {selected && (
+        <span aria-hidden="true" {...stylex.props(styles.selectedBadge)}>
+          ✓
+        </span>
+      )}
     </div>
   );
 }
