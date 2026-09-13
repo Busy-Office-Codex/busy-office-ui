@@ -2,7 +2,7 @@
 category: feedback
 tests:
   - test/browser/modal-focus.spec.ts
-  - test/components.test.mjs
+  - test/components.test.ts
 ---
 
 Full-screen overlay dialog that interrupts the flow to communicate or demand a response (confirm/cancel a delete, approve a change). Controlled via `open` + `onClose`; `title` and `children` are the header/body content slots, `actions` takes the footer button row. There is no built-in trigger — the host app owns the `open` state. Not for a non-blocking notice — Modal always traps focus and blocks the page; use a status `Chip` or inline `Text` for something that shouldn't interrupt the user.

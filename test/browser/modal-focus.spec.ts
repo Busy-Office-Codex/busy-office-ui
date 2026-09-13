@@ -75,7 +75,7 @@ test('while open, the modal makes background content genuinely inert, not just v
   // the claim in docs/Modal.md.
   await page.goto('/#examples');
   const stillFocusable = await page.evaluate(() => {
-    const tile = document.querySelector('button[aria-label="Sales"]');
+    const tile = document.querySelector<HTMLElement>('button[aria-label="Sales"]');
     tile?.focus();
     return document.activeElement === tile;
   });
@@ -85,7 +85,7 @@ test('while open, the modal makes background content genuinely inert, not just v
   await expect(page.getByRole('dialog', { name: 'Reject SO-1042?' })).toBeVisible();
 
   const focusedWhileModalOpen = await page.evaluate(() => {
-    const tile = document.querySelector('button[aria-label="Sales"]');
+    const tile = document.querySelector<HTMLElement>('button[aria-label="Sales"]');
     tile?.focus();
     return document.activeElement === tile;
   });

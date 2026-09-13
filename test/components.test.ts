@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 const packageDirectory = fileURLToPath(new URL('..', import.meta.url));
-let designSystem;
+let designSystem: typeof import('../src/index.js');
 
 beforeAll(async () => {
   execFileSync(process.execPath, ['build.mjs'], {
@@ -165,10 +165,10 @@ describe('design-system rendered contracts', () => {
   });
 
   it('renders each Text variant on its default element, and `as` overrides the element', () => {
-    const heading = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'heading' }, 'Orders'));
-    const caption = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'caption' }, 'Orders'));
+    const heading = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'heading', children: 'Orders' }));
+    const caption = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'caption', children: 'Orders' }));
     const overridden = renderToStaticMarkup(
-      createElement(designSystem.Text, { variant: 'heading', as: 'span' }, 'Orders'),
+      createElement(designSystem.Text, { variant: 'heading', as: 'span', children: 'Orders' }),
     );
 
     expect(heading).toMatch(/^<h2 class="[^"]+">Orders<\/h2>$/);
