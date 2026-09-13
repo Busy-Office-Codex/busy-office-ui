@@ -49,6 +49,13 @@ test('the active app-strip nav item is a rounded-rect highlight, not a capsule',
   // content (this) gets radius.sm, like Dropdown's own highlighted menu item — never
   // radius.pill, which Button would otherwise apply by default. Matches
   // templates/erp-skeleton/Shell.dc.html's active nav-tab exactly (border-radius:6px).
+  //
+  // Shell.tsx applies this borderRadius unconditionally (outside the active ? ... ternary), so
+  // an inactive item's :hover background (variant="ghost") should carry the same radius.sm, not
+  // a pill — but this preview's route registry (preview/client.tsx) gives every module exactly
+  // one route, so stripRoutes never contains more than one item and no inactive nav button is
+  // ever rendered to assert this against. Known, disclosed gap (see docs/Shell.md) — same
+  // category as the app-strip cross-page limitation documented in sample-pages-navigation.spec.ts.
   await page.goto('/#examples');
   const active = page.getByRole('button', { name: 'Purchase orders', exact: true });
   await expect(active).toHaveCSS('border-radius', '6px');
