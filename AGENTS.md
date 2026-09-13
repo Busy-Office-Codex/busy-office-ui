@@ -7,6 +7,14 @@ ready for integration) before selecting work, and hand off completed work with
 the exact reviewed commit SHA and test evidence per that issue's lifecycle. Do
 not duplicate its rules here.
 
+Before selecting cross-repository work, also read the
+[repository map](https://github.com/Busy-Office-Codex/busy-office-integration/blob/main/docs/repositories.md)
+and [shared dependency backlog](https://github.com/Busy-Office-Codex/busy-office-integration/blob/main/coordination.json)
+in `busy-office-integration`. That repository coordinates delivery across
+repositories; it does not change this repository's roadmap, ownership or
+release authority, and issue #1 above remains the only protocol for talking to
+the ERP/core session.
+
 This repository owns the reusable `@busyoffice/design-system` package and its
 pure React example compositions. It does not own ERP business rules, application
 data, runtime, contracts, identity, permissions, deployment, or marketplace
