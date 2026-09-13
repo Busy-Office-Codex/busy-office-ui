@@ -25,7 +25,7 @@ an agreed request.
 
 1. **Wake.** Check `.loop/HALT`. Read `.loop/state.json`, `ROADMAP.md`, then
    open issues in `Busy-Office-Codex/busy-office-ui` and
-   `Busy-Office-Codex/busy-office-erp`. `git fetch`; start from `main`.
+   `Busy-Office-Codex/busy-office-erp`. `git fetch`; start from `develop`.
 2. **Select a batch.** Take, in this order, until the batch holds 3 items:
    1. fixes requested on anything this loop handed off;
    2. open `[UI request]` issues marked `agreed`;
@@ -33,11 +33,11 @@ an agreed request.
    Skip one-way items (see Gate) and items without a stated Accept. An empty
    batch goes to the empty-queue ladder.
 3. **Build.** One branch `feat/batch-<first-item>` (or `chore/loop-…` for loop
-   or roadmap files) off `main`, one commit per item. Items that touch
-   different files run as parallel builder subagents (at most 3); items that
-   share files run in sequence. Never commit to `main`, merge, tag, release or
-   publish. While building, each builder runs only `pnpm typecheck`,
-   `pnpm lint` and `pnpm test`.
+   or roadmap files) off `develop`, one commit per item, PR into `develop`.
+   Items that touch different files run as parallel builder subagents (at most
+   3); items that share files run in sequence. Never commit to `develop` or
+   `main`, merge, tag, release or publish. While building, each builder runs
+   only `pnpm typecheck`, `pnpm lint` and `pnpm test`.
 4. **Verify once, for the whole batch.**
    - Run the full `AGENTS.md` gate suite once on the batch head. Skip
      `pnpm security` when `package.json` and `pnpm-lock.yaml` are unchanged.
@@ -53,14 +53,32 @@ an agreed request.
      continue.
    - **One-way** (removing or renaming public props, types or exports, new
      exports, package version, dependencies, behaviour an ERP host relies on,
-     anything touching `main`, editing `intent.md` or the ROADMAP Objective,
+     merging, releases or anything touching `main`, editing `intent.md` or the ROADMAP Objective,
      closing issues): comment the proposal on a `[UI request]` issue as
      `proposed` and leave the item out of the batch. Never mark your own
      proposal `agreed`.
 6. **Record.** One PR per batch listing the items it closes and the net line
    change under `src/`. Post one `ready for integration` handoff per issue #1
    when every item's Accept passes. Tick the items in `ROADMAP.md` on the batch
-   branch. Write `.loop/state.json` last.
+   branch. If the release rule below now holds, say so in the PR body.
+   Write `.loop/state.json` last.
+
+## Branches and releases
+
+Gitflow. Work branches (`feat/`, `fix/`, `chore/`) come off `develop` and merge
+back into `develop` by PR; the owner merges. `main` only receives release
+merges. The loop never merges, tags or releases; it recommends.
+
+**Recommend a release** when `develop` is green and at least one holds:
+- the ERP host needs a version to pin (an issue asks for one, or a handoff is
+  `accepted`);
+- a public export, prop or behaviour a host sees has changed since the last tag;
+- 3 or more ROADMAP items have closed since the last tag;
+- 2 weeks have passed with unreleased commits on `develop`.
+
+Version: patch for fixes only, minor for anything a host can see. A release is
+`release/x.y.z` from `develop` → version bump and notes → PR into `main` →
+tag `vx.y.z` → merge `main` back into `develop`.
 
 ## State
 

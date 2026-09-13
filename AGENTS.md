@@ -31,6 +31,10 @@ check that cannot run must fail, not skip. Assert removals on structure (element
 role, attribute), not on raw text. Every behaviour a `docs/*.md` page claims has
 a test; prop lists come from the built `.d.ts`, not from hand-written tables.
 
+Branches follow gitflow: work branches come off `develop` and merge back into
+`develop` by PR; `main` only receives release merges. Never commit directly to
+`develop` or `main`. Release rules are in [LOOP.md](LOOP.md).
+
 Use [docs/design-conventions.md](docs/design-conventions.md) and the component
 sources before changing UI. Only this repository's writers may change its source
 or release files. Run `pnpm build`, `pnpm lint`, `pnpm typecheck`, and `pnpm test`
