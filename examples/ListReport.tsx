@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   Button,
+  Card,
   Chip,
   type ChipTone,
   Dropdown,
@@ -28,13 +29,23 @@ const ORDERS: Order[] = [
 const STATUS_ITEMS = ['All statuses', 'Awaiting approval', 'Confirmed', 'Overdue'];
 
 /**
+ * `'ready'` (default) shows the table — including the zero-filtered-rows
+ * caption ("empty" is a reachable case of `'ready'`, not a separate literal,
+ * since it only ever happens as a consequence of the toolbar's own filters).
+ * `'loading'` / `'error'` / `'forbidden'` replace the table region with a
+ * state-specific message, the way a real ERP list page degrades while the
+ * header/toolbar chrome stays put.
+ */
+export type ListReportState = 'ready' | 'loading' | 'error' | 'forbidden';
+
+/**
  * A filterable purchase-order list: search, filter chips, a real Dropdown
  * (not usable in the Claude Design canvas format — its `items` prop is an
  * array, see conventions.md), and a real Table. Mirrors the "list-report"
  * Claude Design template, with real interactivity added where the static
  * canvas version couldn't have any.
  */
-export function ListReport() {
+export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
   const [filter, setFilter] = useState<'all' | 'mine' | 'overdue'>('all');
   const [statusFilter, setStatusFilter] = useState('All statuses');
   const [query, setQuery] = useState('');
@@ -96,41 +107,64 @@ export function ListReport() {
         </div>
       </div>
 
-      <div role="region" aria-label="Purchase orders table" tabIndex={0} style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}>
-        <div style={{ minWidth: 600 }}>
-        <Table density="compact">
-          <TableHead>
-            <TableRow>
-              <TableHeaderCell>Order</TableHeaderCell>
-              <TableHeaderCell>Vendor</TableHeaderCell>
-              <TableHeaderCell>Status</TableHeaderCell>
-              <TableHeaderCell align="end">Amount</TableHeaderCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((order) => (
-              <TableRow key={order.po}>
-                <TableCell>{order.po}</TableCell>
-                <TableCell>{order.vendor}</TableCell>
-                <TableCell>
-                  <Chip variant="status" tone={order.tone}>
-                    {order.status}
-                  </Chip>
-                </TableCell>
-                <TableCell align="end">{order.amount}</TableCell>
-              </TableRow>
-            ))}
-            {rows.length === 0 && (
+      {state === 'loading' && (
+        <Card role="status">
+          <Text variant="body">Loading purchase orders…</Text>
+        </Card>
+      )}
+
+      {state === 'error' && (
+        <Card role="alert">
+          <Text variant="body">Purchase orders couldn't be loaded. Try again.</Text>
+          <div>
+            <Button variant="secondary" size="compact">Retry</Button>
+          </div>
+        </Card>
+      )}
+
+      {state === 'forbidden' && (
+        <Card role="status">
+          <Text variant="body">You don't have access to purchase orders. Ask an admin for the Purchasing role.</Text>
+        </Card>
+      )}
+
+      {state === 'ready' && (
+        <div role="region" aria-label="Purchase orders table" tabIndex={0} style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}>
+          <div style={{ minWidth: 600 }}>
+          <Table density="compact">
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={4}>
-                  <Text variant="caption">No purchase orders match these filters.</Text>
-                </TableCell>
+                <TableHeaderCell>Order</TableHeaderCell>
+                <TableHeaderCell>Vendor</TableHeaderCell>
+                <TableHeaderCell>Status</TableHeaderCell>
+                <TableHeaderCell align="end">Amount</TableHeaderCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {rows.map((order) => (
+                <TableRow key={order.po}>
+                  <TableCell>{order.po}</TableCell>
+                  <TableCell>{order.vendor}</TableCell>
+                  <TableCell>
+                    <Chip variant="status" tone={order.tone}>
+                      {order.status}
+                    </Chip>
+                  </TableCell>
+                  <TableCell align="end">{order.amount}</TableCell>
+                </TableRow>
+              ))}
+              {rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4}>
+                    <Text variant="caption">No purchase orders match these filters.</Text>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

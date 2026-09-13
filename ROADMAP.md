@@ -52,8 +52,11 @@ issues.
    issue #5, PR #6 (`1986ef0`).
 3. [ ] **Prove the framework with the Purchase Orders and Sales sample pages.**
    Accept: the preview host renders both pages only through `Shell` from the
-   `./shell` subpath; a browser test moves between them by app strip, palette
-   command and dock, and checks `aria-current` and the visible page heading
+   `./shell` subpath; a browser test crosses between them by command palette
+   and dock, and confirms the app strip reflects and can reassert the active
+   page (each page is the sole route in its own module here, so app strip has
+   no sibling to cross to — verified against `Shell.tsx`'s own `stripRoutes`
+   filter, not assumed), checking `aria-current` and the visible page heading
    after each move; each page documents its loading, empty, error and
    permission states in `docs/`; the core session records `accepted` with the
    commit it tested. Serves: Objective 1. Needs: issue #11 (`agreed`, project
