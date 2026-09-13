@@ -20,9 +20,22 @@ becomes an item. "It would be useful" is not enough on its own.
    screens or examples) with a concrete scenario, raised as a `[UI request]`
    issue. Suitability at the point of use beats reuse.
 
-**Done for this roadmap:** item 3 is `accepted` by the core session and no
-`[UI request]` issue is open. Then stop expanding the framework; new work
-starts only from a request that passes the tests above.
+## Milestone
+
+The loop works only on the current milestone and stops when it is complete.
+The owner sets the next one.
+
+**Current: M1 — Accessible core, docs that cannot drift** → release 0.3.0.
+- Items: 7 (wave 1), 4 (wave 1), 5 (wave 1), 6 (wave 2, after wave 1 lands).
+- Complete when every item above is `[x]`, the latest `gates` run on `develop`
+  passed at the commit that closed the last item, and a 0.3.0 release
+  recommendation is recorded in that merge commit.
+
+**Next: M2 — Framework proven by two real pages** (item 3). Starts when the owner
+makes it current and its `[UI request]` is agreed with the core session.
+
+After M2, stop expanding the framework: new work starts only from a request
+that passes the Objective tests.
 
 ## Items
 
@@ -59,6 +72,12 @@ issues.
    one example; behaviour sentences in those docs each map to a test;
    prop lists are not hand-written in docs. The test is shown failing on a
    planted defect in its commit message. Serves: Objective 1.
+7. [ ] **Point agent instructions at the central integration repository.**
+   Accept: `AGENTS.md` links the `busy-office-integration` repository map and
+   shared dependency backlog and says to read them before cross-repository task
+   selection; UI keeps its own roadmap and ownership; issue #1 is still named as
+   the canonical protocol and none of its rules are copied. Serves: `intent.md`
+   (consumers own integration). Refs: issue #8 (`agreed`).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
