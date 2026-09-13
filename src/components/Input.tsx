@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import type { InputHTMLAttributes } from 'react';
-import { color, font, radius, space } from '../tokens.stylex.js';
+import { color, density, font, radius, space } from '../tokens.stylex.js';
 import { Text } from './Text.js';
 
 const styles = stylex.create({
@@ -11,10 +11,14 @@ const styles = stylex.create({
   },
   field: {
     fontFamily: font.family,
-    fontSize: font.sizeBody,
+    // Ambient (ROADMAP item 10) — see Button's `base.fontSize` for the same pattern.
+    fontSize: density.fontSize,
     color: color.textPrimary,
     backgroundColor: color.bgSurface,
-    height: '44px',
+    // Reads `rowHeight`, not `controlHeight`: a text field is a content "row", not a
+    // pill-shaped control (see tokens.stylex.ts's `density` doc comment) — comfortable
+    // default is now 40px (was a fixed 44px). `min-height`, not `height` (see Button).
+    minHeight: density.rowHeight,
     borderStyle: 'solid',
     borderWidth: '1px',
     borderRadius: radius.sm,
@@ -46,9 +50,17 @@ const styles = stylex.create({
       color: color.textTertiary,
     },
   },
+  // `size="compact"` (deprecated, ROADMAP item 10 — docs/Input.md) is a per-instance
+  // override, same contract as Button's `compact` (see there): it must force compact
+  // regardless of ambient density, so it hardcodes a literal rather than reading
+  // `density.rowHeight`. Its height stays the exact number it was before this task (36px,
+  // independently chosen to match the ERP skeleton reference's own measured search-bar
+  // height — docs/Input.md) rather than adopting the rowHeight compact tier's 32px, so this
+  // specific, already-deliberate match to the reference isn't disturbed by an unrelated tier
+  // renumbering.
   fieldCompact: {
-    height: '36px',
-    fontSize: font.sizeCaption,
+    minHeight: '2.25rem', // 36px @ 16px root — unchanged by this task
+    fontSize: font.sizeControl, // 13px — was font.sizeCaption (12.5px)
   },
   fieldError: {
     borderColor: {

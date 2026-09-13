@@ -44,9 +44,12 @@ test('Button carries the flex/typography properties the handoff asked for direct
   await expect(button).toHaveCSS('gap', '8px'); // space.space2
   const box = await button.boundingBox();
   if (!box) throw new Error('button not found');
-  expect(box.height).toBeLessThanOrEqual(33); // single line at the compact 32px height
+  // ROADMAP item 10 moved Button's size="compact" height from a literal 32px to the density
+  // `compactDensity` theme's own controlHeight literal, 28px (font.sizeControl (13px) below is
+  // ambient-independent for the same reason) — headroom kept above the new number, not the old one.
+  expect(box.height).toBeLessThanOrEqual(29); // single line at the compact 28px height
   const singleLineHeight = await button.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight));
-  expect(singleLineHeight).toBeLessThanOrEqual(13); // line-height:1 at 12.5px caption text (compact), not the browser default (~1.15–1.5x)
+  expect(singleLineHeight).toBeLessThanOrEqual(13); // line-height:1 at 13px control text (compact), not the browser default (~1.15–1.5x)
 });
 
 test('Modal panel carries base body typography independent of what children supply', async ({ page }) => {
@@ -64,18 +67,22 @@ test('Modal panel carries base body typography independent of what children supp
 
 test('filter Chip and Dropdown trigger labels stay on one line with a tight line-height', async ({ page }) => {
   await page.goto('/#examples');
-  // Both render at font.sizeCaption (12.5px); line-height:'1' is a unitless multiplier, so it
-  // computes to 12.5px of text line-box height, not the pill's own 32px height. ListReport's own
-  // filter Chips were removed in the "14 · Purchase order" rebuild, but Shell's command palette
-  // still renders a live variant="filter" Chip (its category filter row) — target that directly
-  // rather than a Button, so this stays a real check of Chip's own CSS contract.
+  // ROADMAP item 10: both used to render at font.sizeCaption (12.5px); they now read the
+  // ambient density.fontSize instead (a caption-sized control was itself the bug the density
+  // tier work fixed — font.sizeCaption is metadata-only from here on, see tokens.stylex.ts), so
+  // at this page's default (comfortable) density that's 14px. line-height:'1' is a unitless
+  // multiplier, so it computes to 14px of text line-box height, not the pill's own 36px
+  // controlHeight. ListReport's own filter Chips were removed in the "14 · Purchase order"
+  // rebuild, but Shell's command palette still renders a live variant="filter" Chip (its
+  // category filter row) — target that directly rather than a Button, so this stays a real
+  // check of Chip's own CSS contract.
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
   const allChip = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: 'All', exact: true });
   await expect(allChip).toHaveCSS('white-space', 'nowrap');
-  await expect(allChip).toHaveCSS('line-height', '12.5px');
+  await expect(allChip).toHaveCSS('line-height', '14px');
   await page.keyboard.press('Escape');
 
   const dropdown = page.getByRole('button', { name: /^Status/, exact: false });
   await expect(dropdown).toHaveCSS('white-space', 'nowrap');
-  await expect(dropdown).toHaveCSS('line-height', '12.5px');
+  await expect(dropdown).toHaveCSS('line-height', '14px');
 });

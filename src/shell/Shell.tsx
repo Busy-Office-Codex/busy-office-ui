@@ -3,7 +3,7 @@ import { Button } from '../components/Button.js';
 import { Chip } from '../components/Chip.js';
 import { Input } from '../components/Input.js';
 import { Text } from '../components/Text.js';
-import { radius } from '../tokens.stylex.js';
+import { density, radius } from '../tokens.stylex.js';
 
 export type ShellRoute = {
   id: string;
@@ -315,9 +315,17 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
             type="button"
             onClick={(event) => openPalette(event.currentTarget)}
             aria-label="Open command palette"
+            // Density-aware (ROADMAP item 10: "Shell's command-bar ... controls"), same
+            // `controlHeight`/`fontSize` aliases Button/Dropdown/filter-Chip read — this plain
+            // element isn't a `Button` (docs/Shell.md: its search-bar shape isn't one a pill can
+            // produce), but it's still a command-bar control, so it takes its sizing from the
+            // same place. `stylex`'s var-group values are plain `var(...)` strings, valid
+            // directly in a React inline `style` object (Shell already does this for `radius.sm`
+            // on the app-strip highlight below) — no need for a `stylex.create` block just for
+            // this. `min-height`, not a fixed `height` (see Button/Input/Table for why).
             style={{
               width: '100%',
-              height: 36,
+              minHeight: density.controlHeight,
               display: 'flex',
               alignItems: 'center',
               gap: 8,
@@ -327,7 +335,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
               background: '#fff',
               color: '#64748b',
               fontFamily: 'inherit',
-              fontSize: 14,
+              fontSize: density.fontSize,
               cursor: 'pointer',
               textAlign: 'left',
             }}
