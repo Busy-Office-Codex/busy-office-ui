@@ -2,7 +2,7 @@
 category: forms
 tests:
   - test/browser/dropdown-focus.spec.ts
-  - test/state-channels.test.mjs
+  - test/state-channels.test.ts
 ---
 
 Trigger + popover menu for picking one value from a list (a filter-style select). `label` is the trigger text, `items` is an array of `{ label, selected? }`, `onSelect` fires when an item is chosen. Manages its own open/closed state — the trigger fills in dark whenever any item is selected. Not for multi-select — an item's `selected` is display-only and choosing one always closes the menu; compose filter `Chip`s for a multi-select filter row.

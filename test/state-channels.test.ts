@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 const packageDirectory = fileURLToPath(new URL('..', import.meta.url));
-let designSystem;
+let designSystem: typeof import('../src/index.js');
 
 beforeAll(async () => {
   execFileSync(process.execPath, ['build.mjs'], {
@@ -15,13 +15,22 @@ beforeAll(async () => {
   designSystem = await import(/* @vite-ignore */ new URL('../dist/index.js', import.meta.url).href);
 });
 
+type StateProp = {
+  name: string;
+  on: () => string;
+  off: () => string;
+  programmatic: (markup: string) => boolean;
+  programmaticOff: (markup: string) => boolean;
+  nonColour: (markup: string) => boolean;
+};
+
 // Roadmap item 5: every visual state prop must expose its state both
 // programmatically (an ARIA attribute an AT can query) and by a non-colour
 // cue (a glyph, weight or shape change an AT-less, colour-blind viewer can
 // still see) — never by hue alone. Each entry renders the "on" and "off"
 // markup for one state prop and checks both channels; add a row here for
 // every new selected/active/current-style prop the design system ships.
-const STATE_PROPS = [
+const STATE_PROPS: StateProp[] = [
   {
     name: 'Card selected (interactive)',
     on: () =>

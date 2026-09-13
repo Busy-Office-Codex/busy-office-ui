@@ -38,7 +38,7 @@
     "lint": "eslint src examples preview test playwright.config.ts",
     "preview": "node preview/server.mjs",
     "security": "pnpm audit --prod --audit-level high",
-    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p examples/tsconfig.json && tsc --noEmit -p preview/tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p examples/tsconfig.json && tsc --noEmit -p preview/tsconfig.json && tsc --noEmit -p test/tsconfig.json",
     "test": "vitest run",
     "test:browser": "playwright test"
   },
