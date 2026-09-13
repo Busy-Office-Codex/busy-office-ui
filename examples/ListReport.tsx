@@ -15,49 +15,253 @@ import {
   Text,
 } from '../src/index.js';
 
-type Order = { po: string; vendor: string; status: string; tone: ChipTone; amount: string };
+type Order = {
+  po: string;
+  supplier: string;
+  buyer: string;
+  expected: string;
+  receivedLabel: string;
+  fullyReceived: boolean;
+  dueThisWeek: boolean;
+  total: number;
+  status: string;
+  tone: ChipTone;
+};
 
 const ORDERS: Order[] = [
-  { po: 'PO-1042', vendor: 'Alden Paper Co.', status: 'Awaiting approval', tone: 'accent', amount: '$1,240.00' },
-  { po: 'PO-1041', vendor: 'Northgate Office Supply', status: 'Confirmed', tone: 'strong', amount: '$8,960.50' },
-  { po: 'PO-1038', vendor: 'Redline Facilities Group', status: 'Overdue', tone: 'danger', amount: '$3,415.75' },
-  { po: 'PO-1035', vendor: 'Summit Hardware & Tools', status: 'Confirmed', tone: 'strong', amount: '$620.00' },
-  { po: 'PO-1029', vendor: 'Cascade IT Distribution', status: 'Awaiting approval', tone: 'accent', amount: '$14,802.20' },
-  { po: 'PO-1021', vendor: 'Harborline Print & Signage', status: 'Overdue', tone: 'danger', amount: '$975.40' },
+  {
+    po: 'PO-1042',
+    supplier: 'Alden Paper Co.',
+    buyer: 'Jordan Lee',
+    expected: 'Sep 18',
+    receivedLabel: '—',
+    fullyReceived: false,
+    dueThisWeek: true,
+    total: 1240.0,
+    status: 'Awaiting approval',
+    tone: 'accent',
+  },
+  {
+    po: 'PO-1041',
+    supplier: 'Northgate Office Supply',
+    buyer: 'Priya Shah',
+    expected: 'Sep 10',
+    receivedLabel: 'Sep 09',
+    fullyReceived: true,
+    dueThisWeek: false,
+    total: 8960.5,
+    status: 'Confirmed',
+    tone: 'strong',
+  },
+  {
+    po: 'PO-1038',
+    supplier: 'Redline Facilities Group',
+    buyer: 'Marcus Webb',
+    expected: 'Sep 05',
+    receivedLabel: '—',
+    fullyReceived: false,
+    dueThisWeek: false,
+    total: 3415.75,
+    status: 'Overdue',
+    tone: 'danger',
+  },
+  {
+    po: 'PO-1035',
+    supplier: 'Summit Hardware & Tools',
+    buyer: 'Priya Shah',
+    expected: 'Sep 16',
+    receivedLabel: 'Partial',
+    fullyReceived: false,
+    dueThisWeek: true,
+    total: 620.0,
+    status: 'Confirmed',
+    tone: 'strong',
+  },
+  {
+    po: 'PO-1029',
+    supplier: 'Cascade IT Distribution',
+    buyer: 'Jordan Lee',
+    expected: 'Sep 24',
+    receivedLabel: '—',
+    fullyReceived: false,
+    dueThisWeek: false,
+    total: 14802.2,
+    status: 'Awaiting approval',
+    tone: 'accent',
+  },
+  {
+    po: 'PO-1021',
+    supplier: 'Harborline Print & Signage',
+    buyer: 'Marcus Webb',
+    expected: 'Sep 02',
+    receivedLabel: '—',
+    fullyReceived: false,
+    dueThisWeek: false,
+    total: 975.4,
+    status: 'Overdue',
+    tone: 'danger',
+  },
+  {
+    po: 'PO-1018',
+    supplier: 'Meridian Cleaning Supply',
+    buyer: 'Priya Shah',
+    expected: 'Sep 30',
+    receivedLabel: '—',
+    fullyReceived: false,
+    dueThisWeek: false,
+    total: 2150.0,
+    status: 'Sent to supplier',
+    tone: 'neutral',
+  },
+  {
+    po: 'PO-1012',
+    supplier: 'Vantage Electrical Co.',
+    buyer: 'Jordan Lee',
+    expected: 'Sep 15',
+    receivedLabel: '—',
+    fullyReceived: false,
+    dueThisWeek: true,
+    total: 6340.9,
+    status: 'Sent to supplier',
+    tone: 'neutral',
+  },
 ];
 
-const STATUS_ITEMS = ['All statuses', 'Awaiting approval', 'Confirmed', 'Overdue'];
+const STATUS_ITEMS = ['All statuses', 'Awaiting approval', 'Confirmed', 'Overdue', 'Sent to supplier'];
+const SUPPLIER_ITEMS = ['All suppliers', ...Array.from(new Set(ORDERS.map((order) => order.supplier)))];
+const BUYER_ITEMS = ['All buyers', ...Array.from(new Set(ORDERS.map((order) => order.buyer)))];
+const EXPECTED_ITEMS = ['Any time', ...Array.from(new Set(ORDERS.map((order) => order.expected)))];
+
+const AWAITING_APPROVAL_COUNT = ORDERS.filter((order) => order.status === 'Awaiting approval').length;
+const SENT_TO_SUPPLIER_COUNT = ORDERS.filter((order) => order.status === 'Sent to supplier').length;
+const DUE_THIS_WEEK_COUNT = ORDERS.filter((order) => order.dueThisWeek).length;
+const OPEN_COMMITMENTS_TOTAL = ORDERS.filter((order) => !order.fullyReceived).reduce((sum, order) => sum + order.total, 0);
+
+const formatCurrency = (amount: number) =>
+  `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+// The loading skeleton's row/header grid mirrors the real Table's column order — a checkbox
+// column plus the 7 `dc-import name="Table" heads="PO #,Supplier,Buyer,Expected,Received,Total,
+// Status"` columns — so the shimmer state and the real table line up visually.
+const SKELETON_GRID_COLUMNS = '44px minmax(80px,1fr) minmax(150px,1.6fr) minmax(110px,1.1fr) 92px 92px 108px 132px';
+
+const skeletonHeaderLabelStyle = {
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase' as const,
+  color: '#64748b',
+};
+
+/**
+ * A gray shimmer placeholder bar, standing in for a value that hasn't loaded yet. Values match
+ * the owner's loading screenshot: stat tiles are `height:24px;border-radius:6px`, table cells are
+ * shorter/less-rounded (a pill radius for the Status column, to echo its Chip shape).
+ */
+function ShimmerBar({
+  width,
+  height = 14,
+  radius = 4,
+  testId = 'cell-shimmer',
+}: {
+  width: string;
+  height?: number;
+  radius?: number;
+  testId?: string;
+}) {
+  return <div data-testid={testId} style={{ height, borderRadius: radius, background: '#e2e8f0', width }} />;
+}
+
+function StatTile({
+  label,
+  value,
+  shimmerWidth,
+  loading,
+}: {
+  label: string;
+  value: string;
+  shimmerWidth: string;
+  loading: boolean;
+}) {
+  return (
+    <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <Text variant="caption" as="span">
+        {label}
+      </Text>
+      {loading ? (
+        <ShimmerBar width={shimmerWidth} height={24} radius={6} testId="stat-shimmer" />
+      ) : (
+        <Text variant="heading">{value}</Text>
+      )}
+    </div>
+  );
+}
 
 /**
  * `'ready'` (default) shows the table — including the zero-filtered-rows
  * caption ("empty" is a reachable case of `'ready'`, not a separate literal,
  * since it only ever happens as a consequence of the toolbar's own filters).
- * `'loading'` / `'error'` / `'forbidden'` replace the table region with a
+ * `'loading'` replaces the table region with an announced, non-table shimmer
+ * skeleton (stat tiles and every data cell render as gray placeholder bars;
+ * the checkbox column stays real, since which rows exist isn't in question,
+ * only their content — matching the owner's loading screenshot for this
+ * page). `'error'` / `'forbidden'` replace the table region with a
  * state-specific message, the way a real ERP list page degrades while the
  * header/toolbar chrome stays put.
  */
 export type ListReportState = 'ready' | 'loading' | 'error' | 'forbidden';
 
 /**
- * A filterable purchase-order list: search, filter chips, a real Dropdown
- * (not usable in the Claude Design canvas format — its `items` prop is an
- * array, see conventions.md), and a real Table. Mirrors the "list-report"
- * Claude Design template, with real interactivity added where the static
- * canvas version couldn't have any.
+ * A filterable purchase-order list, rebuilt against `templates/erp-skeleton`'s
+ * "14 · Purchase order" business mockup (Claude Design project "Busy Office
+ * Design System") rather than the generic "list-report" template: a stat-tile
+ * strip, a search field plus four real `Dropdown` filters (Supplier, Status,
+ * Buyer, Expected — not usable in the Claude Design canvas format, since its
+ * `items` prop is an array, see conventions.md), and a real `Table` with a
+ * row-selection checkbox column.
  */
 export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
-  const [filter, setFilter] = useState<'all' | 'mine' | 'overdue'>('all');
+  const [supplierFilter, setSupplierFilter] = useState('All suppliers');
   const [statusFilter, setStatusFilter] = useState('All statuses');
+  const [buyerFilter, setBuyerFilter] = useState('All buyers');
+  const [expectedFilter, setExpectedFilter] = useState('Any time');
   const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const rows = ORDERS.filter((order) => {
-    if (filter === 'overdue' && order.status !== 'Overdue') return false;
+    if (supplierFilter !== 'All suppliers' && order.supplier !== supplierFilter) return false;
     if (statusFilter !== 'All statuses' && order.status !== statusFilter) return false;
-    if (query && !order.vendor.toLowerCase().includes(query.toLowerCase()) && !order.po.toLowerCase().includes(query.toLowerCase())) {
-      return false;
+    if (buyerFilter !== 'All buyers' && order.buyer !== buyerFilter) return false;
+    if (expectedFilter !== 'Any time' && order.expected !== expectedFilter) return false;
+    if (query) {
+      const haystack = `${order.po} ${order.supplier} ${order.buyer}`.toLowerCase();
+      if (!haystack.includes(query.toLowerCase())) return false;
     }
     return true;
   });
+
+  const allVisibleSelected = rows.length > 0 && rows.every((order) => selected.has(order.po));
+
+  const toggleAll = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allVisibleSelected) {
+        rows.forEach((order) => next.delete(order.po));
+      } else {
+        rows.forEach((order) => next.add(order.po));
+      }
+      return next;
+    });
+  };
+
+  const toggleOne = (po: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(po)) next.delete(po);
+      else next.add(po);
+      return next;
+    });
+  };
 
   return (
     <div
@@ -69,48 +273,101 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
-        gap: 24,
+        gap: 20,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <Text variant="heading">Purchase orders</Text>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button variant="secondary" size="compact">Export</Button>
-          <Button variant="primary" size="compact">New purchase order</Button>
-        </div>
+        <div style={{ flex: 1 }} />
+        <Button variant="secondary" size="compact">From requisition</Button>
+        <Button variant="primary" size="compact">+ New PO</Button>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Chip variant="filter" selected={filter === 'all'} onClick={() => setFilter('all')}>
-            All open · {ORDERS.length}
-          </Chip>
-          <Chip variant="filter" selected={filter === 'mine'} onClick={() => setFilter('mine')}>
-            Mine · 6
-          </Chip>
-          <Chip variant="filter" selected={filter === 'overdue'} onClick={() => setFilter('overdue')}>
-            Overdue · {ORDERS.filter((o) => o.status === 'Overdue').length}
-          </Chip>
-          <Dropdown
-            label={`Status · ${statusFilter}`}
-            items={STATUS_ITEMS.map((label) => ({ label, selected: label === statusFilter }))}
-            onSelect={setStatusFilter}
-          />
-        </div>
-        <div style={{ minWidth: 280, flex: '0 1 320px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        <StatTile label="Awaiting approval" value={String(AWAITING_APPROVAL_COUNT)} shimmerWidth="40%" loading={state === 'loading'} />
+        <StatTile label="Sent to supplier" value={String(SENT_TO_SUPPLIER_COUNT)} shimmerWidth="35%" loading={state === 'loading'} />
+        <StatTile label="Due to receive this week" value={String(DUE_THIS_WEEK_COUNT)} shimmerWidth="45%" loading={state === 'loading'} />
+        <StatTile label="Open commitments" value={formatCurrency(OPEN_COMMITMENTS_TOTAL)} shimmerWidth="60%" loading={state === 'loading'} />
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ width: 280 }}>
           <Input
-            placeholder="Search vendor or PO number..."
+            placeholder="Search POs…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             size="compact"
           />
         </div>
+        <Dropdown
+          label={`Supplier · ${supplierFilter}`}
+          items={SUPPLIER_ITEMS.map((label) => ({ label, selected: label === supplierFilter }))}
+          onSelect={setSupplierFilter}
+        />
+        <Dropdown
+          label={`Status · ${statusFilter}`}
+          items={STATUS_ITEMS.map((label) => ({ label, selected: label === statusFilter }))}
+          onSelect={setStatusFilter}
+        />
+        <Dropdown
+          label={`Buyer · ${buyerFilter}`}
+          items={BUYER_ITEMS.map((label) => ({ label, selected: label === buyerFilter }))}
+          onSelect={setBuyerFilter}
+        />
+        <Dropdown
+          label={`Expected · ${expectedFilter}`}
+          items={EXPECTED_ITEMS.map((label) => ({ label, selected: label === expectedFilter }))}
+          onSelect={setExpectedFilter}
+        />
       </div>
 
       {state === 'loading' && (
-        <Card role="status">
-          <Text variant="body">Loading purchase orders…</Text>
-        </Card>
+        <div role="status" aria-label="Loading purchase orders" style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflow: 'hidden' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: SKELETON_GRID_COLUMNS,
+              alignItems: 'center',
+              gap: 16,
+              paddingBlock: 12,
+              paddingInline: 16,
+              background: '#f1f5f9',
+              borderBottom: '1px solid #e2e8f0',
+            }}
+          >
+            <input type="checkbox" aria-label="Select all rows" disabled />
+            <span style={skeletonHeaderLabelStyle}>PO #</span>
+            <span style={skeletonHeaderLabelStyle}>Supplier</span>
+            <span style={skeletonHeaderLabelStyle}>Buyer</span>
+            <span style={skeletonHeaderLabelStyle}>Expected</span>
+            <span style={skeletonHeaderLabelStyle}>Received</span>
+            <span style={{ ...skeletonHeaderLabelStyle, textAlign: 'end' }}>Total</span>
+            <span style={skeletonHeaderLabelStyle}>Status</span>
+          </div>
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: SKELETON_GRID_COLUMNS,
+                alignItems: 'center',
+                gap: 16,
+                paddingBlock: 12,
+                paddingInline: 16,
+                borderBottom: index < 7 ? '1px solid #e2e8f0' : 'none',
+              }}
+            >
+              <input type="checkbox" aria-label={`Row ${index + 1} loading`} disabled />
+              <ShimmerBar width="70%" />
+              <ShimmerBar width="85%" />
+              <ShimmerBar width="65%" />
+              <ShimmerBar width="55%" />
+              <ShimmerBar width="50%" />
+              <ShimmerBar width="60%" />
+              <ShimmerBar width="45%" height={18} radius={999} />
+            </div>
+          ))}
+        </div>
       )}
 
       {state === 'error' && (
@@ -130,32 +387,49 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
 
       {state === 'ready' && (
         <div role="region" aria-label="Purchase orders table" tabIndex={0} style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}>
-          <div style={{ minWidth: 600 }}>
+          <div style={{ minWidth: 760 }}>
           <Table density="compact">
             <TableHead>
               <TableRow>
-                <TableHeaderCell>Order</TableHeaderCell>
-                <TableHeaderCell>Vendor</TableHeaderCell>
+                <TableHeaderCell>
+                  <input type="checkbox" aria-label="Select all rows" checked={allVisibleSelected} onChange={toggleAll} />
+                </TableHeaderCell>
+                <TableHeaderCell>PO #</TableHeaderCell>
+                <TableHeaderCell>Supplier</TableHeaderCell>
+                <TableHeaderCell>Buyer</TableHeaderCell>
+                <TableHeaderCell>Expected</TableHeaderCell>
+                <TableHeaderCell>Received</TableHeaderCell>
+                <TableHeaderCell align="end">Total</TableHeaderCell>
                 <TableHeaderCell>Status</TableHeaderCell>
-                <TableHeaderCell align="end">Amount</TableHeaderCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.map((order) => (
                 <TableRow key={order.po}>
+                  <TableCell>
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${order.po}`}
+                      checked={selected.has(order.po)}
+                      onChange={() => toggleOne(order.po)}
+                    />
+                  </TableCell>
                   <TableCell>{order.po}</TableCell>
-                  <TableCell>{order.vendor}</TableCell>
+                  <TableCell>{order.supplier}</TableCell>
+                  <TableCell>{order.buyer}</TableCell>
+                  <TableCell>{order.expected}</TableCell>
+                  <TableCell>{order.receivedLabel}</TableCell>
+                  <TableCell align="end">{formatCurrency(order.total)}</TableCell>
                   <TableCell>
                     <Chip variant="status" tone={order.tone}>
                       {order.status}
                     </Chip>
                   </TableCell>
-                  <TableCell align="end">{order.amount}</TableCell>
                 </TableRow>
               ))}
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4}>
+                  <TableCell colSpan={8}>
                     <Text variant="caption">No purchase orders match these filters.</Text>
                   </TableCell>
                 </TableRow>

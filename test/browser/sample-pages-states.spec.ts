@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
 test('searching for a vendor or PO with no matches shows the empty-filter row instead of any orders', async ({ page }) => {
   await page.goto('/#examples');
 
-  const search = page.getByPlaceholder('Search vendor or PO number...');
+  const search = page.getByPlaceholder('Search POs…');
   await expect(page.getByRole('cell', { name: 'PO-1042', exact: true })).toBeVisible();
 
   await search.fill('no such vendor or PO');

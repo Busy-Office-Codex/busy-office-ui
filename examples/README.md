@@ -21,7 +21,7 @@ be wired into a real feature as-is.
 |---|---|---|
 | `AppShell.tsx` | `templates/app-shell` (rebuilt against `templates/erp-skeleton`'s real "Shell anatomy" spec and its reusable `Shell.dc.html`) | The full shell: command bar with a real ⌘K → command-palette overlay, a module-aware app strip (shows the *current module's* sibling screens, not top-level app names), and a floating dock (launcher + pinned apps with sample counts + recent records). No sidebar — this ERP's shell is command-bar + app-strip + dock. |
 | `Launcher.tsx` | `templates/erp-skeleton`'s "Home (launcher)" screen | The Home/launcher screen reached from the shell's dock: a role-picked "For you" row, then an "All apps" grid (folder-style tiles for Finance/BI/Administration). Renders as `AppShell`'s content when its dock's launcher tile is clicked. |
-| `ListReport.tsx` | `templates/list-report` | Filterable list: search, filter `Chip`s, a real `Dropdown`, a real `Table` |
+| `ListReport.tsx` | `templates/erp-skeleton`'s "14 · Purchase order" business mockup (deliberately rebuilt away from the generic `templates/list-report` template to match this specific reference — see `docs/ListReport.md`) | Purchase-orders list: a stat-tile strip, search plus four real `Dropdown` filters (Supplier, Status, Buyer, Expected), and a real `Table` with a row-selection checkbox column |
 | `RecordDetail.tsx` | `templates/record-detail` | Record header + `Chip` status, summary `Card` tiles, a `Modal` confirm flow |
 | `Dashboard.tsx` | `templates/dashboard` | KPI `Card` grid with a selected state |
 | `Login.tsx` | `templates/login` | A simple centered auth form |
