@@ -19,7 +19,9 @@ ERP services or encode application-specific behavior here.
 
 Before nontrivial work read intent.md, ARCHITECTURE.md, ROADMAP.md and relevant
 UI specifications. Map acceptance to tests before implementation and keep a
-separate reviewer; do not expand the UI/framework boundary. New components and
+separate reviewer (one per batch of changes is enough); do not expand the
+UI/framework boundary. Keep the framework lean: prefer the smallest change,
+deletion over addition, and no prop or export with a single caller. New components and
 props must pass the ROADMAP.md Objective tests. Unattended or repeated runs
 follow [LOOP.md](LOOP.md).
 
