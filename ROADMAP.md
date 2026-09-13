@@ -30,9 +30,10 @@ are all `[x]`; the full gate suite (including `pnpm test:browser`) passed at
 the batch head before it merged into `main`. A release recommendation is
 recorded in that merge commit — the owner decides whether to cut it.
 
-**No milestone is current.** The owner sets the next one — M2 (item 3) is one
-option, once its `[UI request]` is agreed with the core session; item 3's own
-line still applies either way.
+**M2 — Prove the framework with real sample pages — current.** Item 3, issue
+#11 (`agreed`, project owner, 2026-09-13). Complete when item 3 is `[x]` and
+the full gate suite (including `pnpm test:browser`) passes at the batch head
+before it merges into `main`.
 
 After M2, stop expanding the framework: new work starts only from a request
 that passes the Objective tests.
@@ -55,8 +56,8 @@ issues.
    command and dock, and checks `aria-current` and the visible page heading
    after each move; each page documents its loading, empty, error and
    permission states in `docs/`; the core session records `accepted` with the
-   commit it tested. Serves: Objective 1. Needs: a `[UI request]` issue agreed
-   with the core session.
+   commit it tested. Serves: Objective 1. Needs: issue #11 (`agreed`, project
+   owner, 2026-09-13).
 4. [x] Modal on the native `<dialog>` element — `showModal()`/`close()` driven
    by `open`; background content is genuinely `inert` (not just `aria-modal`),
    verified directly since neither `getByRole()` nor `ariaSnapshot()` reflect
