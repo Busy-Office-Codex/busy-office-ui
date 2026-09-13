@@ -31,15 +31,16 @@ check that cannot run must fail, not skip. Assert removals on structure (element
 role, attribute), not on raw text. Every behaviour a `docs/*.md` page claims has
 a test; prop lists come from the built `.d.ts`, not from hand-written tables.
 
-Branches follow gitflow: work branches come off `develop`, stay local (not
-pushed, no PRs) and are merged into `develop` locally with `--no-ff`; only
-`develop` is pushed. `main` only receives release merges. Never commit directly
-to `develop` or `main`. Merging into `develop` needs no owner approval once the
-gates and an independent review pass; merges into `main`, tags and releases
-need the owner. Handoffs cite the `develop` merge commit SHA. Every push to
-`develop` or `main` re-runs the full gate suite in GitHub Actions
-(`.github/workflows/gates.yml`); a red run on `develop` is fixed before any
-other work. Release rules are in [LOOP.md](LOOP.md).
+Branches follow Solo Flow (trunk-based — one writer, no other humans
+committing, so no `develop`/`main` split to coordinate): work branches come
+off `main`, stay local (not pushed, no PRs) and are merged into `main` locally
+with `--no-ff`. Never commit directly to `main`. Merging into `main` needs no
+owner approval once the gates and an independent review pass — that is the
+normal outcome of a tick, not a release; tags, releases and publishing need
+the owner. Handoffs cite the `main` merge commit SHA. Every push to `main`
+re-runs the full gate suite in GitHub Actions (`.github/workflows/gates.yml`);
+a red run on `main` is fixed before any other work. Release rules are in
+[LOOP.md](LOOP.md).
 
 Use [docs/design-conventions.md](docs/design-conventions.md) and the component
 sources before changing UI. Only this repository's writers may change its source

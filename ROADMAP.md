@@ -27,8 +27,8 @@ The owner sets the next one.
 
 **Current: M1 — Accessible core, docs that cannot drift** → release 0.3.0.
 - Items: 7 (wave 1), 4 (wave 1), 5 (wave 1), 6 (wave 2, after wave 1 lands).
-- Complete when every item above is `[x]`, the latest `gates` run on `develop`
-  passed at the commit that closed the last item, and a 0.3.0 release
+- Complete when every item above is `[x]`, the latest `gates` run on `main`
+  passed at the commit that closed the last item, and a release
   recommendation is recorded in that merge commit.
 
 **Next: M2 — Framework proven by two real pages** (item 3). Starts when the owner
