@@ -19,7 +19,9 @@ ERP services or encode application-specific behavior here.
 
 Before nontrivial work read intent.md, ARCHITECTURE.md, ROADMAP.md and relevant
 UI specifications. Map acceptance to tests before implementation and keep a
-separate reviewer; do not expand the UI/framework boundary. New components and
+separate reviewer (one per batch of changes is enough); do not expand the
+UI/framework boundary. Keep the framework lean: prefer the smallest change,
+deletion over addition, and no prop or export with a single caller. New components and
 props must pass the ROADMAP.md Objective tests. Unattended or repeated runs
 follow [LOOP.md](LOOP.md).
 
@@ -28,6 +30,12 @@ check lands with a red-proof: show it failing on a planted defect in the PR. A
 check that cannot run must fail, not skip. Assert removals on structure (element,
 role, attribute), not on raw text. Every behaviour a `docs/*.md` page claims has
 a test; prop lists come from the built `.d.ts`, not from hand-written tables.
+
+Branches follow gitflow: work branches come off `develop` and merge back into
+`develop` by PR; `main` only receives release merges. Never commit directly to
+`develop` or `main`. PRs into `develop` may be merged without owner approval
+once the gates and an independent review pass; merges into `main`, tags and
+releases need the owner. Release rules are in [LOOP.md](LOOP.md).
 
 Use [docs/design-conventions.md](docs/design-conventions.md) and the component
 sources before changing UI. Only this repository's writers may change its source
