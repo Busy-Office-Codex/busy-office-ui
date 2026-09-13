@@ -33,7 +33,9 @@ a test; prop lists come from the built `.d.ts`, not from hand-written tables.
 
 Branches follow gitflow: work branches come off `develop` and merge back into
 `develop` by PR; `main` only receives release merges. Never commit directly to
-`develop` or `main`. Release rules are in [LOOP.md](LOOP.md).
+`develop` or `main`. PRs into `develop` may be merged without owner approval
+once the gates and an independent review pass; merges into `main`, tags and
+releases need the owner. Release rules are in [LOOP.md](LOOP.md).
 
 Use [docs/design-conventions.md](docs/design-conventions.md) and the component
 sources before changing UI. Only this repository's writers may change its source

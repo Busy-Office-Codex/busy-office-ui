@@ -35,9 +35,9 @@ an agreed request.
 3. **Build.** One branch `feat/batch-<first-item>` (or `chore/loop-…` for loop
    or roadmap files) off `develop`, one commit per item, PR into `develop`.
    Items that touch different files run as parallel builder subagents (at most
-   3); items that share files run in sequence. Never commit to `develop` or
-   `main`, merge, tag, release or publish. While building, each builder runs
-   only `pnpm typecheck`, `pnpm lint` and `pnpm test`.
+   3); items that share files run in sequence. Never commit directly to
+   `develop` or `main`, and never tag, release or publish. While building,
+   each builder runs only `pnpm typecheck`, `pnpm lint` and `pnpm test`.
 4. **Verify once, for the whole batch.**
    - Run the full `AGENTS.md` gate suite once on the batch head. Skip
      `pnpm security` when `package.json` and `pnpm-lock.yaml` are unchanged.
@@ -53,21 +53,23 @@ an agreed request.
      continue.
    - **One-way** (removing or renaming public props, types or exports, new
      exports, package version, dependencies, behaviour an ERP host relies on,
-     merging, releases or anything touching `main`, editing `intent.md` or the ROADMAP Objective,
-     closing issues): comment the proposal on a `[UI request]` issue as
+     releases or anything touching `main`, editing `intent.md` or the ROADMAP
+     Objective, closing issues): comment the proposal on a `[UI request]` issue as
      `proposed` and leave the item out of the batch. Never mark your own
      proposal `agreed`.
 6. **Record.** One PR per batch listing the items it closes and the net line
    change under `src/`. Post one `ready for integration` handoff per issue #1
    when every item's Accept passes. Tick the items in `ROADMAP.md` on the batch
-   branch. If the release rule below now holds, say so in the PR body.
-   Write `.loop/state.json` last.
+   branch. When the gate suite and the reviewer both pass, merge the PR into
+   `develop` (merge commit) and delete the branch. If the release rule below
+   now holds, say so in the merged PR. Write `.loop/state.json` last.
 
 ## Branches and releases
 
 Gitflow. Work branches (`feat/`, `fix/`, `chore/`) come off `develop` and merge
-back into `develop` by PR; the owner merges. `main` only receives release
-merges. The loop never merges, tags or releases; it recommends.
+back into `develop` by PR. The loop merges its own PRs into `develop` once
+verify passes; no owner approval is needed there. `main` only receives release
+merges, and the loop never merges into `main`, tags or releases — it recommends.
 
 **Recommend a release** when `develop` is green and at least one holds:
 - the ERP host needs a version to pin (an issue asks for one, or a handoff is
