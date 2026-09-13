@@ -43,3 +43,13 @@ test('the active app-strip nav item is bold, since its background can otherwise 
   await expect(active).toHaveAttribute('aria-current', 'page');
   await expect(active).toHaveCSS('font-weight', '600');
 });
+
+test('the active app-strip nav item is a rounded-rect highlight, not a capsule', async ({ page }) => {
+  // docs/design-conventions.md's capsule-vs-rectangle rule: a highlight behind existing nav
+  // content (this) gets radius.sm, like Dropdown's own highlighted menu item — never
+  // radius.pill, which Button would otherwise apply by default. Matches
+  // templates/erp-skeleton/Shell.dc.html's active nav-tab exactly (border-radius:6px).
+  await page.goto('/#examples');
+  const active = page.getByRole('button', { name: 'Purchase orders', exact: true });
+  await expect(active).toHaveCSS('border-radius', '6px');
+});

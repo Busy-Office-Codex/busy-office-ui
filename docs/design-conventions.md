@@ -25,6 +25,18 @@ Instead, style exclusively through each component's own props:
 
 - **`Shell`** (`@busyoffice/design-system/shell`): the application chrome — `navigation` (host-owned `routes`/`activeRouteId`/`onNavigate`), `pinned` dock tiles, `commands` for the palette, `brand`/`account`/`home` slots and `children` as the page. Hosts keep routing, page retention, command execution and permissions; the shell keeps palette/launcher state and the keyboard/focus contracts. See `docs/Shell.md`.
 
+### Capsule vs. rounded rectangle
+
+`Button`, filter `Chip`, and `Dropdown`'s trigger always render as a full capsule (`radius.pill`, 999px) — that shape is not a per-use choice, it's what those three components *are*. The rule below governs the cases *outside* those three: whenever chrome composes a highlight or an icon-only control by hand (as `Shell` does for its own chrome) rather than reaching for one of them.
+
+**Capsule** — a control that is its own complete, single-line action, displayed beside peers of the same kind (a row of filter dropdowns, a pair of primary/secondary action buttons, a row of filter chips). The full pill reads as "a discrete thing you press."
+
+**Rounded rectangle** (`radius.sm`/`md`/`lg`, scaled to the element — never `radius.pill`) — everything else, for one of two reasons:
+1. **It holds more than a single text label** — a search bar with icon + placeholder + shortcut hint, a stat-tile `Card` (label + value + caption), `Modal`'s panel (header + body + actions), an icon-only utility square (a dock tile, a notification bell). A 999px radius only reads as "rounded" on a short, uniform-height element; on anything wider, taller, or square it either does nothing visible or turns the shape into a literal circle.
+2. **It's a highlight behind existing content, not a new action** — e.g. `Shell`'s active app-strip tab: a "you are here" indicator painted behind nav text that's already part of the persistent chrome, not a call-to-action. `Dropdown`'s own highlighted/hovered menu item uses the same reasoning and the same token (`radius.sm`) for exactly this case.
+
+One-line test: is it a thing you click to *do* something, standing next to peers of the same kind? → capsule. Is it a container with structure, or a highlight showing current state/position? → rounded rectangle, radius scaled to size, never a capsule.
+
 For any layout or spacing outside these components (page structure, grids, gaps), use plain inline styles or your own CSS — this design system does not yet ship layout primitives or a spacing scale the agent can reach for.
 
 ## Where the truth lives
