@@ -2,6 +2,7 @@
 category: data-display
 tests:
   - test/browser/focus-ring-and-placeholder.spec.ts
+  - test/browser/design-fidelity-fixes.spec.ts
   - test/state-channels.test.ts
 ---
 

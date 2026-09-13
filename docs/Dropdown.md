@@ -2,6 +2,7 @@
 category: forms
 tests:
   - test/browser/dropdown-focus.spec.ts
+  - test/browser/design-fidelity-fixes.spec.ts
   - test/state-channels.test.ts
 ---
 

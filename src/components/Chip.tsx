@@ -20,6 +20,8 @@ const styles = stylex.create({
     display: 'inline-flex',
     alignItems: 'center',
     gap: space.space2,
+    whiteSpace: 'nowrap',
+    lineHeight: '1',
     cursor: 'pointer',
     opacity: {
       default: 1,
