@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
-import { color, font, glass, radius, shadow, space } from '../tokens.stylex.js';
+import { color, density, font, glass, radius, shadow, space } from '../tokens.stylex.js';
 
 const styles = stylex.create({
   wrapper: {
@@ -9,8 +9,13 @@ const styles = stylex.create({
   },
   trigger: {
     fontFamily: font.family,
-    fontSize: font.sizeCaption,
-    height: '32px',
+    // Fully density-driven (ROADMAP item 10) — Dropdown has no size prop/override to keep
+    // working, so unlike Button/Input there's no literal branch here at all. Reads the same
+    // `controlHeight` alias as Button/filter Chip: docs/design-conventions.md already groups
+    // Button, filter Chip and Dropdown's trigger as the one "always a capsule" shape family,
+    // so they share one control height too.
+    fontSize: density.fontSize,
+    minHeight: density.controlHeight,
     paddingInline: space.space4,
     borderRadius: radius.pill,
     borderStyle: 'solid',

@@ -1,14 +1,18 @@
 import * as stylex from '@stylexjs/stylex';
 import type { ButtonHTMLAttributes } from 'react';
-import { color, font, motion, radius, space } from '../tokens.stylex.js';
+import { color, density, font, motion, radius, space } from '../tokens.stylex.js';
 
 const styles = stylex.create({
   base: {
     fontFamily: font.family,
-    fontSize: font.sizeBody,
+    // Ambient (ROADMAP item 10): reads the density alias group, not a fixed size — a
+    // `Density`-wrapped ancestor changes this without Button knowing about it.
+    fontSize: density.fontSize,
     fontWeight: font.weightMedium,
     borderRadius: radius.pill,
-    height: '40px',
+    // `min-height`, not `height` — lets the box grow to fit content instead of clipping it
+    // (e.g. at a larger root font size); see docs/design-conventions.md.
+    minHeight: density.controlHeight,
     paddingInline: space.space5,
     whiteSpace: 'nowrap',
     display: 'inline-flex',
@@ -40,10 +44,16 @@ const styles = stylex.create({
       ':focus-visible': '2px',
     },
   },
+  // `size="compact"` (deprecated, ROADMAP item 10 — docs/Button.md) is a per-instance
+  // override: it must force the compact tier's own numbers regardless of the ambient density,
+  // since a compact Button inside a comfortable/spacious `Density` region still has to render
+  // compact. So it hardcodes the compact tier's literal values rather than reading
+  // `density.controlHeight`/`density.fontSize` (which would just track whatever tier is
+  // ambient, defeating the "always compact" contract of this prop).
   compact: {
-    height: '32px',
+    minHeight: '1.75rem', // compact tier controlHeight (28px @ 16px root)
     paddingInline: space.space4,
-    fontSize: font.sizeCaption,
+    fontSize: font.sizeControl, // compact tier fontSize (13px) — was font.sizeCaption (12.5px)
   },
   primary: {
     backgroundColor: {
