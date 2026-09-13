@@ -85,7 +85,7 @@ issues.
 9. [x] Compact `size`/`density` on `Button`/`Input`/`Table` (0.3.0) — closes the
    gap item 8 found; `Shell`'s app-strip nav and the sample host's "+New"
    action moved back onto real `Button` now that it has a compact size. Issue
-   #10 (`agreed`), owner-directed.
+   #10 (`agreed`), owner-directed — `f0e9748`.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
