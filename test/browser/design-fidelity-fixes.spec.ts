@@ -30,13 +30,21 @@ test('Button and Card transitions read from the shared motion token, not a hardc
   await expect(card).toHaveCSS('transition-duration', '0.2s');
 });
 
-test('a Button label does not wrap when its flex track is narrower than the label', async ({ page }) => {
+test('Button carries the flex/typography properties the handoff asked for directly, not just their side effects', async ({ page }) => {
   await page.goto('/#examples');
   const button = page.getByRole('button', { name: 'New purchase order', exact: true });
+  // Assert the properties themselves — no Button call site renders an icon yet (no Icon component
+  // exists), so there's no real icon+label layout to prove alignItems/gap against behaviorally;
+  // asserting the computed CSS directly is the honest check available today. Authored as
+  // inline-flex, but this button is itself a flex item of ListReport's button row, so its outer
+  // display is blockified to "flex" per CSS Display Level 3 — match either, since both are the
+  // same authored flex container, just blockified by context.
+  await expect(button).toHaveCSS('display', /^(inline-)?flex$/);
+  await expect(button).toHaveCSS('align-items', 'center');
+  await expect(button).toHaveCSS('gap', '8px'); // space.space2
   const box = await button.boundingBox();
   if (!box) throw new Error('button not found');
-  // Single line at the fixed 40px height — a wrapped label would grow past it.
-  expect(box.height).toBeLessThanOrEqual(41);
+  expect(box.height).toBeLessThanOrEqual(41); // single line at the fixed 40px height
   const singleLineHeight = await button.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight));
   expect(singleLineHeight).toBeLessThanOrEqual(16); // line-height:1 at 15px body text, not the browser default (~1.15–1.5x)
 });
