@@ -82,6 +82,10 @@ issues.
    `Dropdown` keyboard/listbox support, `Chip`/`Card` focus-visible rings and
    `Input` placeholder contrast closed (owner-directed, not a milestone item)
    — `0158a19`.
+9. [x] Compact `size`/`density` on `Button`/`Input`/`Table` (0.3.0) — closes the
+   gap item 8 found; `Shell`'s app-strip nav and the sample host's "+New"
+   action moved back onto real `Button` now that it has a compact size. Issue
+   #10 (`agreed`), owner-directed.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).

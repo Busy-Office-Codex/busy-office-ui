@@ -9,7 +9,7 @@
   "docsDir": "docs",
   "readmeHeader": ".design-sync/conventions.md",
   "dtsPropsFor": {
-    "Button": "variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; disabled?: boolean; type?: 'button' | 'submit' | 'reset'; onClick?: () => void; 'aria-label'?: string; className?: string; id?: string; style?: React.CSSProperties; children?: React.ReactNode;",
+    "Button": "variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; /** 'default' (40px, a page's one primary/rare action) or 'compact' (32px, toolbar rows and repeated action bars) */ size?: 'default' | 'compact'; disabled?: boolean; type?: 'button' | 'submit' | 'reset'; onClick?: () => void; 'aria-label'?: string; className?: string; id?: string; style?: React.CSSProperties; children?: React.ReactNode;",
     "Card": "selected?: boolean; disabled?: boolean; onClick?: () => void; className?: string; id?: string; style?: React.CSSProperties; children?: React.ReactNode;",
     "Chip": "/** 'filter' (default) is an interactive pill button; 'status' is a static tag. */ variant?: 'filter' | 'status'; /** filter only: filled ink when true */ selected?: boolean; /** filter only: shows a trailing × while selected */ onRemove?: () => void; /** filter only */ onClick?: () => void; /** filter only */ disabled?: boolean; /** status only: 'neutral' (default) | 'strong' | 'accent' | 'danger' */ tone?: 'neutral' | 'strong' | 'accent' | 'danger'; children?: React.ReactNode;",
     "Dropdown": "label: string; items: { label: string; selected?: boolean }[]; onSelect?: (label: string) => void; defaultOpen?: boolean;",

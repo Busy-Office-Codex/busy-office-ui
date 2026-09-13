@@ -64,8 +64,8 @@ export function ListReport() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <Text variant="heading">Purchase orders</Text>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Button variant="secondary">Export</Button>
-          <Button variant="primary">New purchase order</Button>
+          <Button variant="secondary" size="compact">Export</Button>
+          <Button variant="primary" size="compact">New purchase order</Button>
         </div>
       </div>
 
@@ -91,13 +91,14 @@ export function ListReport() {
             placeholder="Search vendor or PO number..."
             value={query}
             onChange={(event) => setQuery(event.target.value)}
+            size="compact"
           />
         </div>
       </div>
 
       <div role="region" aria-label="Purchase orders table" tabIndex={0} style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}>
         <div style={{ minWidth: 600 }}>
-        <Table>
+        <Table density="compact">
           <TableHead>
             <TableRow>
               <TableHeaderCell>Order</TableHeaderCell>
@@ -109,20 +110,14 @@ export function ListReport() {
           <TableBody>
             {rows.map((order) => (
               <TableRow key={order.po}>
-                <TableCell>
-                  <Text variant="caption">{order.po}</Text>
-                </TableCell>
-                <TableCell>
-                  <Text variant="caption">{order.vendor}</Text>
-                </TableCell>
+                <TableCell>{order.po}</TableCell>
+                <TableCell>{order.vendor}</TableCell>
                 <TableCell>
                   <Chip variant="status" tone={order.tone}>
                     {order.status}
                   </Chip>
                 </TableCell>
-                <TableCell align="end">
-                  <Text variant="caption">{order.amount}</Text>
-                </TableCell>
+                <TableCell align="end">{order.amount}</TableCell>
               </TableRow>
             ))}
             {rows.length === 0 && (

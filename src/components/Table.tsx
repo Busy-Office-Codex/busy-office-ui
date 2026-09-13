@@ -10,6 +10,9 @@ const styles = stylex.create({
     fontSize: font.sizeBody,
     backgroundColor: color.bgSurface,
   },
+  tableCompact: {
+    fontSize: font.sizeCaption,
+  },
   head: {
     backgroundColor: color.bgSubtle,
     borderBottomStyle: 'solid',
@@ -41,11 +44,13 @@ const styles = stylex.create({
   },
 });
 
-export type TableProps = HTMLAttributes<HTMLTableElement> & { children: ReactNode };
+export type TableDensity = 'default' | 'compact';
 
-export function Table({ children, ...rest }: TableProps) {
+export type TableProps = HTMLAttributes<HTMLTableElement> & { children: ReactNode; density?: TableDensity };
+
+export function Table({ children, density = 'default', ...rest }: TableProps) {
   return (
-    <table {...rest} {...stylex.props(styles.table)}>
+    <table {...rest} {...stylex.props(styles.table, density === 'compact' && styles.tableCompact)}>
       {children}
     </table>
   );

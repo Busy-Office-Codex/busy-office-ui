@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Text } from '../src/index.js';
+import { Button, Text } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
 import { Launcher } from './Launcher.js';
 
@@ -122,25 +122,9 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
         }
         account={
           <>
-            <button
-              type="button"
-              style={{
-                height: 32,
-                flexShrink: 0,
-                padding: '0 14px',
-                borderRadius: 999,
-                border: 0,
-                background: '#0f172a',
-                color: '#fff',
-                fontFamily: 'inherit',
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
+            <Button type="button" variant="primary" size="compact" style={{ flexShrink: 0 }}>
               + New ▾
-            </button>
+            </Button>
             <button
               type="button"
               aria-label="Notifications, 3 unread"

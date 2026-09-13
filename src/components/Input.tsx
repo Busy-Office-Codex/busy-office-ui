@@ -46,6 +46,10 @@ const styles = stylex.create({
       color: color.textTertiary,
     },
   },
+  fieldCompact: {
+    height: '36px',
+    fontSize: font.sizeCaption,
+  },
   fieldError: {
     borderColor: {
       default: color.danger,
@@ -66,12 +70,17 @@ const styles = stylex.create({
   },
 });
 
-export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+export type InputSize = 'default' | 'compact';
+
+// Omits the native `size` attribute (visible width in characters) to reuse the name for our own
+// compact/default sizing, consistent with Button's `size` prop.
+export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   label?: string;
   error?: string;
+  size?: InputSize;
 };
 
-export function Input({ label, error, id, disabled, ...rest }: InputProps) {
+export function Input({ label, error, id, disabled, size = 'default', ...rest }: InputProps) {
   const field = (
     <input
       id={id}
@@ -81,6 +90,7 @@ export function Input({ label, error, id, disabled, ...rest }: InputProps) {
         styles.field,
         Boolean(error) && styles.fieldError,
         disabled && styles.fieldDisabled,
+        size === 'compact' && styles.fieldCompact,
       )}
     />
   );
