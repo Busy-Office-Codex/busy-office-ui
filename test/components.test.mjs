@@ -104,6 +104,10 @@ describe('design-system rendered contracts', () => {
     );
 
     expect(closedMarkup).toBe('');
+    expect(openMarkup).toContain('role="dialog"');
+    expect(openMarkup).toContain('aria-modal="true"');
+    expect(openMarkup).toContain('aria-label="Reject invoice?"');
+    expect(openMarkup).toContain('<h2');
     expect(openMarkup).toContain('Reject invoice?');
     expect(openMarkup).toContain('The requester will be notified.');
     expect(openMarkup).toContain('<button');

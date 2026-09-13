@@ -91,3 +91,34 @@ test('a queued close callback cannot clear the opener captured by an immediate r
   await page.evaluate(() => (window as typeof window & { flushFocusFrames: () => void }).flushFocusFrames());
   await expect(trigger).toBeFocused();
 });
+
+test('Tab and Shift+Tab wrap focus within the command palette instead of escaping it', async ({ page }) => {
+  await page.goto('/#examples');
+  const trigger = page.getByRole('button', { name: 'Open command palette', exact: true });
+  const search = paletteSearch(page);
+  const close = page.getByRole('button', { name: 'Close command palette', exact: true });
+  const lastCategory = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: 'Pages', exact: true });
+
+  await trigger.click();
+  await expect(search).toBeFocused();
+
+  await page.keyboard.press('Shift+Tab');
+  await expect(lastCategory).toBeFocused();
+
+  await page.keyboard.press('Tab');
+  await expect(search).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(close).toBeFocused();
+});
+
+test('command palette stays keyboard-operable at narrow viewport widths', async ({ page }) => {
+  await page.setViewportSize({ width: 380, height: 720 });
+  await page.goto('/#examples');
+  const trigger = page.getByRole('button', { name: 'Open command palette', exact: true });
+  const search = paletteSearch(page);
+
+  await trigger.click();
+  await expect(search).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(trigger).toBeFocused();
+});

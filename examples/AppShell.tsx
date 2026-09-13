@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { Button, Chip, Input, Text } from '../src/index.js';
 import { Launcher, type LauncherDestination } from './Launcher.js';
 
@@ -55,9 +55,31 @@ function NavItem({ active, disabled, onClick, children }: { active: boolean; dis
   return <Button type="button" variant={active ? 'secondary' : 'ghost'} aria-current={active ? 'page' : undefined} disabled={disabled} onClick={onClick}>{children}</Button>;
 }
 
+const PALETTE_FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 function CommandPalette({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Tab') return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const focusable = Array.from(panel.querySelectorAll<HTMLElement>(PALETTE_FOCUSABLE_SELECTOR));
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
   return (
     <div
       onClick={onClose}
@@ -73,7 +95,13 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
       }}
     >
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
+        onKeyDown={handleKeyDown}
         style={{
           width: 680,
           maxWidth: '90vw',
