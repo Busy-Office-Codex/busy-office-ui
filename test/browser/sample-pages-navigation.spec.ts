@@ -23,11 +23,13 @@ test('moves between Purchase Orders and Sales via the app strip, the command pal
   const purchaseOrdersStrip = page.getByRole('button', { name: 'Purchase orders', exact: true });
   const salesOrderStrip = page.getByRole('button', { name: 'Sales order', exact: true });
   const purchaseOrdersTable = page.getByRole('region', { name: 'Purchase orders table' });
+  const purchaseOrdersHeading = page.getByRole('heading', { name: 'Purchase orders', exact: true });
   const salesHeading = page.getByRole('heading', { name: 'SO-1042 · Northwind Traders' });
   const dialog = page.getByRole('dialog', { name: 'Command palette' });
 
   // Starts on Purchase Orders, the default route.
   await expect(purchaseOrdersStrip).toHaveAttribute('aria-current', 'page');
+  await expect(purchaseOrdersHeading).toBeVisible();
   await expect(purchaseOrdersTable).toBeVisible();
 
   // App-strip button: a real click on the page it already represents (its
@@ -35,6 +37,7 @@ test('moves between Purchase Orders and Sales via the app strip, the command pal
   // it keeps announcing the current page correctly.
   await purchaseOrdersStrip.click();
   await expect(purchaseOrdersStrip).toHaveAttribute('aria-current', 'page');
+  await expect(purchaseOrdersHeading).toBeVisible();
   await expect(purchaseOrdersTable).toBeVisible();
 
   // Dock tile moves to Sales.
@@ -49,6 +52,7 @@ test('moves between Purchase Orders and Sales via the app strip, the command pal
   await dialog.getByRole('button', { name: /^Purchase orders\b/ }).click();
   await expect(dialog).toBeHidden();
   await expect(purchaseOrdersStrip).toHaveAttribute('aria-current', 'page');
+  await expect(purchaseOrdersHeading).toBeVisible();
   await expect(purchaseOrdersTable).toBeVisible();
 
   // Dock tile moves to Sales again.
