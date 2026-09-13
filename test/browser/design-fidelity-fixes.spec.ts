@@ -44,9 +44,9 @@ test('Button carries the flex/typography properties the handoff asked for direct
   await expect(button).toHaveCSS('gap', '8px'); // space.space2
   const box = await button.boundingBox();
   if (!box) throw new Error('button not found');
-  expect(box.height).toBeLessThanOrEqual(41); // single line at the fixed 40px height
+  expect(box.height).toBeLessThanOrEqual(33); // single line at the compact 32px height
   const singleLineHeight = await button.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight));
-  expect(singleLineHeight).toBeLessThanOrEqual(16); // line-height:1 at 15px body text, not the browser default (~1.15–1.5x)
+  expect(singleLineHeight).toBeLessThanOrEqual(13); // line-height:1 at 12.5px caption text (compact), not the browser default (~1.15–1.5x)
 });
 
 test('Modal panel carries base body typography independent of what children supply', async ({ page }) => {
@@ -62,15 +62,18 @@ test('Modal panel carries base body typography independent of what children supp
   expect(lineHeight).toBe('24px'); // font.lineHeightBody (1.6) × 15px
 });
 
-test('Button (compact) and Dropdown trigger labels stay on one line with a tight line-height', async ({ page }) => {
+test('filter Chip and Dropdown trigger labels stay on one line with a tight line-height', async ({ page }) => {
   await page.goto('/#examples');
   // Both render at font.sizeCaption (12.5px); line-height:'1' is a unitless multiplier, so it
-  // computes to 12.5px of text line-box height, not the pill's own 32px height. ListReport's
-  // filter Chips were removed in the "14 · Purchase order" rebuild — its compact "+ New PO"
-  // Button shares the same nowrap/line-height:1 CSS contract a filter Chip did.
-  const button = page.getByRole('button', { name: '+ New PO', exact: true });
-  await expect(button).toHaveCSS('white-space', 'nowrap');
-  await expect(button).toHaveCSS('line-height', '12.5px');
+  // computes to 12.5px of text line-box height, not the pill's own 32px height. ListReport's own
+  // filter Chips were removed in the "14 · Purchase order" rebuild, but Shell's command palette
+  // still renders a live variant="filter" Chip (its category filter row) — target that directly
+  // rather than a Button, so this stays a real check of Chip's own CSS contract.
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  const allChip = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: 'All', exact: true });
+  await expect(allChip).toHaveCSS('white-space', 'nowrap');
+  await expect(allChip).toHaveCSS('line-height', '12.5px');
+  await page.keyboard.press('Escape');
 
   const dropdown = page.getByRole('button', { name: /^Status/, exact: false });
   await expect(dropdown).toHaveCSS('white-space', 'nowrap');
