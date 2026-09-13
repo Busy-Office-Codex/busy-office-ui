@@ -45,19 +45,23 @@ test('Enter and Space activate an interactive Card the same way a click does', a
   await expect(approvalsCard).toHaveCSS('border-top-color', UNSELECTED_BORDER);
 });
 
-test('a filter Chip shows a visible focus-visible ring on keyboard focus', async ({ page }) => {
+// ListReport's filter Chips were removed in the "14 · Purchase order" rebuild (Claude Design
+// project "Busy Office Design System") in favor of four Dropdown filters — its trigger is the
+// same small pill-shaped control shape a filter Chip was, and shares the same
+// outline/:focus-visible styling contract, so it proves the same property.
+test('a Dropdown filter trigger shows a visible focus-visible ring on keyboard focus', async ({ page }) => {
   await page.goto('/#examples');
-  const chip = page.getByRole('button', { name: 'Mine · 6', exact: true });
+  const trigger = page.getByRole('button', { name: /^Supplier/ });
 
-  await expect(chip).toHaveCSS('outline-width', '0px');
-  await chip.focus();
-  await expect(chip).toHaveCSS('outline-width', '2px');
-  await expect(chip).toHaveCSS('outline-style', 'solid');
+  await expect(trigger).toHaveCSS('outline-width', '0px');
+  await trigger.focus();
+  await expect(trigger).toHaveCSS('outline-width', '2px');
+  await expect(trigger).toHaveCSS('outline-style', 'solid');
 });
 
 test('Input placeholder text meets AA contrast, not the disabled/faded token', async ({ page }) => {
   await page.goto('/#examples');
-  const input = page.getByPlaceholder('Search vendor or PO number...');
+  const input = page.getByPlaceholder('Search POs…');
   await expect(input).toBeVisible();
 
   const placeholderColor = await input.evaluate((el) => {

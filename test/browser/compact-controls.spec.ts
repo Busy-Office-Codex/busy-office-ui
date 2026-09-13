@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
 test('Button size="compact" renders at the compact height, default stays 40px', async ({ page }) => {
   await page.goto('/#examples');
 
-  const compactButton = page.getByRole('button', { name: 'Export', exact: true });
+  const compactButton = page.getByRole('button', { name: 'From requisition', exact: true });
   await expect(compactButton).toHaveCSS('height', '32px');
 
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
@@ -18,7 +18,7 @@ test('Button size="compact" renders at the compact height, default stays 40px', 
 test('Input size="compact" renders at the compact height, default stays 44px', async ({ page }) => {
   await page.goto('/#examples');
 
-  const compactInput = page.getByPlaceholder('Search vendor or PO number...');
+  const compactInput = page.getByPlaceholder('Search POs…');
   await expect(compactInput).toHaveCSS('height', '36px');
 
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();

@@ -49,12 +49,34 @@ describe('ListReport state prop', () => {
     expect(markup).not.toContain('No purchase orders match these filters.');
   });
 
-  it('"loading" replaces the table with an announced status region, table gone', () => {
+  it('"ready" renders the checkbox selection column with proper aria-labels, real data intact', () => {
+    const markup = renderToStaticMarkup(createElement(ListReport, { state: 'ready' }));
+
+    expect(markup).toContain('aria-label="Select all rows"');
+    expect(markup).toContain('aria-label="Select PO-1042"');
+    // Real table content, not shimmer placeholders.
+    expect(markup).not.toContain('data-testid="cell-shimmer"');
+    expect(markup).not.toContain('data-testid="stat-shimmer"');
+  });
+
+  it('"loading" replaces the table with an announced status region, no real table, only shimmer content', () => {
     const markup = renderToStaticMarkup(createElement(ListReport, { state: 'loading' }));
 
     expect(markup).toContain('role="status"');
-    expect(markup).toContain('Loading purchase orders');
+    expect(markup).toContain('aria-label="Loading purchase orders"');
     expect(markup).not.toContain('<table');
+
+    // 4 stat tiles + 8 skeleton rows x 7 data columns = 60 shimmer bars.
+    expect(markup.match(/data-testid="stat-shimmer"/g)).toHaveLength(4);
+    expect(markup.match(/data-testid="cell-shimmer"/g)).toHaveLength(56);
+
+    // The checkbox column stays real (not shimmering) even while row content loads: header
+    // "select all" plus one checkbox per of the 8 skeleton rows, all disabled since there is
+    // nothing to select yet.
+    expect(markup.match(/type="checkbox"/g)).toHaveLength(9);
+    expect(markup.match(/disabled=""/g)).toHaveLength(9);
+    expect(markup).toContain('aria-label="Select all rows"');
+    expect(markup).toContain('aria-label="Row 1 loading"');
   });
 
   it('"error" replaces the table with an alert region and a retry action', () => {

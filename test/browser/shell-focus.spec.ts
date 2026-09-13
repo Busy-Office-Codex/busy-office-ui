@@ -22,23 +22,23 @@ test('command trigger opens with native Enter and Space and focuses palette sear
 
 test('shortcuts preserve the original page-input opener and its value', async ({ page }) => {
   await page.goto('/#examples');
-  const pageInput = page.getByPlaceholder('Search vendor or PO number...');
+  const pageInput = page.getByPlaceholder('Search POs…');
   const search = paletteSearch(page);
 
-  await pageInput.fill('Alden');
+  await pageInput.fill('Redline');
   await page.keyboard.press('Control+k');
   await expect(search).toBeFocused();
   await page.keyboard.press('Control+k');
   await expect(search).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(pageInput).toBeFocused();
-  await expect(pageInput).toHaveValue('Alden');
+  await expect(pageInput).toHaveValue('Redline');
 
   await page.keyboard.press('Meta+k');
   await expect(search).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(pageInput).toBeFocused();
-  await expect(pageInput).toHaveValue('Alden');
+  await expect(pageInput).toHaveValue('Redline');
 });
 
 test('close button and backdrop restore focus and allow reopening', async ({ page }) => {
@@ -75,7 +75,7 @@ test('a queued close callback cannot clear the opener captured by an immediate r
     };
   });
   await page.goto('/#examples');
-  const pageInput = page.getByPlaceholder('Search vendor or PO number...');
+  const pageInput = page.getByPlaceholder('Search POs…');
   const trigger = page.getByRole('button', { name: 'Open command palette', exact: true });
   const search = paletteSearch(page);
 
