@@ -3,6 +3,7 @@ import { Button } from '../components/Button.js';
 import { Chip } from '../components/Chip.js';
 import { Input } from '../components/Input.js';
 import { Text } from '../components/Text.js';
+import { radius } from '../tokens.stylex.js';
 
 export type ShellRoute = {
   id: string;
@@ -369,7 +370,13 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
               aria-current={active ? 'page' : undefined}
               disabled={route.disabled}
               onClick={() => navigate(route.id)}
-              style={{ flexShrink: 0, fontWeight: active ? 600 : undefined }}
+              // A capsule reads as "a discrete action" (see docs/design-conventions.md's
+              // capsule-vs-rectangle rule); this is a highlight behind existing nav content,
+              // not a new action, so it gets radius.sm like Dropdown's own highlighted menu
+              // item does — not Button's default pill. Applied to both states: 'ghost's own
+              // :hover background would otherwise show a pill-shaped highlight on an inactive
+              // tab, inconsistent with the active tab's rounded-rect.
+              style={{ flexShrink: 0, fontWeight: active ? 600 : undefined, borderRadius: radius.sm }}
             >
               {route.label}
             </Button>
