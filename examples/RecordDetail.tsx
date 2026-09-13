@@ -35,7 +35,7 @@ export function RecordDetail() {
           <div style={{ flex: 1, minWidth: 220 }}>
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Text variant="title">Order total</Text>
+                <Text variant="caption" as="h3">Order total</Text>
                 <Text variant="heading">$24,300</Text>
               </div>
             </Card>
@@ -43,7 +43,7 @@ export function RecordDetail() {
           <div style={{ flex: 1, minWidth: 220 }}>
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Text variant="title">Line items</Text>
+                <Text variant="caption" as="h3">Line items</Text>
                 <Text variant="heading">12</Text>
               </div>
             </Card>
@@ -51,7 +51,7 @@ export function RecordDetail() {
           <div style={{ flex: 1, minWidth: 220 }}>
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Text variant="title">Requested by</Text>
+                <Text variant="caption" as="h3">Requested by</Text>
                 <Text variant="heading">Sales — East region</Text>
               </div>
             </Card>

@@ -309,10 +309,31 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
           </>
         )}
         <div style={{ flex: 1 }} />
-        <div style={{ position: 'relative', width: 420, maxWidth: '40vw' }}>
-          <Button type="button" variant="secondary" onClick={(event) => openPalette(event.currentTarget)} aria-label="Open command palette" style={{ width: '100%', justifyContent: 'space-between' }}>
-            Search commands
-          </Button>
+        <div style={{ position: 'relative', width: 520, maxWidth: '40vw' }}>
+          <button
+            type="button"
+            onClick={(event) => openPalette(event.currentTarget)}
+            aria-label="Open command palette"
+            style={{
+              width: '100%',
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '0 12px',
+              borderRadius: 10,
+              border: '1px solid #e2e8f0',
+              background: '#fff',
+              color: '#64748b',
+              fontFamily: 'inherit',
+              fontSize: 14,
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <span aria-hidden="true" style={{ width: 13, height: 13, borderRadius: '50%', border: '1.5px solid #64748b', flexShrink: 0 }} />
+            <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Type a command, a record, or an app…</span>
+          </button>
           <span style={{ ...kbd, position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: '#fff', pointerEvents: 'none' }}>⌘K</span>
         </div>
         <div style={{ flex: 1 }} />
@@ -340,9 +361,29 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
         {stripRoutes.map((route) => {
           const active = route.id === activeRoute?.id && !showLauncher;
           return (
-            <Button key={route.id} type="button" variant={active ? 'secondary' : 'ghost'} aria-current={active ? 'page' : undefined} disabled={route.disabled} onClick={() => navigate(route.id)}>
+            <button
+              key={route.id}
+              type="button"
+              aria-current={active ? 'page' : undefined}
+              disabled={route.disabled}
+              onClick={() => navigate(route.id)}
+              style={{
+                flexShrink: 0,
+                padding: '6px 12px',
+                borderRadius: 999,
+                border: 0,
+                background: active ? 'rgba(15, 23, 42, 0.08)' : 'transparent',
+                color: '#0f172a',
+                fontFamily: 'inherit',
+                fontSize: 13,
+                fontWeight: active ? 600 : 500,
+                cursor: route.disabled ? 'not-allowed' : 'pointer',
+                opacity: route.disabled ? 0.4 : 1,
+                whiteSpace: 'nowrap',
+              }}
+            >
               {route.label}
-            </Button>
+            </button>
           );
         })}
       </div>
@@ -385,18 +426,61 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
           }}
         >
           <div style={{ flexShrink: 0 }}>
-            <Button type="button" variant="primary" disabled={!valid} onClick={() => setShowLauncher(true)} aria-label="Open launcher">
-              Launcher
-            </Button>
+            <button
+              type="button"
+              disabled={!valid}
+              onClick={() => setShowLauncher(true)}
+              aria-label="Open launcher"
+              style={{
+                width: 44,
+                height: 44,
+                flexShrink: 0,
+                borderRadius: 12,
+                border: 0,
+                background: '#0f172a',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gridTemplateRows: '1fr 1fr',
+                gap: 3,
+                placeItems: 'center',
+                padding: 12,
+                cursor: valid ? 'pointer' : 'not-allowed',
+                opacity: valid ? 1 : 0.4,
+              }}
+            >
+              {[0, 1, 2, 3].map((dot) => (
+                <span key={dot} aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />
+              ))}
+            </button>
           </div>
           {pinned.length > 0 && <div style={{ width: 1, height: 36, background: '#e2e8f0', flexShrink: 0 }} />}
           {pinned.map((app) => {
             const route = app.routeId ? navigation.routes.find((candidate) => candidate.id === app.routeId) : undefined;
+            const disabled = !route || route.disabled;
             return (
               <div key={app.id} style={{ position: 'relative', flexShrink: 0 }}>
-                <Button type="button" variant="ghost" aria-label={app.label} title={app.label} disabled={!route || route.disabled} onClick={route ? () => navigate(route.id) : undefined}>
-                  {app.label}
-                </Button>
+                <button
+                  type="button"
+                  aria-label={app.label}
+                  title={app.label}
+                  disabled={disabled}
+                  onClick={route ? () => navigate(route.id) : undefined}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    border: '1px solid #e2e8f0',
+                    background: '#fff',
+                    color: '#0f172a',
+                    fontFamily: 'inherit',
+                    fontSize: 15,
+                    fontWeight: 600,
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                    opacity: disabled ? 0.4 : 1,
+                  }}
+                >
+                  {[...app.label][0]?.toUpperCase()}
+                </button>
                 {app.count !== undefined && (
                   <div style={{ position: 'absolute', top: -6, right: -6 }}>
                     <Chip variant="status" tone="accent">

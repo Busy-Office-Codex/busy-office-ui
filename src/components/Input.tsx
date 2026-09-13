@@ -42,6 +42,9 @@ const styles = stylex.create({
       default: 'text',
       ':disabled': 'not-allowed',
     },
+    '::placeholder': {
+      color: color.textTertiary,
+    },
   },
   fieldError: {
     borderColor: {

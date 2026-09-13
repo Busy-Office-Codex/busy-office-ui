@@ -27,6 +27,16 @@ const styles = stylex.create({
       default: shadow.xs,
       ':hover': shadow.md,
     },
+    outlineStyle: 'solid',
+    outlineOffset: '2px',
+    outlineColor: {
+      default: 'transparent',
+      ':focus-visible': color.focusRing,
+    },
+    outlineWidth: {
+      default: 0,
+      ':focus-visible': '2px',
+    },
   },
   selected: {
     borderColor: color.accent,
@@ -45,13 +55,20 @@ export type CardProps = HTMLAttributes<HTMLDivElement> & {
   disabled?: boolean;
 };
 
-export function Card({ selected, disabled, onClick, children, ...rest }: CardProps) {
+export function Card({ selected, disabled, onClick, onKeyDown, children, ...rest }: CardProps) {
   const interactive = Boolean(onClick) && !disabled;
   return (
     <div
       role={onClick ? 'button' : undefined}
       tabIndex={interactive ? 0 : undefined}
       onClick={disabled ? undefined : onClick}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        if (interactive && !event.defaultPrevented && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          event.currentTarget.click();
+        }
+      }}
       {...rest}
       {...stylex.props(
         styles.base,

@@ -109,14 +109,20 @@ export function ListReport() {
           <TableBody>
             {rows.map((order) => (
               <TableRow key={order.po}>
-                <TableCell>{order.po}</TableCell>
-                <TableCell>{order.vendor}</TableCell>
+                <TableCell>
+                  <Text variant="caption">{order.po}</Text>
+                </TableCell>
+                <TableCell>
+                  <Text variant="caption">{order.vendor}</Text>
+                </TableCell>
                 <TableCell>
                   <Chip variant="status" tone={order.tone}>
                     {order.status}
                   </Chip>
                 </TableCell>
-                <TableCell align="end">{order.amount}</TableCell>
+                <TableCell align="end">
+                  <Text variant="caption">{order.amount}</Text>
+                </TableCell>
               </TableRow>
             ))}
             {rows.length === 0 && (

@@ -25,6 +25,16 @@ const styles = stylex.create({
       default: 1,
       ':disabled': 0.4,
     },
+    outlineStyle: 'solid',
+    outlineOffset: '2px',
+    outlineColor: {
+      default: 'transparent',
+      ':focus-visible': color.focusRing,
+    },
+    outlineWidth: {
+      default: 0,
+      ':focus-visible': '2px',
+    },
   },
   filterSelected: {
     backgroundColor: color.action,
