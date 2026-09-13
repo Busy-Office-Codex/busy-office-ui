@@ -25,8 +25,11 @@ an agreed request.
 
 1. **Wake.** Check `.loop/HALT`. Read `.loop/state.json`, `ROADMAP.md`, then
    open issues in `Busy-Office-Codex/busy-office-ui` and
-   `Busy-Office-Codex/busy-office-erp`. `git fetch`; start from `develop`.
+   `Busy-Office-Codex/busy-office-erp`, and the latest `gates` workflow run on
+   `develop` (`gh run list -w gates -b develop -L 1`). `git fetch`; start from
+   `develop`.
 2. **Select a batch.** Take, in this order, until the batch holds 3 items:
+   0. a failing `gates` run on `develop` → fixing it is the whole batch;
    1. fixes requested on anything this loop handed off;
    2. open `[UI request]` issues marked `agreed`;
    3. `[ ]` ROADMAP items whose Accept is stated and whose "Needs" is met.
@@ -75,7 +78,8 @@ off `develop` and are merged back into `develop` locally with `--no-ff`; only
 verify passes. `main` only receives release merges, and the loop never merges
 into `main`, tags or releases — it recommends.
 
-**Recommend a release** when `develop` is green and at least one holds:
+**Recommend a release** when the latest `gates` run on `develop` passed and at
+least one holds:
 - the ERP host needs a version to pin (an issue asks for one, or a handoff is
   `accepted`);
 - a public export, prop or behaviour a host sees has changed since the last tag;
