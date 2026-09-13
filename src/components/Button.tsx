@@ -10,6 +10,7 @@ const styles = stylex.create({
     borderRadius: radius.pill,
     height: '40px',
     paddingInline: space.space5,
+    whiteSpace: 'nowrap',
     borderStyle: 'solid',
     borderWidth: '1px',
     borderColor: 'transparent',
@@ -33,6 +34,11 @@ const styles = stylex.create({
       default: 0,
       ':focus-visible': '2px',
     },
+  },
+  compact: {
+    height: '32px',
+    paddingInline: space.space4,
+    fontSize: font.sizeCaption,
   },
   primary: {
     backgroundColor: {
@@ -72,11 +78,13 @@ const styles = stylex.create({
 });
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonSize = 'default' | 'compact';
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
+  size?: ButtonSize;
 };
 
-export function Button({ variant = 'primary', ...rest }: ButtonProps) {
-  return <button {...rest} {...stylex.props(styles.base, styles[variant])} />;
+export function Button({ variant = 'primary', size = 'default', ...rest }: ButtonProps) {
+  return <button {...rest} {...stylex.props(styles.base, styles[variant], size === 'compact' && styles.compact)} />;
 }

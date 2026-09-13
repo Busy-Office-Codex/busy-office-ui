@@ -8,14 +8,14 @@ Every component is on `window.BusyOfficeDesignSystem` (`Button`, `Card`, `Chip`,
 
 This is a StyleX design system: the compiled stylesheet contains only hashed, opaque class and custom-property names. **Never author CSS classes or `var(--…)` tokens against it** — there is no utility-class family and no public token API. Style through each component's props:
 
-- `Button`: `variant="primary" | "secondary" | "ghost" | "danger"` (pill, 40px). `primary` is solid ink; the accent blue is reserved for focus rings and selection. `danger` is a red outline — use for destructive actions. `disabled`, `onClick`, `type` pass through.
+- `Button`: `variant="primary" | "secondary" | "ghost" | "danger"` (pill). `primary` is solid ink; the accent blue is reserved for focus rings and selection. `danger` is a red outline — use for destructive actions. `size="default"` (40px, a page's one primary/rare action) `| "compact"` (32px, toolbar rows and repeated action bars). `disabled`, `onClick`, `type` pass through.
 - `Text`: `variant="display" | "heading" | "title" | "body" | "caption" | "overline"` is the entire type scale (40 → 24 → 17 → 15 → 12.5 → 11px). `as` overrides the element (defaults: display→h1, heading→h2, title→h3, body→p, caption/overline→span). Use it for all copy; never raw `<h1>`/`<p>`.
-- `Input`: `label` renders a caption label above; `error` (string) renders a red border plus a red message — validation only, not help text. `placeholder`, `value`, `onChange`, `disabled` are forwarded.
+- `Input`: `label` renders a caption label above; `error` (string) renders a red border plus a red message — validation only, not help text. `size="default"` (44px) `| "compact"` (36px, toolbar search fields). `placeholder`, `value`, `onChange`, `disabled` are forwarded.
 - `Chip`: `variant="filter"` (default) is an interactive pill — `selected` fills it ink, `onRemove` adds a trailing ×. `variant="status"` is a static tag with `tone="neutral" | "strong" | "accent" | "danger"` (`accent` for counts/highlights, `danger` for overdue/errors).
 - `Card`: container with `selected` (accent ring) and `disabled` (muted); pass `onClick` to make it interactive (hover elevation, pointer).
 - `Modal`: controlled by `open` + `onClose`; `title` (string) and `children` are the content slots, `actions` is the footer button row (usually a `ghost` and a `primary`/`danger` `Button`). The host owns `open` state; there is no built-in trigger.
 - `Dropdown`: `label` (trigger text), `items: { label, selected? }[]`, `onSelect(label)`. Manages its own open state; `defaultOpen` for an initially open menu.
-- `Table` + `TableHead`/`TableBody`/`TableRow`/`TableHeaderCell`/`TableCell`: children-based compound table so any component (e.g. a status `Chip`) can sit in a cell. `TableHeaderCell`/`TableCell` take `align="start" | "end"` — use `"end"` for numeric columns.
+- `Table` + `TableHead`/`TableBody`/`TableRow`/`TableHeaderCell`/`TableCell`: children-based compound table so any component (e.g. a status `Chip`) can sit in a cell. `TableHeaderCell`/`TableCell` take `align="start" | "end"` — use `"end"` for numeric columns. `Table` takes `density="default" | "compact"` (12.5px body cell text for a dense grid; header cells and row padding are unaffected).
 
 For page layout outside these components (grids, gaps, page padding, surfaces) use plain inline styles or your own CSS — the system ships no layout primitives or spacing scale. Page background is `#f8fafc`; surfaces and table frames are white with a `1px solid #e2e8f0` border and 10–12px radius.
 

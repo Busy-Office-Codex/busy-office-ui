@@ -59,10 +59,10 @@ export function RecordDetail() {
         </div>
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-          <Button variant="ghost">Cancel</Button>
-          <Button variant="secondary">Request changes</Button>
-          <Button variant="primary">Approve</Button>
-          <Button variant="danger" onClick={() => setRejecting(true)}>
+          <Button variant="ghost" size="compact">Cancel</Button>
+          <Button variant="secondary" size="compact">Request changes</Button>
+          <Button variant="primary" size="compact">Approve</Button>
+          <Button variant="danger" size="compact" onClick={() => setRejecting(true)}>
             Reject
           </Button>
         </div>
@@ -74,10 +74,10 @@ export function RecordDetail() {
         title="Reject SO-1042?"
         actions={
           <>
-            <Button variant="ghost" onClick={() => setRejecting(false)}>
+            <Button variant="ghost" size="compact" onClick={() => setRejecting(false)}>
               Cancel
             </Button>
-            <Button variant="danger" onClick={() => setRejecting(false)}>
+            <Button variant="danger" size="compact" onClick={() => setRejecting(false)}>
               Reject
             </Button>
           </>

@@ -361,29 +361,18 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
         {stripRoutes.map((route) => {
           const active = route.id === activeRoute?.id && !showLauncher;
           return (
-            <button
+            <Button
               key={route.id}
               type="button"
+              size="compact"
+              variant={active ? 'secondary' : 'ghost'}
               aria-current={active ? 'page' : undefined}
               disabled={route.disabled}
               onClick={() => navigate(route.id)}
-              style={{
-                flexShrink: 0,
-                padding: '6px 12px',
-                borderRadius: 999,
-                border: 0,
-                background: active ? 'rgba(15, 23, 42, 0.08)' : 'transparent',
-                color: '#0f172a',
-                fontFamily: 'inherit',
-                fontSize: 13,
-                fontWeight: active ? 600 : 500,
-                cursor: route.disabled ? 'not-allowed' : 'pointer',
-                opacity: route.disabled ? 0.4 : 1,
-                whiteSpace: 'nowrap',
-              }}
+              style={{ flexShrink: 0, fontWeight: active ? 600 : undefined }}
             >
               {route.label}
-            </button>
+            </Button>
           );
         })}
       </div>
