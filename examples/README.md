@@ -49,15 +49,16 @@ writing one should be back-ported to the other).
 ## How the launcher and menu work
 
 Per `templates/erp-skeleton`'s own "Shell anatomy" annotations, this ERP has
-no sidebar. Navigation is five pieces, all in `AppShell.tsx`:
+no sidebar. Navigation is five pieces, implemented in the package's
+`src/shell/Shell.tsx` and composed with sample data by `AppShell.tsx`:
 
 1. **Command bar** — always visible, top of every page. Its named shared
    button opens the **command palette** with Enter, Space, or ⌘K/Ctrl+K.
    The palette search receives focus; Escape, its Close button, and the
    backdrop return focus to the opener when it remains connected, visible,
-   and active. It is a full search/filter overlay (category
-   `Chip`s: All/Orders/Customers/Invoices/Actions/Pages, an "Actions"
-   section, a "Records" section) that a real app would wire to live search
+   and active. It is a search/filter overlay over the host's `commands`
+   (category `Chip`s derived from each command's `group` — here Actions,
+   Records and Pages) that a real app would wire to live search
    results and command execution.
 2. **App strip** — right below the command bar. Shows the *current
    module's* sibling screens (e.g. module `"Sales"` → Customers · Sales
@@ -78,9 +79,12 @@ no sidebar. Navigation is five pieces, all in `AppShell.tsx`:
 
 Implemented local interactions include: the Ctrl/⌘K listener, command-palette
 focus return, the launcher toggle, and the app-strip's active-item highlighting
-are all real `useState`/`useEffect` — read `AppShell.tsx` directly for the
-wiring, not just this summary.
+are all real `useState`/`useEffect` — read `src/shell/Shell.tsx` directly for
+the wiring, not just this summary.
 
-The shell and launcher are also available to this repository's demo through
-`@busyoffice/design-system/examples/app-shell`. This is a preview-only
-composition subpath for local examples; it is not a production SDK contract.
+The reusable shell itself lives in the package as
+`@busyoffice/design-system/shell` (`Shell`, `ShellProps`, `validateShellNavigation`
+— see `docs/Shell.md`); `AppShell.tsx` is a sample host composition over it
+with sample modules, pinned apps and commands. `AppShell` is also exported to
+this repository's demo through `@busyoffice/design-system/examples/app-shell`,
+a preview-only subpath; the production contract is `Shell`.

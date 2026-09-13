@@ -23,6 +23,8 @@ Instead, style exclusively through each component's own props:
 - **`Dropdown`**: `label` (trigger text), `items` (array of `{ label, selected? }`), `onSelect`. Manages its own open/closed state internally (click the trigger to toggle) — the trigger appears filled/dark whenever any item is `selected`. **Only usable from real JSX/React code** — its `items` prop is an array, which cannot be expressed in the `.dc.html` template format's `<x-import>` syntax (attributes are plain strings only). A static page template needing a filter/select affordance should use `Chip` (`variant="filter"`) instead.
 - **`Table` / `TableHead` / `TableBody` / `TableRow` / `TableHeaderCell` / `TableCell`**: a compound table — deliberately children-based (not a `rows` data-array prop) so any real component (e.g. a `Chip`) can be composed inside a cell, and so it stays usable from the `.dc.html` template format. `TableHeaderCell`/`TableCell` take an optional `align="start" | "end"` (use `"end"` for numeric columns).
 
+- **`Shell`** (`@busyoffice/design-system/shell`): the application chrome — `navigation` (host-owned `routes`/`activeRouteId`/`onNavigate`), `pinned` dock tiles, `commands` for the palette, `brand`/`account`/`home` slots and `children` as the page. Hosts keep routing, page retention, command execution and permissions; the shell keeps palette/launcher state and the keyboard/focus contracts. See `docs/Shell.md`.
+
 For any layout or spacing outside these components (page structure, grids, gaps), use plain inline styles or your own CSS — this design system does not yet ship layout primitives or a spacing scale the agent can reach for.
 
 ## Where the truth lives

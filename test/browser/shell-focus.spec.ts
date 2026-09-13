@@ -97,18 +97,30 @@ test('Tab and Shift+Tab wrap focus within the command palette instead of escapin
   const trigger = page.getByRole('button', { name: 'Open command palette', exact: true });
   const search = paletteSearch(page);
   const close = page.getByRole('button', { name: 'Close command palette', exact: true });
-  const lastCategory = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: 'Pages', exact: true });
+  const lastCommand = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Sales order\b/ });
 
   await trigger.click();
   await expect(search).toBeFocused();
 
   await page.keyboard.press('Shift+Tab');
-  await expect(lastCategory).toBeFocused();
+  await expect(lastCommand).toBeFocused();
 
   await page.keyboard.press('Tab');
   await expect(search).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(close).toBeFocused();
+});
+
+test('running a page command navigates the host and closes the palette', async ({ page }) => {
+  await page.goto('/#examples');
+  const dialog = page.getByRole('dialog', { name: 'Command palette' });
+
+  await expect(page.getByRole('button', { name: 'Purchase orders', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await dialog.getByRole('button', { name: /^Sales order\b/ }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Sales order', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByRole('heading', { name: 'SO-1042 · Northwind Traders' })).toBeVisible();
 });
 
 test('command palette stays keyboard-operable at narrow viewport widths', async ({ page }) => {

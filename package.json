@@ -1,6 +1,6 @@
 {
   "name": "@busyoffice/design-system",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "packageManager": "pnpm@11.24.0",
   "engines": {
@@ -13,6 +13,10 @@
   "exports": {
     ".": "./dist/index.js",
     "./styles.css": "./dist/design-system.css",
+    "./shell": {
+      "types": "./dist/shell/index.d.ts",
+      "import": "./dist/shell.js"
+    },
     "./examples/app-shell": {
       "types": "./dist/examples/AppShell.d.ts",
       "import": "./dist/examples/app-shell.js"

@@ -8,7 +8,8 @@ components, StyleX stylesheet, fonts, and pure reference page compositions.
 ```ts
 import { Button, Card, Text } from '@busyoffice/design-system';
 import '@busyoffice/design-system/styles.css';
-import { AppShell } from '@busyoffice/design-system/examples/app-shell';
+import { Shell } from '@busyoffice/design-system/shell';
+import { AppShell } from '@busyoffice/design-system/examples/app-shell'; // preview-only sample host
 ```
 
 The existing example guide remains at [examples/README.md](examples/README.md).

@@ -8,11 +8,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 await build({
   entryPoints: {
     index: 'src/index.ts',
+    shell: 'src/shell/index.ts',
     'examples/app-shell': 'examples/AppShell.tsx',
     'examples/list-report': 'examples/ListReport.tsx',
     'examples/record-detail': 'examples/RecordDetail.tsx',
   },
   bundle: true,
+  splitting: true,
+  chunkNames: 'chunks/[name]-[hash]',
   format: 'esm',
   jsx: 'automatic',
   platform: 'browser',
