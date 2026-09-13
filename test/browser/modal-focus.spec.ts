@@ -62,3 +62,32 @@ test('reject modal remains keyboard-operable at narrow viewport widths', async (
   await expect(dialog).toBeHidden();
   await expect(trigger).toBeFocused();
 });
+
+test('while open, the modal makes background content genuinely inert, not just visually covered', async ({
+  page,
+}) => {
+  // The point of the native <dialog> is real accessibility-tree exclusion, not
+  // a bigger overlay — but neither getByRole() nor ariaSnapshot() reflect a
+  // modal dialog's inertness (both still resolve/see background content, a
+  // false negative confirmed against this exact page). Asserting the DOM-level
+  // behavioural signature of `inert` instead — focus() on a present, otherwise-
+  // focusable background element is a silent no-op — is what genuinely proves
+  // the claim in docs/Modal.md.
+  await page.goto('/#examples');
+  const stillFocusable = await page.evaluate(() => {
+    const tile = document.querySelector('button[aria-label="Sales"]');
+    tile?.focus();
+    return document.activeElement === tile;
+  });
+  expect(stillFocusable).toBe(true); // sanity check: the tile is a real, focusable control
+
+  await openRejectModal(page);
+  await expect(page.getByRole('dialog', { name: 'Reject SO-1042?' })).toBeVisible();
+
+  const focusedWhileModalOpen = await page.evaluate(() => {
+    const tile = document.querySelector('button[aria-label="Sales"]');
+    tile?.focus();
+    return document.activeElement === tile;
+  });
+  expect(focusedWhileModalOpen).toBe(false);
+});
