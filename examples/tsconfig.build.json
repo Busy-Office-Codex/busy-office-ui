@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "outDir": "../dist",
+    "emitDeclarationOnly": true
+  },
+  "include": ["AppShell.tsx", "Launcher.tsx", "ListReport.tsx", "RecordDetail.tsx", "../src/**/*.ts", "../src/**/*.tsx"]
+}
