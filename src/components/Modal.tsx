@@ -3,15 +3,40 @@ import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { glass, radius, shadow, space } from '../tokens.stylex.js';
 import { Text } from './Text.js';
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function isFocusable(element: HTMLElement): boolean {
+  if (!element.isConnected || element.matches(':disabled, [hidden], [inert], [aria-hidden="true"]')) return false;
+  if (element.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
+  const style = window.getComputedStyle(element);
+  return style.visibility !== 'hidden' && style.display !== 'none' && element.getClientRects().length > 0;
+}
+
+function focusableWithin(panel: HTMLElement): HTMLElement[] {
+  return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(isFocusable);
+}
+
+// Applied only while `open`: an author-origin `display` always beats the UA
+// stylesheet's `dialog:not([open]) { display: none }`, so an unconditional
+// class here would keep this full-viewport overlay intercepting clicks even
+// while closed.
 const styles = stylex.create({
-  overlay: {
+  dialog: {
     position: 'fixed',
     inset: 0,
+    margin: 0,
+    width: '100%',
+    height: '100%',
+    maxWidth: 'none',
+    maxHeight: 'none',
+    border: 'none',
+    padding: 0,
+    color: 'inherit',
     backgroundColor: 'rgba(15, 23, 42, 0.32)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1000,
   },
   panel: {
     width: '400px',
@@ -41,62 +66,40 @@ export type ModalProps = {
   actions?: ReactNode;
 };
 
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-function isFocusable(element: HTMLElement): boolean {
-  if (!element.isConnected || element.matches(':disabled, [hidden], [inert], [aria-hidden="true"]')) return false;
-  if (element.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
-  const style = window.getComputedStyle(element);
-  return style.visibility !== 'hidden' && style.display !== 'none' && element.getClientRects().length > 0;
-}
-
-function focusableWithin(panel: HTMLElement): HTMLElement[] {
-  return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(isFocusable);
-}
-
 export function Modal({ open, onClose, title, children, actions }: ModalProps) {
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const openerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (!open) return;
-    // Safari/Firefox leave document.body active after a button click, so body is never a real opener.
-    const activeElement = document.activeElement;
-    openerRef.current = activeElement instanceof HTMLElement && activeElement !== document.body ? activeElement : null;
-
-    const panel = panelRef.current;
-    if (panel) {
-      const first = focusableWithin(panel)[0];
-      first?.focus();
-      if (document.activeElement !== first) panel.focus();
-    }
-
-    return () => {
-      const opener = openerRef.current;
-      openerRef.current = null;
-      if (opener && isFocusable(opener)) opener.focus();
-    };
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    else if (!open && dialog.open) dialog.close();
   }, [open]);
 
-  if (!open) return null;
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const handleCancel = (event: Event) => {
+      // Stay a controlled component: never let the browser's own Escape
+      // action close the dialog out from under the `open` prop.
+      event.preventDefault();
+      onClose?.();
+    };
+    dialog.addEventListener('cancel', handleCancel);
+    return () => dialog.removeEventListener('cancel', handleCancel);
+  }, [onClose]);
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape') {
-      if (!onClose) return;
-      event.stopPropagation();
-      onClose();
-      return;
-    }
+  // A modal <dialog> makes the rest of the page inert (Accept: absent from
+  // the accessibility tree), but Chromium does not reliably wrap Tab within
+  // the remaining focusable set on its own — verified by browser test, not
+  // assumed — so the loop is still handled here.
+  const handleKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
     if (event.key !== 'Tab') return;
     const panel = panelRef.current;
     if (!panel) return;
     const focusable = focusableWithin(panel);
-    if (focusable.length === 0) {
-      event.preventDefault();
-      panel.focus();
-      return;
-    }
+    if (focusable.length === 0) return;
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
     if (event.shiftKey && document.activeElement === first) {
@@ -109,23 +112,22 @@ export function Modal({ open, onClose, title, children, actions }: ModalProps) {
   };
 
   return (
-    <div {...stylex.props(styles.overlay)} onClick={onClose}>
-      <div
-        {...stylex.props(styles.panel)}
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-        onKeyDown={handleKeyDown}
-      >
+    <dialog
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      {...stylex.props(open && styles.dialog)}
+      onClick={onClose}
+      onKeyDown={handleKeyDown}
+    >
+      <div ref={panelRef} {...stylex.props(styles.panel)} onClick={(event) => event.stopPropagation()}>
         <Text variant="title" as="h2">
           {title}
         </Text>
         {children}
         {actions && <div {...stylex.props(styles.actions)}>{actions}</div>}
       </div>
-    </div>
+    </dialog>
   );
 }

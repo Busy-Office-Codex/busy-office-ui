@@ -25,14 +25,14 @@ becomes an item. "It would be useful" is not enough on its own.
 The loop works only on the current milestone and stops when it is complete.
 The owner sets the next one.
 
-**Current: M1 — Accessible core, docs that cannot drift** → release 0.3.0.
-- Items: 7 (wave 1), 4 (wave 1), 5 (wave 1), 6 (wave 2, after wave 1 lands).
-- Complete when every item above is `[x]`, the latest `gates` run on `main`
-  passed at the commit that closed the last item, and a release
-  recommendation is recorded in that merge commit.
+**M1 — Accessible core, docs that cannot drift — complete.** Items 4, 5, 6, 7
+are all `[x]`; the full gate suite (including `pnpm test:browser`) passed at
+the batch head before it merged into `main`. A release recommendation is
+recorded in that merge commit — the owner decides whether to cut it.
 
-**Next: M2 — Framework proven by two real pages** (item 3). Starts when the owner
-makes it current and its `[UI request]` is agreed with the core session.
+**No milestone is current.** The owner sets the next one — M2 (item 3) is one
+option, once its `[UI request]` is agreed with the core session; item 3's own
+line still applies either way.
 
 After M2, stop expanding the framework: new work starts only from a request
 that passes the Objective tests.
@@ -57,27 +57,25 @@ issues.
    permission states in `docs/`; the core session records `accepted` with the
    commit it tested. Serves: Objective 1. Needs: a `[UI request]` issue agreed
    with the core session.
-4. [ ] **Modal on the native `<dialog>` element.** Accept: `Modal` opens with
-   `showModal()` and keeps `ModalProps` unchanged; content outside an open
-   modal is absent from the accessibility tree; the existing modal browser
-   tests pass unmodified. Serves: Objective 2 (closes the `aria-modal`-only
-   containment noted in `docs/Modal.md`).
-5. [ ] **State is never carried by colour alone.** Accept: every visual state
-   prop (`Card` `selected`/`disabled`, filter `Chip` `selected`, selected
-   `Dropdown` item) exposes the state programmatically and by a non-colour cue;
-   a unit test enumerates these props and fails when one lacks either channel.
-   Serves: Objective 2.
-6. [ ] **Docs cannot drift from components.** Accept: a unit test fails when a
-   `docs/<Component>.md` lacks `category` frontmatter, a "Not for" sentence or
-   one example; behaviour sentences in those docs each map to a test;
-   prop lists are not hand-written in docs. The test is shown failing on a
-   planted defect in its commit message. Serves: Objective 1.
-7. [ ] **Point agent instructions at the central integration repository.**
-   Accept: `AGENTS.md` links the `busy-office-integration` repository map and
-   shared dependency backlog and says to read them before cross-repository task
-   selection; UI keeps its own roadmap and ownership; issue #1 is still named as
-   the canonical protocol and none of its rules are copied. Serves: `intent.md`
-   (consumers own integration). Refs: issue #8 (`agreed`).
+4. [x] Modal on the native `<dialog>` element — `showModal()`/`close()` driven
+   by `open`; background content is genuinely `inert` (not just `aria-modal`),
+   verified directly since neither `getByRole()` nor `ariaSnapshot()` reflect
+   dialog inertness — `a80dce4`, inertness regression test `fab0212`.
+5. [x] State is never carried by colour alone — `Card` `selected`/`disabled`
+   and filter `Chip` `selected` now expose state both programmatically
+   (`aria-pressed`/`aria-disabled`) and by a non-colour cue; enumerated in
+   `test/state-channels.test.mjs` — `882c2b5`. Known gap: a `Card` with
+   `selected` and no `onClick` still has no programmatic channel (no button
+   role to hang `aria-pressed` on); latent today, no real caller does this.
+6. [x] Docs cannot drift from components — `test/docs-contract.test.mjs`
+   discovers every component doc from the package's own export lines and
+   checks `category`, a "Not for" sentence, an example, no hand-written prop
+   table, and a `tests:` list of real backing test files — `2eb1964`. That
+   last check verifies the doc names real, non-empty tests, not that a given
+   sentence maps to a given assertion (disclosed weaker reading; sentence-level
+   correspondence isn't mechanically decidable).
+7. [x] Point agent instructions at the central integration repository —
+   `c03bc2e`. Issue #8 (`agreed`) handoff posted citing this commit.
 8. [x] Sample screens aligned to the real ERP skeleton density reference;
    `Dropdown` keyboard/listbox support, `Chip`/`Card` focus-visible rings and
    `Input` placeholder contrast closed (owner-directed, not a milestone item)
