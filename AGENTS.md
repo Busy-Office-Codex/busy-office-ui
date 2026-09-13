@@ -36,7 +36,10 @@ pushed, no PRs) and are merged into `develop` locally with `--no-ff`; only
 `develop` is pushed. `main` only receives release merges. Never commit directly
 to `develop` or `main`. Merging into `develop` needs no owner approval once the
 gates and an independent review pass; merges into `main`, tags and releases
-need the owner. Handoffs cite the `develop` merge commit SHA. Release rules are in [LOOP.md](LOOP.md).
+need the owner. Handoffs cite the `develop` merge commit SHA. Every push to
+`develop` or `main` re-runs the full gate suite in GitHub Actions
+(`.github/workflows/gates.yml`); a red run on `develop` is fixed before any
+other work. Release rules are in [LOOP.md](LOOP.md).
 
 Use [docs/design-conventions.md](docs/design-conventions.md) and the component
 sources before changing UI. Only this repository's writers may change its source
