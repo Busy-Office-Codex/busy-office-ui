@@ -97,7 +97,7 @@ test('Tab and Shift+Tab wrap focus within the command palette instead of escapin
   const trigger = page.getByRole('button', { name: 'Open command palette', exact: true });
   const search = paletteSearch(page);
   const close = page.getByRole('button', { name: 'Close command palette', exact: true });
-  const lastCommand = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Sales order\b/ });
+  const lastCommand = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Dashboards\b/ });
 
   await trigger.click();
   await expect(search).toBeFocused();

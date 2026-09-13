@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Button, Chip, Text } from '../src/index.js';
+import { Text } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
 import { Launcher } from './Launcher.js';
 
@@ -113,17 +113,55 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
         navigation={{ routes, activeRouteId, onNavigate }}
         pinned={pinned}
         commands={commands}
+        brand={
+          <>
+            <div style={{ width: 26, height: 26, borderRadius: 7, background: '#0f172a', flexShrink: 0 }} />
+            <span style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>Busy Office</span>
+            <span style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap' }}>Acme Co ▾</span>
+          </>
+        }
         account={
           <>
-            <Button variant="primary">+ New ▾</Button>
-            <div style={{ position: 'relative' }}>
-              <Button variant="ghost">🔔</Button>
-              <div style={{ position: 'absolute', top: -6, right: -6 }}>
-                <Chip variant="status" tone="accent">
-                  3
-                </Chip>
-              </div>
-            </div>
+            <button
+              type="button"
+              style={{
+                height: 32,
+                flexShrink: 0,
+                padding: '0 14px',
+                borderRadius: 999,
+                border: 0,
+                background: '#0f172a',
+                color: '#fff',
+                fontFamily: 'inherit',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              + New ▾
+            </button>
+            <button
+              type="button"
+              aria-label="Notifications, 3 unread"
+              title="Notifications"
+              style={{
+                position: 'relative',
+                width: 32,
+                height: 32,
+                flexShrink: 0,
+                borderRadius: 8,
+                border: '1px solid #e2e8f0',
+                background: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: 4, background: '#94a3b8' }} />
+              <span aria-hidden="true" style={{ position: 'absolute', top: 4, right: 4, width: 7, height: 7, borderRadius: '50%', background: '#0057b8', border: '1.5px solid #fff' }} />
+            </button>
             <div style={{ width: 32, height: 32, borderRadius: 999, background: '#e2e8f0', flexShrink: 0 }} />
           </>
         }

@@ -3,16 +3,19 @@ import { useCallback, useState, type ReactElement } from 'react';
 import { AppShell, type AppShellRoute } from '../examples/AppShell.js';
 import { ListReport } from '../examples/ListReport.js';
 import { RecordDetail } from '../examples/RecordDetail.js';
+import { Dashboard } from '../examples/Dashboard.js';
 import '../fonts/ibm-plex-sans.css';
 
 const routes = [
   { id: 'purchase-orders', module: 'Purchase', label: 'Purchase orders' },
   { id: 'sales-order-detail', module: 'Sales', label: 'Sales order' },
+  { id: 'dashboard', module: 'BI', label: 'Dashboards' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   'purchase-orders': <ListReport />,
   'sales-order-detail': <RecordDetail />,
+  dashboard: <Dashboard />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */
