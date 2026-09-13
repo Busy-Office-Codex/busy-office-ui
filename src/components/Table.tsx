@@ -16,8 +16,13 @@ const styles = stylex.create({
     borderBottomColor: color.border,
   },
   row: {
-    // Ambient (ROADMAP item 10) — `min-height`, not `height` (see Button/Input for why).
-    minHeight: density.rowHeight,
+    // Ambient (ROADMAP item 10). Deliberately `height`, not `min-height`, unlike Button/Input:
+    // `min-height`/`max-height` are not part of the CSS table row-sizing algorithm and browsers
+    // ignore them on `<tr>` — only `height` gets the spec's special table-row treatment, where it
+    // already behaves as a minimum (a row grows to fit taller content rather than clipping it).
+    // Verified directly: min-height here rendered a fixed ~40px regardless of root font size,
+    // silently not scaling; height correctly grows the row and never clips.
+    height: density.rowHeight,
     borderBottomStyle: 'solid',
     borderBottomWidth: '1px',
     borderBottomColor: color.border,

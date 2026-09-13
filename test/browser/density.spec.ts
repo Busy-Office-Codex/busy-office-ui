@@ -33,12 +33,20 @@ test.describe('Density tiers (ROADMAP item 10)', () => {
 
     // Both tiers here are real `stylex.createTheme` overrides (spacious around compact) — this
     // proves nesting is a genuine "nearest ancestor wins" CSS cascade, not just "compact always
-    // wins" or "the outermost Density wins". (A `value="comfortable"` region nested inside an
-    // active compact/spacious ancestor is a known, disclosed exception — see the `Density`
-    // component's own doc comment in src/components/Density.tsx: comfortable applies no theme
-    // at all, so it can't "reset" an active ancestor override; that's not exercised here.)
+    // wins" or "the outermost Density wins".
     await expect(page.getByRole('button', { name: 'Outer spacious button', exact: true })).toHaveCSS('height', '44px');
     await expect(page.getByRole('button', { name: 'Inner compact button', exact: true })).toHaveCSS('height', '28px');
+  });
+
+  test('a comfortable Density region resets an active non-default ancestor', async ({ page }) => {
+    await page.goto('/#density-lab');
+
+    // `value="comfortable"` applies `comfortableDensity` (a real theme, same values as the
+    // `density` group's defaults) rather than no theme — specifically so this case works: without
+    // a real theme object to apply, a nested comfortable region would just inherit whatever the
+    // active compact/spacious ancestor set, since there'd be nothing to override it with.
+    await expect(page.getByRole('button', { name: 'Outer compact button', exact: true })).toHaveCSS('height', '28px');
+    await expect(page.getByRole('button', { name: 'Inner comfortable button', exact: true })).toHaveCSS('height', '36px');
   });
 
   test('control and row heights scale with the root font size, and content is not clipped', async ({ page }) => {
@@ -59,9 +67,14 @@ test.describe('Density tiers (ROADMAP item 10)', () => {
     if (!box) throw new Error('scaling probe row not found');
     expect(box.height).toBeGreaterThanOrEqual(50); // rowHeight 2.5rem × 20px root, as a floor
 
-    // No clipping: the row's rendered box must be tall enough to contain its own content —
+    // No clipping: the cell's rendered box must be tall enough to contain its own content —
     // scrollHeight (the content's actual extent) must not exceed clientHeight (the visible box).
-    const clipped = await row.evaluate((element) => element.scrollHeight > element.clientHeight);
+    // Checked on the <td>, not the <tr>: a table row's scrollHeight/clientHeight can differ by a
+    // stray 1px from ordinary sub-pixel rounding in the table row-sizing algorithm, which isn't
+    // real clipping — verified directly (scrollHeight 50 vs clientHeight 49 on the row, while the
+    // cell inside it — the actual content-bearing box — measured scrollHeight === clientHeight).
+    const cell = row.locator('td');
+    const clipped = await cell.evaluate((element) => element.scrollHeight > element.clientHeight);
     expect(clipped).toBe(false);
   });
 });

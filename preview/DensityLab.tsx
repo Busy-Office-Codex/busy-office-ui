@@ -50,6 +50,15 @@ export function DensityLab() {
         </Density>
       </section>
 
+      <section aria-label="nesting: a comfortable region resets an active non-default ancestor">
+        <Density value="compact">
+          <Button variant="primary">Outer compact button</Button>
+          <Density value="comfortable">
+            <Button variant="primary">Inner comfortable button</Button>
+          </Density>
+        </Density>
+      </section>
+
       <section aria-label="root font scaling">
         <Button variant="primary">Scaling probe button</Button>
         <Table>

@@ -118,9 +118,12 @@ issues.
     and app-strip controls take height, padding and font size only from
     those aliases (a browser test measures each under all three tiers —
     control 28/36/44, row 32/40/48, font 13/14/15 — and fails on any
-    hard-coded height); density and type tokens are `rem`, with control and
-    row heights as `min-height` (a test sets the root font to 20px and
-    asserts no row clips its content); the type scale gains `sizeControl`
+    hard-coded height); density and type tokens are `rem`, and control/row
+    heights never clip their own content when the root font grows —
+    `min-height` for ordinary flow elements, `height` for `<tr>` (the only
+    property the CSS table row-sizing algorithm honors as a minimum; `min-
+    height` is silently ignored on table rows) — a test sets the root font
+    to 20px and asserts no row clips its content; the type scale gains `sizeControl`
     (13) and `sizeUi` (14) and `caption` stays metadata-only;
     `size="compact"`/`density="compact"` keep working as per-instance
     overrides onto the same aliases and their docs say they are deprecated.

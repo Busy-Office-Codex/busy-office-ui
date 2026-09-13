@@ -114,6 +114,22 @@ export const density = stylex.defineVars({
   fontSize: font.sizeUi,
 });
 
+// Same values as `density`'s own defaults above — needed anyway, not redundant: a `Density`-
+// wrapped region can only override an ambient non-default (compact/spacious) ancestor by applying
+// a real `createTheme` object of its own. Without this, `<Density value="comfortable">` nested
+// inside an active compact/spacious ancestor could not reset back to comfortable — it would just
+// inherit the ancestor's CSS custom properties unchanged, since there'd be nothing to override
+// them with. Keep every value here identical to `density`'s defaults; a drift between the two
+// would be a real bug (the two definitions of "comfortable" disagreeing).
+export const comfortableDensity = stylex.createTheme(density, {
+  controlHeight: '2.25rem', // 36px @ 16px root
+  rowHeight: '2.5rem', // 40px @ 16px root
+  cellPaddingX: space.space4,
+  cellPaddingY: space.space2,
+  fieldGap: space.space4,
+  fontSize: font.sizeUi,
+});
+
 export const compactDensity = stylex.createTheme(density, {
   controlHeight: '1.75rem', // 28px @ 16px root
   rowHeight: '2rem', // 32px @ 16px root
