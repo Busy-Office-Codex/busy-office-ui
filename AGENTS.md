@@ -26,16 +26,17 @@ props must pass the ROADMAP.md Objective tests. Unattended or repeated runs
 follow [LOOP.md](LOOP.md).
 
 Write acceptance as the property a test checks, not the value you expect. A new
-check lands with a red-proof: show it failing on a planted defect in the PR. A
+check lands with a red-proof: show it failing on a planted defect in its commit message. A
 check that cannot run must fail, not skip. Assert removals on structure (element,
 role, attribute), not on raw text. Every behaviour a `docs/*.md` page claims has
 a test; prop lists come from the built `.d.ts`, not from hand-written tables.
 
-Branches follow gitflow: work branches come off `develop` and merge back into
-`develop` by PR; `main` only receives release merges. Never commit directly to
-`develop` or `main`. PRs into `develop` may be merged without owner approval
-once the gates and an independent review pass; merges into `main`, tags and
-releases need the owner. Release rules are in [LOOP.md](LOOP.md).
+Branches follow gitflow: work branches come off `develop`, stay local (not
+pushed, no PRs) and are merged into `develop` locally with `--no-ff`; only
+`develop` is pushed. `main` only receives release merges. Never commit directly
+to `develop` or `main`. Merging into `develop` needs no owner approval once the
+gates and an independent review pass; merges into `main`, tags and releases
+need the owner. Handoffs cite the `develop` merge commit SHA. Release rules are in [LOOP.md](LOOP.md).
 
 Use [docs/design-conventions.md](docs/design-conventions.md) and the component
 sources before changing UI. Only this repository's writers may change its source

@@ -33,10 +33,11 @@ an agreed request.
    Skip one-way items (see Gate) and items without a stated Accept. An empty
    batch goes to the empty-queue ladder.
 3. **Build.** One branch `feat/batch-<first-item>` (or `chore/loop-…` for loop
-   or roadmap files) off `develop`, one commit per item, PR into `develop`.
-   Items that touch different files run as parallel builder subagents (at most
-   3); items that share files run in sequence. Never commit directly to
-   `develop` or `main`, and never tag, release or publish. While building,
+   or roadmap files) off `develop`, one commit per item. Work branches stay
+   local: never push them and never open PRs for them. Items that touch
+   different files run as parallel builder subagents (at most 3); items that
+   share files run in sequence. Never commit directly to `develop` or `main`,
+   and never tag, release or publish. While building,
    each builder runs only `pnpm typecheck`, `pnpm lint` and `pnpm test`.
 4. **Verify once, for the whole batch.**
    - Run the full `AGENTS.md` gate suite once on the batch head. Skip
@@ -49,27 +50,30 @@ an agreed request.
      and ship the rest; that item's `attempts` goes up by one.
 5. **Gate.** Classify each decision where it arises.
    - **Two-way** (internal implementation, tests, docs wording, examples,
-     additive ARIA attributes): decide, note the reason in the PR body,
-     continue.
+     additive ARIA attributes): decide, note the reason in the merge commit
+     message, continue.
    - **One-way** (removing or renaming public props, types or exports, new
      exports, package version, dependencies, behaviour an ERP host relies on,
      releases or anything touching `main`, editing `intent.md` or the ROADMAP
      Objective, closing issues): comment the proposal on a `[UI request]` issue as
      `proposed` and leave the item out of the batch. Never mark your own
      proposal `agreed`.
-6. **Record.** One PR per batch listing the items it closes and the net line
-   change under `src/`. Post one `ready for integration` handoff per issue #1
-   when every item's Accept passes. Tick the items in `ROADMAP.md` on the batch
-   branch. When the gate suite and the reviewer both pass, merge the PR into
-   `develop` (merge commit) and delete the branch. If the release rule below
-   now holds, say so in the merged PR. Write `.loop/state.json` last.
+6. **Record.** Tick the items in `ROADMAP.md` on the batch branch. When the
+   gate suite and the reviewer both pass, `git fetch`, rebase the batch branch
+   onto `origin/develop` if it moved, merge it into local `develop` with
+   `--no-ff`, push `develop`, and delete the local branch. The merge commit
+   message lists the items closed, the net line change under `src/`, the
+   two-way decisions taken and, if the release rule below now holds, a
+   release recommendation. Post one `ready for integration` handoff per
+   issue #1 citing that merge commit's SHA. Write `.loop/state.json` last.
 
 ## Branches and releases
 
-Gitflow. Work branches (`feat/`, `fix/`, `chore/`) come off `develop` and merge
-back into `develop` by PR. The loop merges its own PRs into `develop` once
-verify passes; no owner approval is needed there. `main` only receives release
-merges, and the loop never merges into `main`, tags or releases — it recommends.
+Gitflow. Work branches (`feat/`, `fix/`, `chore/`) are local only: they come
+off `develop` and are merged back into `develop` locally with `--no-ff`; only
+`develop` is pushed. No owner approval is needed to merge into `develop` once
+verify passes. `main` only receives release merges, and the loop never merges
+into `main`, tags or releases — it recommends.
 
 **Recommend a release** when `develop` is green and at least one holds:
 - the ERP host needs a version to pin (an issue asks for one, or a handoff is
@@ -79,13 +83,13 @@ merges, and the loop never merges into `main`, tags or releases — it recommend
 - 2 weeks have passed with unreleased commits on `develop`.
 
 Version: patch for fixes only, minor for anything a host can see. A release is
-`release/x.y.z` from `develop` → version bump and notes → PR into `main` →
-tag `vx.y.z` → merge `main` back into `develop`.
+`release/x.y.z` from `develop` → version bump and notes → merge into `main`
+with the owner's OK → tag `vx.y.z` → merge `main` back into `develop`.
 
 ## State
 
-`.loop/state.json` is local (gitignored); PRs and issue comments are the durable
-record.
+`.loop/state.json` is local (gitignored); merge commits on `develop` and issue
+comments are the durable record.
 
 ```json
 { "tick": 0, "batch": [], "attempts": {}, "outcome": null, "meta": [],

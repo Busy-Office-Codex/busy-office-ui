@@ -29,7 +29,8 @@ starts only from a request that passes the tests above.
 Format: `[x]` done · `[ ]` open · `[?]` proposed (needs an agreed issue).
 **Accept** names the property a test checks, never the expected value.
 **Serves** names the Objective test or `intent.md` clause. Keep open items
-plus at most 10 closed one-liners here; detail lives in PRs and issues.
+plus at most 10 closed one-liners here; detail lives in commit messages and
+issues.
 
 1. [x] Dialog accessibility and command-palette focus containment — PR #3
    (`d27f653`).
@@ -57,7 +58,7 @@ plus at most 10 closed one-liners here; detail lives in PRs and issues.
    `docs/<Component>.md` lacks `category` frontmatter, a "Not for" sentence or
    one example; behaviour sentences in those docs each map to a test;
    prop lists are not hand-written in docs. The test is shown failing on a
-   planted defect in its PR. Serves: Objective 1.
+   planted defect in its commit message. Serves: Objective 1.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
