@@ -1,5 +1,12 @@
 # Busy Office UI — Agent Instructions
 
+Coordination with the ERP/core session runs through GitHub Issues per
+[busy-office-ui#1](https://github.com/Busy-Office-Codex/busy-office-ui/issues/1),
+the canonical protocol. Check open requests there (and ERP-side requests marked
+ready for integration) before selecting work, and hand off completed work with
+the exact reviewed commit SHA and test evidence per that issue's lifecycle. Do
+not duplicate its rules here.
+
 This repository owns the reusable `@busyoffice/design-system` package and its
 pure React example compositions. It does not own ERP business rules, application
 data, runtime, contracts, identity, permissions, deployment, or marketplace
