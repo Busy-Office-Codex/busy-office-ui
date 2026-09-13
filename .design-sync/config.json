@@ -1,0 +1,28 @@
+{
+  "projectId": "5a1c23d0-2283-4bbc-83f6-7b4095f071de",
+  "pkg": "@busyoffice/design-system",
+  "globalName": "BusyOfficeDesignSystem",
+  "shape": "package",
+  "buildCmd": "pnpm build",
+  "cssEntry": "dist/design-system.css",
+  "extraFonts": ["fonts/ibm-plex-sans.css"],
+  "docsDir": "docs",
+  "readmeHeader": ".design-sync/conventions.md",
+  "dtsPropsFor": {
+    "Button": "variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; disabled?: boolean; type?: 'button' | 'submit' | 'reset'; onClick?: () => void; 'aria-label'?: string; className?: string; id?: string; style?: React.CSSProperties; children?: React.ReactNode;",
+    "Card": "selected?: boolean; disabled?: boolean; onClick?: () => void; className?: string; id?: string; style?: React.CSSProperties; children?: React.ReactNode;",
+    "Chip": "/** 'filter' (default) is an interactive pill button; 'status' is a static tag. */ variant?: 'filter' | 'status'; /** filter only: filled ink when true */ selected?: boolean; /** filter only: shows a trailing × while selected */ onRemove?: () => void; /** filter only */ onClick?: () => void; /** filter only */ disabled?: boolean; /** status only: 'neutral' (default) | 'strong' | 'accent' | 'danger' */ tone?: 'neutral' | 'strong' | 'accent' | 'danger'; children?: React.ReactNode;",
+    "Dropdown": "label: string; items: { label: string; selected?: boolean }[]; onSelect?: (label: string) => void; defaultOpen?: boolean;",
+    "Text": "variant?: 'display' | 'heading' | 'title' | 'body' | 'caption' | 'overline'; /** Override the rendered element; defaults follow the variant (display→h1, heading→h2, title→h3, body→p, caption/overline→span). */ as?: keyof JSX.IntrinsicElements; children: React.ReactNode;"
+  },
+  "overrides": {
+    "Modal": { "cardMode": "single", "viewport": "640x420" }
+  },
+  "docsMap": {
+    "TableHead": "docs/Table.md",
+    "TableBody": "docs/Table.md",
+    "TableRow": "docs/Table.md",
+    "TableHeaderCell": "docs/Table.md",
+    "TableCell": "docs/Table.md"
+  }
+}
