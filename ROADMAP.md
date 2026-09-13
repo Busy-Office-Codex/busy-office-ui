@@ -80,7 +80,8 @@ issues.
    (consumers own integration). Refs: issue #8 (`agreed`).
 8. [x] Sample screens aligned to the real ERP skeleton density reference;
    `Dropdown` keyboard/listbox support, `Chip`/`Card` focus-visible rings and
-   `Input` placeholder contrast closed (owner-directed, not a milestone item).
+   `Input` placeholder contrast closed (owner-directed, not a milestone item)
+   — `0158a19`.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
