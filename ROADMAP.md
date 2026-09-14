@@ -107,26 +107,13 @@ issues.
    gap item 8 found; `Shell`'s app-strip nav and the sample host's "+New"
    action moved back onto real `Button` now that it has a compact size. Issue
    #10 (`agreed`), owner-directed — `f0e9748`.
-10. [ ] **Density tier.** Accept: `src/tokens.stylex.ts` exports a `density`
-    var group — `controlHeight`, `rowHeight`, `cellPaddingX`, `cellPaddingY`,
-    `fieldGap`, `fontSize` — whose defaults are the comfortable tier, plus
-    `compact` and `spacious` themes (`stylex.createTheme`); a `Density`
-    component exported from the package root applies a tier to its subtree
-    and tiers nest (a browser test wraps a compact region inside a
-    comfortable page and measures both); `Button`, `Input`, `Dropdown`'s
-    trigger, filter `Chip`, `Table` head/cells/rows and `Shell`'s command-bar
-    and app-strip controls take height, padding and font size only from
-    those aliases (a browser test measures each under all three tiers —
-    control 28/36/44, row 32/40/48, font 13/14/15 — and fails on any
-    hard-coded height); density and type tokens are `rem`, with control and
-    row heights as `min-height` (a test sets the root font to 20px and
-    asserts no row clips its content); the type scale gains `sizeControl`
-    (13) and `sizeUi` (14) and `caption` stays metadata-only;
-    `size="compact"`/`density="compact"` keep working as per-instance
-    overrides onto the same aliases and their docs say they are deprecated.
-    Serves: Objective 1 (one mechanism replaces per-component size props);
-    intent.md "portable" (a host sets one attribute). Needs: issue #12
-    (`agreed`).
+10. [x] Density tier — `density` var group (`controlHeight`/`rowHeight`/
+    `cellPaddingX`/`cellPaddingY`/`fieldGap`/`fontSize`, `rem`, compact 28/32/13
+    · comfortable 36/40/14 · spacious 44/48/15) and the `Density` component;
+    `Button`/`Input`/`Dropdown`/filter-`Chip`/`Table`/`Shell`'s palette trigger
+    read it ambiently, `size="compact"`/`density="compact"` kept as deprecated
+    per-instance overrides; `sizeControl`(13)/`sizeUi`(14) added to the type
+    scale. Issue #12 (`agreed`) — `2dc8370`, fixed `7f50778`.
 11. [ ] **Filter and action hierarchy.** Accept: `Dropdown`'s trigger fills
     only when a narrowing value is selected (`active`; the default "All …"
     item does not count) and is otherwise an outline pill with hover and open

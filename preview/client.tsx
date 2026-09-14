@@ -4,6 +4,7 @@ import { AppShell, type AppShellRoute } from '../examples/AppShell.js';
 import { ListReport } from '../examples/ListReport.js';
 import { RecordDetail } from '../examples/RecordDetail.js';
 import { Dashboard } from '../examples/Dashboard.js';
+import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
 const routes = [
@@ -40,4 +41,8 @@ function SamplePreview() {
   );
 }
 
-createRoot(document.getElementById('root')!).render(<SamplePreview />);
+// `#density-lab` mounts a bare, isolated harness for test/browser/density.spec.ts (ROADMAP item
+// 10) instead of the sample host — see DensityLab.tsx for why.
+createRoot(document.getElementById('root')!).render(
+  window.location.hash === '#density-lab' ? <DensityLab /> : <SamplePreview />,
+);

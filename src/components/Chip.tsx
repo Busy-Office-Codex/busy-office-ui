@@ -1,13 +1,16 @@
 import * as stylex from '@stylexjs/stylex';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import { color, font, radius, space } from '../tokens.stylex.js';
+import { color, density, font, radius, space } from '../tokens.stylex.js';
 
 const styles = stylex.create({
+  // Fully density-driven (ROADMAP item 10), same as Dropdown's trigger: filter Chip has no
+  // size prop to keep working, and it's part of the same "always a capsule" shape family as
+  // Button/Dropdown's trigger (docs/design-conventions.md), so it shares `controlHeight`.
   filterBase: {
     fontFamily: font.family,
-    fontSize: font.sizeCaption,
+    fontSize: density.fontSize,
     borderRadius: radius.pill,
-    height: '32px',
+    minHeight: density.controlHeight,
     paddingInline: space.space4,
     borderStyle: 'solid',
     borderWidth: '1px',
@@ -44,6 +47,11 @@ const styles = stylex.create({
     color: color.textOnInk,
     fontWeight: font.weightMedium,
   },
+  // Deliberately NOT density-driven (ROADMAP item 10 scoped this to the `filter` variant
+  // only): a status Chip is a non-interactive tag, not a "control" in the reference-review
+  // sense that motivated this tier system (docs/design-conventions.md's capsule-vs-rectangle
+  // rule doesn't group it with Button/Dropdown/filter-Chip either) — its fixed 24px height and
+  // `sizeCaption` text are display metadata, not a sizing concern this task's scope covers.
   statusBase: {
     fontFamily: font.family,
     fontSize: font.sizeCaption,
