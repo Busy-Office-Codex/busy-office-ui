@@ -59,21 +59,20 @@ tests in the open backlog); item 15 documents the system that has stopped
 moving instead of adding to it — see item 15 below for full scope, the
 hosting decision and the verify-review fixes.
 
-**M5 — Remove the deprecated `size`/`density` per-instance overrides — item
-16, issue #15 (`agreed`, project owner, 2026-09-14).** Follow-up to item 10:
-`Button.size`, `Input.size`, `Table.density` were kept as deprecated
-per-instance overrides through M3, explicitly scoped to "survive one
-release" — that release (`v0.4.0`) has shipped. A call-site sweep found the
-props are still live in `src/shell/Shell.tsx` (3 uses) and
-`examples/{AppShell,ListReport,RecordDetail}.tsx` (11 uses total), so this
-is a migration (every call site moves to wrapping its region in
-`<Density value="compact">`) followed by removing the three props from the
-public `.d.ts` surface, not a bare deletion. One open design question
-blocks the start of work: `Input`'s `size="compact"` renders 36px,
-independently matched to the ERP skeleton reference's own measured
-search-bar height, while `Density`'s compact `rowHeight` is 32px —
-migrating Input call sites as-is would shrink them 4px. See issue #15 for
-the three options; the owner's answer becomes part of item 16's Accept.
+**M5 — Remove the deprecated `size`/`density` per-instance overrides —
+complete.** Item 16, issue #15 (`agreed`, project owner, 2026-09-14).
+Follow-up to item 10: `Button.size` and `Table.density` were removed from
+the public `.d.ts` surface once every real call site (`src/shell/Shell.tsx`,
+`examples/{AppShell,ListReport,RecordDetail}.tsx`, 12 Button/Table uses
+total) migrated to wrapping its region in `<Density value="compact">`.
+`Input`'s `size="compact"` (2 real call sites, both search-bar fields) was
+un-deprecated instead of migrated, renamed to `size="search"`: the owner's
+resolution (issue #15) of the height question this item raised — its fixed
+36px never tracked any density tier (`Density`'s compact `rowHeight` is
+32px, a different concept), so treating it as a density override was the
+original mistake, not something worth preserving through a migration. A
+required three-lens verify review (this batch closed M5) found and fixed a
+real gap before merge — see item 16 below.
 
 After M5, stop expanding the framework: new work starts only from a request
 that passes the Objective tests.
@@ -197,21 +196,31 @@ issues.
     check clean; all 5 fixed pages and the contrast fix manually confirmed
     live in Chrome. Serves: intent.md "documentation". Issue #13/#14
     (`agreed`, project owner, 2026-09-14).
-16. [ ] **Remove the deprecated `size`/`density` per-instance overrides.**
-    Migrate every live call site (`src/shell/Shell.tsx` x3,
-    `examples/AppShell.tsx` x1, `examples/ListReport.tsx` x4,
-    `examples/RecordDetail.tsx` x6) from `size="compact"`/
-    `density="compact"` to a wrapping `<Density value="compact">` region;
-    then remove `Button.size`, `Input.size`, `Table.density` from the
-    public `.d.ts`; update `docs/{Button,Input,Table}.md` and rebuild
-    docs-site. Accept: no call site anywhere in `src/`, `examples/` or
-    `preview/` references the removed props (grep-verified); the owner's
-    answer to the Input 36px-vs-32px question (issue #15) is applied
-    consistently, not silently defaulted; full gate suite green including
-    `pnpm test:browser`; docs-site rebuilds clean with no reference to the
-    removed props. Serves: Objective 1 (simplicity — one way to get compact
-    sizing, not two). Needs: issue #15 (`agreed`, project owner,
-    2026-09-14) — the Input question resolved before work starts.
+16. [x] **Remove the deprecated `size`/`density` per-instance overrides.**
+    Every live Button/Table call site (`src/shell/Shell.tsx` x2,
+    `examples/AppShell.tsx` x1, `examples/ListReport.tsx` x3,
+    `examples/RecordDetail.tsx` x6 — one wave-1 workflow agent per file,
+    isolated worktrees, exact wrap boundaries pre-specified to avoid a
+    layout regression at any flex-item-owning container) migrated from
+    `size="compact"`/`density="compact"` to a wrapping
+    `<Density value="compact">` region; `Button.size`/`ButtonSize` and
+    `Table.density`/`TableDensity` then removed from the public `.d.ts`.
+    `Input`'s 2 real call sites (Shell's command palette, ListReport's PO
+    search) renamed `size="compact"` → `size="search"`, un-deprecated
+    rather than migrated — the owner's resolution (issue #15) of the
+    36px-vs-32px question this item raised: that height was never a
+    density concept, so it was never meant to track the compact
+    `rowHeight` tier. `docs/{Button,Input,Table,Shell,Density,
+    design-conventions}.md` updated; docs-site rebuilt. A required
+    three-lens verify review (this batch closed M5) found `docs/Shell.md`
+    and `docs/Density.md` still asserted the removed props as live —
+    fixed before merge, along with two minor test/formatting nits. Full
+    gate suite green (`pnpm test` 94/94, `pnpm test:browser` 76/76,
+    pixel-identical to pre-migration — confirming the Density wraps
+    changed no visible output); docs-site rebuilds clean, 20/20 links
+    resolve, zero stale prop references outside intentional history
+    sentences. Serves: Objective 1 (simplicity — one way to get compact
+    sizing, not two). Issue #15 (`agreed`, project owner, 2026-09-14).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
