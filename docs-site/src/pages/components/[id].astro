@@ -1,0 +1,42 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { LiveDemo } from '../../components/LiveDemo.tsx';
+import { extractJsxBlock } from '../../lib/extractDemo.ts';
+import { compileJsxSample } from '../../lib/compileJsx.ts';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('docs', (entry) => entry.id !== 'design-conventions');
+  return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const jsxSample = extractJsxBlock(entry.body ?? '');
+const compiled = jsxSample ? compileJsxSample(jsxSample) : null;
+---
+<Base title={entry.id}>
+  <a href="/">&larr; All components</a>
+  <h1>{entry.id}</h1>
+  {entry.data.category && <p class="category-badge">{entry.data.category}</p>}
+
+  <article>
+    <Content />
+  </article>
+
+  <h2>Live demo</h2>
+  {compiled ? (
+    <LiveDemo client:load code={compiled} />
+  ) : (
+    <p>No JSX sample found for this page.</p>
+  )}
+
+  {entry.data.tests && entry.data.tests.length > 0 && (
+    <>
+      <h2>Tests</h2>
+      <ul class="tests-list">
+        {entry.data.tests.map((test) => <li>{test}</li>)}
+      </ul>
+    </>
+  )}
+</Base>

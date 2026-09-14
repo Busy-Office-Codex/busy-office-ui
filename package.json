@@ -34,6 +34,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json --emitDeclarationOnly && tsc -p examples/tsconfig.build.json && node build.mjs",
     "build:preview": "node preview/build.mjs",
+    "build:docs": "pnpm --filter docs-site build",
     "dev": "pnpm build:preview && pnpm preview",
     "lint": "eslint src examples preview test playwright.config.ts",
     "preview": "node preview/server.mjs",

@@ -9,9 +9,9 @@ Applies one of three density tiers — `"compact" | "comfortable" | "spacious"` 
 
 ```jsx
 <Density value="compact">
-  <Toolbar>
+  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
     <Button variant="secondary">Export</Button>
-    <Dropdown label="Status" items={items} />
-  </Toolbar>
+    <Dropdown label="Status" items={[{ label: 'Open', selected: true }, { label: 'Closed' }]} onSelect={() => {}} />
+  </div>
 </Density>
 ```

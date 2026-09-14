@@ -1,0 +1,26 @@
+{
+  "name": "docs-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/build-examples.mjs && astro dev",
+    "build": "node scripts/build-examples.mjs && astro build",
+    "check-links": "node scripts/check-links.mjs",
+    "test": "pnpm build && pnpm check-links",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/react": "6.0.5",
+    "@busyoffice/design-system": "workspace:*",
+    "astro": "7.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@stylexjs/esbuild-plugin": "0.11.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "esbuild": "0.25.12"
+  }
+}

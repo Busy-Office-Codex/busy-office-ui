@@ -1,0 +1,93 @@
+---
+import '@busyoffice/design-system/styles.css';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props as Props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{title} · Busy Office UI docs</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Busy Office UI</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/tokens/">Tokens</a>
+        <a href="/density/">Density</a>
+        <a href="/conventions/">Conventions</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <style is:global>
+      /*
+        Fixed light chrome regardless of OS `prefers-color-scheme`: `@busyoffice/design-system`
+        reads no dark-mode media query anywhere (it's light-only today — every component's
+        surface is a fixed light token), so a dark page canvas puts an OS-dark-mode viewer's
+        `.live-demo` background behind components whose own ink/accent fills are drawn to sit
+        on a light canvas. `Button variant="primary"`'s solid fill (`color.action`, `#0f172a`)
+        is the exact color a naive dark canvas used here, so it (and `Text`, an active/selected
+        `Dropdown` trigger, and a selected filter `Chip`, which share the same fill) rendered
+        invisible against it. Fixing the canvas, not the components, matches what's actually
+        being demonstrated.
+      */
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      a { color: inherit; }
+      .site-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 24px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .site-header .brand { font-weight: 600; text-decoration: none; }
+      .site-header nav { display: flex; gap: 16px; flex-wrap: wrap; }
+      main { max-width: 1040px; margin: 0 auto; padding: 24px; box-sizing: border-box; }
+      .live-demo {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 24px;
+        margin: 16px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      pre {
+        background: #0f172a;
+        color: #f1f5f9;
+        padding: 16px;
+        border-radius: 10px;
+        overflow-x: auto;
+      }
+      .tests-list { font-size: 14px; }
+      .category-badge {
+        display: inline-block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #475569;
+        background: #f1f5f9;
+        border-radius: 999px;
+        padding: 4px 12px;
+        margin-bottom: 8px;
+      }
+    </style>
+  </body>
+</html>

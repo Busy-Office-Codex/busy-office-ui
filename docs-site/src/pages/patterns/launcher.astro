@@ -1,0 +1,16 @@
+---
+import Base from '../../layouts/Base.astro';
+// Same pre-compiled-source exception as dashboard.astro — Launcher.tsx has no package export
+// subpath either. See that file's comment for the full reasoning.
+import { Launcher } from '../../generated/launcher.js';
+import '../../generated/examples.css';
+---
+<Base title="Launcher pattern">
+  <a href="/">&larr; Home</a>
+  <h1>Launcher</h1>
+  <p>
+    Home/launcher sample screen. Source:
+    <a href="https://github.com/Busy-Office-Codex/busy-office-ui/blob/main/examples/Launcher.tsx">examples/Launcher.tsx</a>
+  </p>
+  <Launcher client:load />
+</Base>
