@@ -605,8 +605,14 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
                     aria-hidden="true"
                     style={{
                       position: 'absolute',
-                      top: -6,
-                      right: -6,
+                      // -7, not -6: an absolutely positioned child's top/right are measured from
+                      // its containing block's PADDING box, not its border box (CSS spec) — the
+                      // tile button's 1px border eats exactly 1px off a literal -6, rendering at
+                      // -5 relative to the tile's visible (border-box) edge. -7 compensates so
+                      // the RENDERED offset matches the reference's -6/-6 exactly (verified: the
+                      // failing test measured -5, confirming the 1px border was the cause).
+                      top: -7,
+                      right: -7,
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
