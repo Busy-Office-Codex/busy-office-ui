@@ -246,21 +246,31 @@ issues.
     one login example, not two. Standalone, reachable via `#login` (not
     Shell-routed — it precedes the shell conceptually). Built by one of 4
     parallel workflow agents (isolated worktrees). Issue #17.
-18. [ ] Role page (03) — `examples/RolePage.tsx`, module General. Accept:
-    real Shell-hosted page, existing exports only, matches reference tabs/
-    content structure. Issue #17.
-19. [ ] Inbox (04) — `examples/Inbox.tsx`, module General. Same Accept
-    pattern as item 18. Issue #17.
-20. [ ] Notifications (05) — `examples/Notifications.tsx`, module General.
-    Same Accept pattern as item 18. Issue #17.
+18. [x] Role page (03) — `examples/RolePage.tsx`, module General. KPI tile
+    row, a work-queue `Table`, shortcuts, and a team/delegation panel
+    behind the same filter-`Chip`-as-tabs pattern item 21 established.
+    Issue #17.
+19. [x] Inbox (04) — `examples/Inbox.tsx`, module General. Two-pane thread
+    list + detail: a real, controlled `Dropdown` filter that actually
+    narrows the list, linked-record context `Card`, a message thread, a
+    reply composer. Issue #17.
+20. [x] Notifications (05) — `examples/Notifications.tsx`, module General.
+    Grouped notification list (Today/Yesterday) with inline actions, a
+    channel-preferences panel sharing `examples/checkboxStyles.ts`. Issue
+    #17.
 21. [x] Profile (07) — `examples/Profile.tsx`, module General. Avatar/name
     header, a filter-`Chip`-as-tabs row (no `Tab` component in this
     package — reuses the same selection affordance Shell's palette
     category row already does), 8-field settings form. Reachable via the
     command palette (`general/profile`-style wiring in
     `preview/client.tsx`). Issue #17.
-22. [ ] Help (08) — `examples/Help.tsx`, module General. Same Accept
-    pattern as item 18. Issue #17.
+22. [x] Help (08) — `examples/Help.tsx`, module General. Setup checklist
+    (3 of 6 complete), a guided-tour `Card`, and docs/shortcuts/support
+    link lists. General now has 5 real routes (with item 21), giving the
+    app strip its first genuine sibling set — closed a previously
+    disclosed gap (docs/Shell.md, `test/browser/shell-chrome-color.spec.ts`):
+    an inactive app-strip item's `:hover` radius is now confirmed directly,
+    not just inferred. Issue #17.
 23. [ ] Customers (09) — `examples/Customers.tsx`, module Sales. Same
     Accept pattern as item 18. Issue #17.
 24. [ ] Sales order — list (10) — `examples/SalesOrderList.tsx`, module

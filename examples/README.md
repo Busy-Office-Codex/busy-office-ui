@@ -28,6 +28,10 @@ be wired into a real feature as-is.
 | `Profile.tsx` | `templates/erp-skeleton`'s "07 · Profile" screen | Avatar/name header, a filter-`Chip`-as-tabs row (no `Tab` component in this package), and an 8-field settings form |
 | `AdminOverview.tsx` | `templates/erp-skeleton`'s "21 · Administration — overview" screen | A 9-card admin-area grid plus a recent-activity panel with a status `Chip` |
 | `Settings.tsx` | `templates/erp-skeleton`'s "25 · Settings" screen | Sectioned org settings form: Company fields, four `Dropdown` value pickers (Locale & currency), and toggle rows (Modules) |
+| `RolePage.tsx` | `templates/erp-skeleton`'s "03 · Role page" screen | Role-scoped workspace: KPI tiles, a work-queue `Table`, shortcuts, and a team/delegation panel |
+| `Inbox.tsx` | `templates/erp-skeleton`'s "04 · Inbox" screen | Two-pane thread list + detail: a real `Dropdown` filter, linked-record context `Card`, a message thread, and a reply composer |
+| `Notifications.tsx` | `templates/erp-skeleton`'s "05 · Notifications" screen | Grouped notification list (Today/Yesterday) with inline actions, plus a channel-preferences `Card` |
+| `Help.tsx` | `templates/erp-skeleton`'s "08 · Help" screen | Setup checklist, a guided-tour `Card`, and docs/shortcuts/support link lists |
 
 **`AppShell.tsx` is the one to read to understand navigation** — it composes
 a real, working command palette (open it with Ctrl/⌘K or its command button)

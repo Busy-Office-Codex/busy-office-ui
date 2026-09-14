@@ -8,6 +8,10 @@ import { Profile } from '../examples/Profile.js';
 import { AdminOverview } from '../examples/AdminOverview.js';
 import { Settings } from '../examples/Settings.js';
 import { Login } from '../examples/Login.js';
+import { RolePage } from '../examples/RolePage.js';
+import { Inbox } from '../examples/Inbox.js';
+import { Notifications } from '../examples/Notifications.js';
+import { Help } from '../examples/Help.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -23,6 +27,13 @@ const routes = [
   { id: 'profile', module: 'General', label: 'Profile' },
   { id: 'admin-overview', module: 'Administration', label: 'Overview' },
   { id: 'settings', module: 'Settings', label: 'General' },
+  // Batch 2: General's first real siblings — Profile now has company, so the app strip
+  // finally has more than one item to cross between within a module (see
+  // test/browser/sample-pages-navigation.spec.ts's comment on this being untested before).
+  { id: 'role-page', module: 'General', label: 'Role page' },
+  { id: 'inbox', module: 'General', label: 'Inbox' },
+  { id: 'notifications', module: 'General', label: 'Notifications' },
+  { id: 'help', module: 'General', label: 'Help' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -32,6 +43,10 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   profile: <Profile />,
   'admin-overview': <AdminOverview />,
   settings: <Settings />,
+  'role-page': <RolePage />,
+  inbox: <Inbox />,
+  notifications: <Notifications />,
+  help: <Help />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */
