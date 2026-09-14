@@ -24,7 +24,10 @@ be wired into a real feature as-is.
 | `ListReport.tsx` | `templates/erp-skeleton`'s "14 · Purchase order" business mockup (deliberately rebuilt away from the generic `templates/list-report` template to match this specific reference — see `docs/ListReport.md`) | Purchase-orders list: a stat-tile strip, search plus four real `Dropdown` filters (Supplier, Status, Buyer, Expected), and a real `Table` with a row-selection checkbox column |
 | `RecordDetail.tsx` | `templates/record-detail` | Record header + `Chip` status, summary `Card` tiles, a `Modal` confirm flow |
 | `Dashboard.tsx` | `templates/dashboard` | KPI `Card` grid with a selected state |
-| `Login.tsx` | `templates/login` | A simple centered auth form |
+| `Login.tsx` | `templates/erp-skeleton`'s "01 · Login" screen (rebuilt from the simpler standalone `templates/login` template — ROADMAP M6, one login example, not two) | Two-column sign-in: workspace switcher, email/password, a "Continue with SSO" alternative, a remember-this-device row, and a brand panel |
+| `Profile.tsx` | `templates/erp-skeleton`'s "07 · Profile" screen | Avatar/name header, a filter-`Chip`-as-tabs row (no `Tab` component in this package), and an 8-field settings form |
+| `AdminOverview.tsx` | `templates/erp-skeleton`'s "21 · Administration — overview" screen | A 9-card admin-area grid plus a recent-activity panel with a status `Chip` |
+| `Settings.tsx` | `templates/erp-skeleton`'s "25 · Settings" screen | Sectioned org settings form: Company fields, four `Dropdown` value pickers (Locale & currency), and toggle rows (Modules) |
 
 **`AppShell.tsx` is the one to read to understand navigation** — it composes
 a real, working command palette (open it with Ctrl/⌘K or its command button)

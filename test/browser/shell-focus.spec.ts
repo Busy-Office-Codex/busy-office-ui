@@ -97,7 +97,11 @@ test('Tab and Shift+Tab wrap focus within the command palette instead of escapin
   const trigger = page.getByRole('button', { name: 'Open command palette', exact: true });
   const search = paletteSearch(page);
   const close = page.getByRole('button', { name: 'Close command palette', exact: true });
-  const lastCommand = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Dashboards\b/ });
+  // `.last()`, not a specific route's label: ROADMAP M6 (issue #17) grows the preview's route
+  // registry batch by batch, so whichever route is last in `preview/client.tsx`'s `routes` array
+  // keeps changing — this test only cares that Shift+Tab from the search field wraps to whatever
+  // the last command in the palette actually is, not which one that is.
+  const lastCommand = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button').last();
 
   await trigger.click();
   await expect(search).toBeFocused();
