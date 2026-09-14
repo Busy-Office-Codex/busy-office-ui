@@ -126,14 +126,14 @@ test('the Purchase-orders stat tile renders as a real Card, not the old hand-rol
   expect(boxShadow).not.toBe('none');
 });
 
-test('Input renders at its declared height (border-box), at both compact and default size', async ({ page }) => {
+test('Input renders at its declared height (border-box), at both search and default size', async ({ page }) => {
   await page.goto('/#examples');
 
-  // Compact: examples/ListReport.tsx's toolbar search field, size="search", declares 36px.
-  const compactInput = page.getByPlaceholder('Search POs…');
-  await expect(compactInput).toHaveCSS('box-sizing', 'border-box');
-  const compactHeight = await compactInput.evaluate((element) => (element as HTMLElement).offsetHeight);
-  expect(compactHeight).toBe(36);
+  // search: examples/ListReport.tsx's toolbar search field, size="search", declares 36px.
+  const searchInput = page.getByPlaceholder('Search POs…');
+  await expect(searchInput).toHaveCSS('box-sizing', 'border-box');
+  const searchHeight = await searchInput.evaluate((element) => (element as HTMLElement).offsetHeight);
+  expect(searchHeight).toBe(36);
 
   // Default: examples/RecordDetail.tsx's Reject-modal "Comment" field, no size prop, declares 40px.
   await page.getByRole('button', { name: 'Sales', exact: true }).click();

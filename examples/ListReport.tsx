@@ -462,63 +462,63 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
       {state === 'ready' && (
         <div role="region" aria-label="Purchase orders table" tabIndex={0} style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}>
           <div style={{ minWidth: 760 }}>
-          <Density value="compact">
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeaderCell>
-                  <input
-                    type="checkbox"
-                    aria-label="Select all rows"
-                    checked={allVisibleSelected}
-                    onChange={toggleAll}
-                    {...stylex.props(checkboxStyles.checkbox)}
-                  />
-                </TableHeaderCell>
-                <TableHeaderCell>PO #</TableHeaderCell>
-                <TableHeaderCell>Supplier</TableHeaderCell>
-                <TableHeaderCell>Buyer</TableHeaderCell>
-                <TableHeaderCell>Expected</TableHeaderCell>
-                <TableHeaderCell>Received</TableHeaderCell>
-                <TableHeaderCell align="end">Total</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((order) => (
-                <TableRow key={order.po}>
-                  <TableCell>
-                    <input
-                      type="checkbox"
-                      aria-label={`Select ${order.po}`}
-                      checked={selected.has(order.po)}
-                      onChange={() => toggleOne(order.po)}
-                      {...stylex.props(checkboxStyles.checkbox)}
-                    />
-                  </TableCell>
-                  <TableCell>{order.po}</TableCell>
-                  <TableCell>{order.supplier}</TableCell>
-                  <TableCell>{order.buyer}</TableCell>
-                  <TableCell>{order.expected}</TableCell>
-                  <TableCell>{order.receivedLabel}</TableCell>
-                  <TableCell align="end">{formatCurrency(order.total)}</TableCell>
-                  <TableCell>
-                    <Chip variant="status" tone={order.tone}>
-                      {order.status}
-                    </Chip>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {rows.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8}>
-                    <Text variant="caption">No purchase orders match these filters.</Text>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          </Density>
+            <Density value="compact">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>
+                      <input
+                        type="checkbox"
+                        aria-label="Select all rows"
+                        checked={allVisibleSelected}
+                        onChange={toggleAll}
+                        {...stylex.props(checkboxStyles.checkbox)}
+                      />
+                    </TableHeaderCell>
+                    <TableHeaderCell>PO #</TableHeaderCell>
+                    <TableHeaderCell>Supplier</TableHeaderCell>
+                    <TableHeaderCell>Buyer</TableHeaderCell>
+                    <TableHeaderCell>Expected</TableHeaderCell>
+                    <TableHeaderCell>Received</TableHeaderCell>
+                    <TableHeaderCell align="end">Total</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((order) => (
+                    <TableRow key={order.po}>
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ${order.po}`}
+                          checked={selected.has(order.po)}
+                          onChange={() => toggleOne(order.po)}
+                          {...stylex.props(checkboxStyles.checkbox)}
+                        />
+                      </TableCell>
+                      <TableCell>{order.po}</TableCell>
+                      <TableCell>{order.supplier}</TableCell>
+                      <TableCell>{order.buyer}</TableCell>
+                      <TableCell>{order.expected}</TableCell>
+                      <TableCell>{order.receivedLabel}</TableCell>
+                      <TableCell align="end">{formatCurrency(order.total)}</TableCell>
+                      <TableCell>
+                        <Chip variant="status" tone={order.tone}>
+                          {order.status}
+                        </Chip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {rows.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={8}>
+                        <Text variant="caption">No purchase orders match these filters.</Text>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Density>
           </div>
         </div>
       )}
