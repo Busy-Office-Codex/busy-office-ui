@@ -26,12 +26,30 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
     <div
       style={{
         background: '#f8fafc',
-        minHeight: '100vh',
-        padding: 40,
+        // ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): matches
+        // ListReport.tsx/Dashboard.tsx's 24px content padding (the reference's own value) instead
+        // of this page's old 40px — one shared content frame across all three sample pages.
+        // `box-sizing: 'border-box'` is new too: without it this padding was added on top of
+        // `minHeight`/the page's natural height rather than absorbed into it (same content-box
+        // pitfall already fixed for `Input`/checkboxes elsewhere in this milestone), inflating
+        // this page's scrollHeight past the viewport. `minHeight: '100vh'` is removed outright —
+        // Shell's own root already sets `minHeight: '100vh'` and its content-slot wrapper already
+        // has `flex: 1` (stretches to fill), so this page setting the same 100vh minimum AGAIN,
+        // nested inside that chrome, only pushed the total rendered height past the viewport.
+        // This page's content is naturally shorter than a full viewport, and that's fine — its
+        // background (`#f8fafc`) is the same literal as `color.bgCanvas`, the color Shell's own
+        // root already paints, so there's no visible seam below the content either way.
+        padding: 24,
+        boxSizing: 'border-box',
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* `margin: 0`, not `'0 auto'` — this inner wrapper's `maxWidth` still caps line length on
+          wide viewports, but no longer re-centers the content away from the outer wrapper's own
+          left-aligned padding above (the reference is left-aligned, not centered; see
+          ListReport.tsx, which has no inner max-width wrapper at all, for the page this left edge
+          must match). */}
+      <div style={{ maxWidth: 960, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Text variant="heading">SO-1042 · Northwind Traders</Text>

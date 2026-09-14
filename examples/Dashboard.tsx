@@ -11,14 +11,23 @@ export function Dashboard() {
   return (
     <div
       style={{
-        minHeight: '100vh',
         background: '#f8fafc',
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 40,
+        // ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): 24px content
+        // padding (the reference's own value), matching ListReport.tsx/RecordDetail.tsx — see
+        // RecordDetail.tsx for the full box-sizing/minHeight reasoning shared by all three pages.
+        // `boxSizing: 'border-box'` was already set here (unlike RecordDetail's root, which
+        // needed it added), so this page's `padding: 40` was already absorbed into its declared
+        // height rather than adding to it — only the 40->24 padding value and the removed
+        // `minHeight: '100vh'` are new.
+        padding: 24,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ maxWidth: 1120, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 32 }}>
+      {/* `margin: 0`, not `'0 auto'` — left-aligns instead of centering, so this page's left edge
+          matches ListReport.tsx's (no inner max-width wrapper) and RecordDetail.tsx's (same fix)
+          at the same x position. */}
+      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 32 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Text variant="heading">Good morning, Priya</Text>
           <Text variant="body">Here's what needs your attention today.</Text>

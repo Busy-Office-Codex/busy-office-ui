@@ -136,16 +136,16 @@ issues.
     button gets hover/focus states; a unit test greps `Shell.tsx`/
     `AppShell.tsx` against `tokens.stylex.ts`'s own literals. Issue #12
     (`agreed`) — `022034e`, fixed `2835601`, `c95f6ef`.
-14. [ ] **Page composition on the reference frame.** Accept: all three sample
-    pages use the reference's 24px content padding with left-aligned
-    max-widths (a browser test asserts the page heading's x is equal across
-    pages at 1280px); no sample page scrolls into empty canvas inside `Shell`
-    (`scrollHeight` equals the viewport at 800px for all three); the preview
-    host resets the UA body margin and keeps its banner out of the vertical
-    flow; the Purchase-orders stat tile is a `Card` (one tile implementation
-    across pages; its 16px padding vs the reference's 14 is a disclosed
-    deviation); `Input` and `Chip` are `border-box` so declared heights are
-    rendered heights. Serves: Objective 1 (less host code); Objective 2.
+14. [x] Page composition on the reference frame — all three sample pages
+    on the reference's 24px content padding, left-aligned (heading x=24
+    on all three at 1280px, was 40/160/80); no page scrolls into empty
+    canvas (`scrollHeight`=800px viewport for all three, was up to
+    +325px of void); preview host resets the UA body margin, banner
+    fixed out of flow and clear of the dock's footprint; Purchase-orders
+    stat tile is a real `Card` (16px-vs-14px padding a disclosed
+    deviation); `Input` `border-box` (`Chip`'s `filter` variant
+    investigated, already `border-box` by UA default — no bug, no fix).
+    Issue #12 (`agreed`) — `d5e5047`, fixed `edb62ee`.
 15. [?] **Docs website.** Astro v1 deployed from CI on every push to `main`
     (Cloudflare Pages from the private repo, or the container image if no
     account): one page per `docs/*.md` with its live demo, tokens and density

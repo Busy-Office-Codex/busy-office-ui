@@ -19,6 +19,16 @@ const styles = stylex.create({
     // pill-shaped control (see tokens.stylex.ts's `density` doc comment) — comfortable
     // default is now 40px (was a fixed 44px). `min-height`, not `height` (see Button).
     minHeight: density.rowHeight,
+    // ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): `<input>` (unlike
+    // `<button>`, which Chrome's own UA stylesheet already renders `border-box`) defaults to
+    // `content-box`, under which the 1px border below AND the UA default ~1px top/bottom padding
+    // (this field only sets `paddingInline`, leaving block padding at the browser default) both
+    // add on top of the declared `min-height` instead of being absorbed into it — verified live:
+    // a declared 36px (compact) rendered `offsetHeight` 40px, and a declared 40px (default)
+    // rendered 44px, a consistent +4px in both cases. `border-box` folds both back in, so the
+    // rendered height matches the declared one — same fix pattern as `statusBase`'s danger-tone
+    // border in `Chip.tsx` (ROADMAP item 12) and the row-selection checkboxes' border (item 12).
+    boxSizing: 'border-box',
     borderStyle: 'solid',
     borderWidth: '1px',
     borderRadius: radius.sm,

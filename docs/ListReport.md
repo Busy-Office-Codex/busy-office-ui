@@ -13,12 +13,13 @@ tests:
   - test/browser/table-row-separator.spec.ts
   - test/browser/table-row-uniformity.spec.ts
   - test/browser/list-report-checkboxes.spec.ts
+  - test/browser/page-composition.spec.ts
 ---
 
 `examples/ListReport.tsx` — a filterable purchase-order list page (route id `purchase-orders`, module `Purchase`), composed only from package components (`Button`, `Card`, `Chip`, `Dropdown`, `Input`, `Table`, `Text`). Rebuilt against `templates/erp-skeleton/ErpSkeleton.dc.html`'s "14 · Purchase order" section in the "Busy Office Design System" Claude Design project — a specific business mockup — rather than the generic `templates/list-report` template it previously mirrored. It renders the header, stat-tile strip, and filter/search toolbar unconditionally, and takes a `state?: 'ready' | 'loading' | 'error' | 'forbidden'` prop (default `'ready'`) that controls what appears below the toolbar, in place of the table region. Not for a Claude Design canvas template — its `Dropdown` usage requires real JSX (see `docs/design-conventions.md`); use it as a buildable page composition, not a static template.
 
 - **Header**: `Purchase orders` heading, a `Button variant="secondary"` ("From requisition") and a `Button variant="primary"` ("+ New PO").
-- **Stat tiles**: a 4-column grid — Awaiting approval, Sent to supplier, Due to receive this week, Open commitments — each computed from the sample `ORDERS` data.
+- **Stat tiles**: a 4-column grid — Awaiting approval, Sent to supplier, Due to receive this week, Open commitments — each computed from the sample `ORDERS` data. Each tile is a real `Card` (no `onClick`, so it renders as a static, non-interactive tile) — the same component `RecordDetail`'s summary cards and `Dashboard`'s KPI tiles already used, one tile implementation across all three sample pages (ROADMAP item 14). `Card`'s 16px padding vs. the `templates/erp-skeleton` reference's own measured 14px is a disclosed deviation, accepted rather than adding a new `Card` padding variant for a 2px difference.
 - **Toolbar**: a search `Input` ("Search POs…", matching against PO #, supplier and buyer) plus four `Dropdown` filters — Supplier, Status, Buyer, Expected.
 - **Table columns**: a row-selection checkbox column, then PO #, Supplier, Buyer, Expected, Received, Total (end-aligned), Status (a status `Chip`). The checkbox column has proper `aria-label`s ("Select PO-1042", "Select all rows") for accessibility; selection is local UI state (no server call), same as the search/filter state.
 
