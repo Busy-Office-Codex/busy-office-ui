@@ -181,7 +181,16 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
         style={{
           position: 'fixed',
           left: 12,
-          bottom: 12,
+          // 84, not 12: the dock is centered (Shell.tsx: left:0;right:0;justifyContent:center),
+          // so no horizontal position for this left-aligned banner avoids it at every viewport
+          // width — verified directly (independent review measurement): at 1280px the banner's
+          // rect (x:12-504) overlapped the dock's (x:410.5-869.5); at 380px, where the banner's
+          // text wraps to two lines and grows taller, it covered ~78% of the dock's height.
+          // pointerEvents:'none' already keeps clicks passing through, but the visual collision
+          // was real. 84 reuses the ERP skeleton reference's own reserved band for the dock
+          // (ErpSkeleton.dc.html: content inset bottom:84) rather than an arbitrary number,
+          // clearing the dock's own measured ~74px footprint with margin.
+          bottom: 84,
           zIndex: 1,
           pointerEvents: 'none',
           padding: '4px 10px',
