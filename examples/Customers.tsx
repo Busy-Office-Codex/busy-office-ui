@@ -126,7 +126,7 @@ export function Customers() {
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ width: 280 }}>
-          <Input placeholder="Search customers…" value={query} onChange={(event) => setQuery(event.target.value)} size="search" />
+          <Input aria-label="Search customers" placeholder="Search customers…" value={query} onChange={(event) => setQuery(event.target.value)} size="search" />
         </div>
         <Dropdown
           label={`Segment · ${segmentFilter}`}

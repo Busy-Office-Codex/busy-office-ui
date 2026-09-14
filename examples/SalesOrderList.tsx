@@ -155,10 +155,8 @@ const formatCurrency = (amount: number) =>
  * content match the reference, not an independently pixel-measured/contrast-audited pass. Meant
  * to render as the content inside `AppShell` (module="Sales", route label "Sales orders" — the
  * plural list view, distinct from `AppShell.tsx`'s existing singular "Sales order" route, which
- * is RecordDetail.tsx's detail view) — see AppShell.tsx. `AppShell.tsx`'s own `NAV.Sales` array
- * doesn't carry a "Sales orders" entry yet in this checkout; left untouched per this batch's
- * explicit scope (that file is owned by a different, already-reviewed change), so this page isn't
- * yet reachable from the sample shell's app strip or command palette.
+ * is RecordDetail.tsx's detail view) — see AppShell.tsx's `NAV.Sales` and `preview/client.tsx`'s
+ * routing for the wiring.
  *
  * Only the search field and the Customer/Date range/Warehouse `Dropdown`s are wired to real
  * `useState` filtering, the same pattern `ListReport.tsx` (this batch's reference) uses for its
