@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card, Chip, Input, Modal, Text } from '../src/index.js';
+import { Button, Card, Chip, Density, Input, Modal, Text } from '../src/index.js';
 
 /**
  * `'ready'` (default) shows the header, the three summary cards and the
@@ -69,9 +69,9 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
         {state === 'error' && (
           <Card role="alert">
             <Text variant="body">This sales order couldn't be loaded. Try again.</Text>
-            <div>
-              <Button variant="secondary" size="compact">Retry</Button>
-            </div>
+            <Density value="compact">
+              <Button variant="secondary">Retry</Button>
+            </Density>
           </Card>
         )}
 
@@ -116,14 +116,16 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-              <Button variant="ghost" size="compact">Cancel</Button>
-              <Button variant="secondary" size="compact">Request changes</Button>
-              <Button variant="primary" size="compact">Approve</Button>
-              <Button variant="danger" size="compact" onClick={() => setRejecting(true)}>
-                Reject
-              </Button>
-            </div>
+            <Density value="compact">
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                <Button variant="ghost">Cancel</Button>
+                <Button variant="secondary">Request changes</Button>
+                <Button variant="primary">Approve</Button>
+                <Button variant="danger" onClick={() => setRejecting(true)}>
+                  Reject
+                </Button>
+              </div>
+            </Density>
           </>
         )}
       </div>
@@ -134,12 +136,16 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
         title="Reject SO-1042?"
         actions={
           <>
-            <Button variant="ghost" size="compact" onClick={() => setRejecting(false)}>
-              Cancel
-            </Button>
-            <Button variant="danger" size="compact" onClick={() => setRejecting(false)}>
-              Reject
-            </Button>
+            <Density value="compact">
+              <Button variant="ghost" onClick={() => setRejecting(false)}>
+                Cancel
+              </Button>
+            </Density>
+            <Density value="compact">
+              <Button variant="danger" onClick={() => setRejecting(false)}>
+                Reject
+              </Button>
+            </Density>
           </>
         }
       >
