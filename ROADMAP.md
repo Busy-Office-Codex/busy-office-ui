@@ -52,14 +52,12 @@ whole of M3 (items 10–14: the density tier, filter/action hierarchy, Table
 alignment, Shell chrome on tokens, page composition), owner approval
 2026-09-14.
 
-**M4 — Docs website for `@busyoffice/design-system` — item 15, issue #14
-(`agreed`, project owner, 2026-09-14).** The framework stopped expanding
-after M3 (no new component, prop or export cleared the Objective tests in
-the open backlog); item 15 documents the system that has stopped moving
-instead of adding to it. Scope and Accept carried on #13: Astro; pages
-generated from `docs/*.md` with a live demo per page built from the package;
-tokens + density pages; the four sample screens as patterns; a CI job that
-builds and deploys the site on every push to `main`; a link check passes.
+**M4 — Docs website for `@busyoffice/design-system` — complete.** Item 15,
+issue #14 (`agreed`, project owner, 2026-09-14). The framework stopped
+expanding after M3 (no new component, prop or export cleared the Objective
+tests in the open backlog); item 15 documents the system that has stopped
+moving instead of adding to it — see item 15 below for full scope, the
+hosting decision and the verify-review fixes.
 
 After M4, stop expanding the framework: new work starts only from a request
 that passes the Objective tests.
@@ -153,16 +151,36 @@ issues.
     deviation); `Input` `border-box` (`Chip`'s `filter` variant
     investigated, already `border-box` by UA default — no bug, no fix).
     Issue #12 (`agreed`) — `d5e5047`, fixed `edb62ee`.
-15. [ ] **Docs website.** Astro v1 deployed from CI on every push to `main`
-    (Cloudflare Pages from the private repo, or the container image if no
-    account): one page per `docs/*.md` with its live demo, tokens and density
-    pages, the four sample screens as patterns, conventions; no search,
-    versioning or build-time check scripts in v1. Accept: a CI job builds and
-    deploys the site on every `main` push; every `docs/*.md` page renders
-    with a live demo; a link check passes. Serves: intent.md
-    "documentation". Needs: hosting choice made (Cloudflare Pages if an
-    account exists, else the container route). Issue #13/#14 (`agreed`,
-    project owner, 2026-09-14).
+15. [x] **Docs website.** `docs-site/` (Astro + `@astrojs/react`), a new
+    workspace member — one page per `docs/*.md` (discovered from the
+    collection, not hardcoded), each rendering its fenced sample as a real,
+    hydrated live demo against the actual built package (`@busyoffice/
+    design-system`, `/shell`, `/examples/list-report`, `/examples/record-
+    detail` — documented subpaths only, package `exports`/`dist`/`src`
+    untouched); a tokens page reading real values out of `src/tokens.
+    stylex.ts`; a density page with a live three-tier comparison; four
+    sample-screen pattern pages (Launcher, ListReport, RecordDetail,
+    Dashboard); a conventions page. No search, versioning or build-time
+    check scripts beyond the link check, per v1 scope. Hosting: the
+    container route (owner decision, 2026-09-14, not Cloudflare Pages — no
+    new external account) — `.github/workflows/docs.yml` builds the root
+    package + docs-site, runs the link check, and pushes a container image
+    to `ghcr.io` on every push to `main` using the built-in `GITHUB_TOKEN`;
+    CI does not reach the maintainer's local podman host directly, matching
+    how `busy-office-ui-preview` is already run there manually.
+    A three-lens verify review (spec-match, contrast/accessibility,
+    simplicity) found and fixed, before merge: 5 of 13 doc pages had a
+    broken live demo (undefined refs / an unmatched ```tsx fence / an
+    unrenderable Fragment-wrapped IIFE — see `db0e06f`/`ee8ba75`), and a
+    docs-site-only dark-mode media query gave `.live-demo` the exact hex of
+    Button's primary ink fill, making it (and Text/Dropdown/filter-Chip)
+    invisible to OS-dark-mode viewers — `@busyoffice/design-system` reads no
+    `prefers-color-scheme` anywhere, so the docs canvas was pinned light
+    instead. Full gate suite green at the batch head (`pnpm test` 94/94,
+    `pnpm test:browser` 76/76); docs-site's own build + 20/20-page link
+    check clean; all 5 fixed pages and the contrast fix manually confirmed
+    live in Chrome. Serves: intent.md "documentation". Issue #13/#14
+    (`agreed`, project owner, 2026-09-14).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
