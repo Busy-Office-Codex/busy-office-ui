@@ -27,15 +27,23 @@ const { title } = Astro.props as Props;
       <slot />
     </main>
     <style is:global>
-      :root { color-scheme: light dark; }
+      /*
+        Fixed light chrome regardless of OS `prefers-color-scheme`: `@busyoffice/design-system`
+        reads no dark-mode media query anywhere (it's light-only today — every component's
+        surface is a fixed light token), so a dark page canvas puts an OS-dark-mode viewer's
+        `.live-demo` background behind components whose own ink/accent fills are drawn to sit
+        on a light canvas. `Button variant="primary"`'s solid fill (`color.action`, `#0f172a`)
+        is the exact color a naive dark canvas used here, so it (and `Text`, an active/selected
+        `Dropdown` trigger, and a selected filter `Chip`, which share the same fill) rendered
+        invisible against it. Fixing the canvas, not the components, matches what's actually
+        being demonstrated.
+      */
+      :root { color-scheme: light; }
       body {
         margin: 0;
         font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         background: #f8fafc;
         color: #0f172a;
-      }
-      @media (prefers-color-scheme: dark) {
-        body { background: #0f172a; color: #f1f5f9; }
       }
       a { color: inherit; }
       .site-header {
@@ -51,6 +59,7 @@ const { title } = Astro.props as Props;
       .site-header nav { display: flex; gap: 16px; flex-wrap: wrap; }
       main { max-width: 1040px; margin: 0 auto; padding: 24px; box-sizing: border-box; }
       .live-demo {
+        background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
         padding: 24px;
