@@ -41,3 +41,28 @@ test('the app-strip item renders inactive (color.textSecondary) styling while th
   // color.textSecondary (#475569) -> rgb(71, 85, 105).
   await expect(stripItem).toHaveCSS('color', 'rgb(71, 85, 105)');
 });
+
+// ROADMAP M6 (issue #17, batch 2) closes the gap the two tests above disclosed: General now has
+// 5 real routes (Profile, Role page, Inbox, Notifications, Help — preview/client.tsx), so the app
+// strip finally renders a genuinely-inactive sibling next to an active one, without needing the
+// launcher-open workaround. Confirms docs/Shell.md's claim directly: Shell.tsx applies
+// `borderRadius: radius.sm` unconditionally on both branches specifically so an inactive item's
+// `:hover` background stays a rounded-rect highlight, not `ghost`'s own default pill.
+test('a genuinely-inactive app-strip sibling renders the rounded-rect radius, not a pill, including on hover', async ({ page }) => {
+  await page.goto('/#examples');
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Profile\b/ }).click();
+
+  const active = page.getByRole('button', { name: 'Profile', exact: true });
+  const inactive = page.getByRole('button', { name: 'Role page', exact: true });
+  await expect(active).toHaveAttribute('aria-current', 'page');
+  await expect(inactive).not.toHaveAttribute('aria-current', 'page');
+
+  // radius.sm (6px) on both — not Button's default radius.pill (999px) that `ghost` would
+  // otherwise apply to the inactive tab.
+  await expect(active).toHaveCSS('border-radius', '6px');
+  await expect(inactive).toHaveCSS('border-radius', '6px');
+
+  await inactive.hover();
+  await expect(inactive).toHaveCSS('border-radius', '6px');
+});
