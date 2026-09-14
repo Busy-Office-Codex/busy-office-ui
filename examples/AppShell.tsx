@@ -64,7 +64,12 @@ export type AppShellModule = 'General' | 'Sales' | 'Purchase' | 'Finance' | 'BI'
 
 const NAV: Record<AppShellModule, string[]> = {
   General: ['Home', 'Role page', 'Inbox', 'Approvals', 'Notifications', 'Profile', 'Help'],
-  Sales: ['Customers', 'Sales order', 'Delivery', 'Invoice', 'Returns'],
+  // ROADMAP M6 (issue #17, batch 3): 'Sales order' (singular) was already the detail-view route
+  // (RecordDetail.tsx) before this milestone touched Sales — kept exactly as-is (test/browser/
+  // sample-pages-navigation.spec.ts and others target it by exact label). The list-view screen
+  // (item 24) needed its own distinct label rather than overloading the same one; 'Sales orders'
+  // (plural) added as a new sibling entry, not a rename.
+  Sales: ['Customers', 'Sales orders', 'Sales order', 'Delivery', 'Invoice', 'Returns'],
   Purchase: ['Purchase orders', 'Suppliers', 'Inventory', 'Approvals', 'Receiving'],
   Finance: ['Overview', 'Ledger', 'Receivables', 'Payables', 'Reports'],
   BI: ['Dashboards', 'Explore', 'Datasets', 'Schedules'],
