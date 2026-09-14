@@ -36,19 +36,21 @@ one open clause — the core session records `accepted` on #11 — is an
 acknowledgement, not a build item, so M2 stops the loop for nothing and M3
 proceeds; item 3 flips to `[x]` when that comment lands.
 
-**M3 — One density tier, realigned to the ERP skeleton — current.** Items
-10–14, issue #12 (`agreed`, project owner, 2026-09-14). Goal: a host sets one
-density (`compact` / `comfortable` / `spacious`) on any wrapper and every
-control, row and label follows, and the sample screens measure against the
-ERP skeleton reference instead of approximating it. Set by the owner after a
-grilled review (2026-09-14): the "too big at 100%" impression was traced, with
-measurements, to ink weight, vertical budget and a missing 13/14px tier — not
-to the type scale — so a uniform 90% scale was refused. Waves: item 10 first
-and alone (it changes the heights everything else assumes); then 11 + 13
-(disjoint files); then 12, then 14. Complete when items 10–14 are `[x]`, the
-full gate suite (including `pnpm test:browser`) passes at the batch head
-before it merges into `main`, the Claude Design project is re-synced
-(`/design-sync`), and a `0.4.0` release is recommended in the merge commit.
+**M3 — One density tier, realigned to the ERP skeleton — complete.** Items
+10–14, issue #12 (`agreed`, project owner, 2026-09-14); landed at `77b9e43`. A
+host sets one density (`compact` / `comfortable` / `spacious`) on any wrapper
+and every control, row and label follows; the sample screens measure against
+the ERP skeleton reference instead of approximating it. Set by the owner
+after a grilled review (2026-09-14): the "too big at 100%" impression was
+traced, with measurements, to ink weight, vertical budget and a missing
+13/14px tier — not to the type scale — so a uniform 90% scale was refused.
+The full gate suite (including `pnpm test:browser`, 76/76) passed at each
+batch head before merging into `main`; the Claude Design project is re-synced
+(`/design-sync`, 2026-09-14 — the new `Density` component plus 10
+density-wired components re-verified). **`0.4.0` recommended for the whole
+of M3** (items 10–14: the density tier, filter/action hierarchy, Table
+alignment, Shell chrome on tokens, page composition) — cutting the tag is
+the owner's call.
 
 Item 15 (docs website) is proposed, not in M3 — it starts only from an agreed
 `[UI request]` (#13) and after M3, so it documents a system that has stopped
