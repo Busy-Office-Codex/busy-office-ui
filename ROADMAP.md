@@ -74,8 +74,26 @@ original mistake, not something worth preserving through a migration. A
 required three-lens verify review (this batch closed M5) found and fixed a
 real gap before merge — see item 16 below.
 
-After M5, stop expanding the framework: new work starts only from a request
-that passes the Objective tests.
+**M6 — Sample pages for every desktop screen in the ERP skeleton reference —
+items 17–33, issue #17 (`agreed`, project owner, 2026-09-14).** Owner-directed
+(2026-09-14): the Claude Design project's `templates/erp-skeleton/
+ErpSkeleton.dc.html` ("a gray wireframe canvas of every ERP page") has 24
+distinct desktop screens; only 3 were mirrored before this milestone
+(`Launcher`≈Home, `RecordDetail`≈Sales order detail, `ListReport`≈Purchase
+order). 16 are buildable from existing components; 5 (Inventory, Finance,
+Reports, BI dashboard, BI explore) are blocked on a proposed `Chart`
+primitive (issue #16, `proposed` — not built speculatively, per the owner's
+explicit "propose separately" decision) and are not items in this
+milestone. Structural first pass, per owner decision: real components,
+correct composition and content matching the reference's own labels/data —
+not independently pixel-measured or contrast-audited (a later, separate
+fidelity pass, screen-by-screen, the way item 12 did it). Also expands
+`AppShell.tsx`'s route registry and rebuilds `preview/client.tsx`'s routing
+to actually host every page, replacing the prior 3-route preview — the
+"redo preview" half of the request.
+
+After M6, or once its scope is exhausted, stop expanding the framework: new
+work starts only from a request that passes the Objective tests.
 
 ## Items
 
@@ -221,6 +239,50 @@ issues.
     resolve, zero stale prop references outside intentional history
     sentences. Serves: Objective 1 (simplicity — one way to get compact
     sizing, not two). Issue #15 (`agreed`, project owner, 2026-09-14).
+17. [ ] Login (01) — update `examples/Login.tsx` to the fuller erp-skeleton
+    version (workspace switcher, SSO, MFA row, brand panel) rather than a
+    second file. Accept: real Shell-independent standalone page (pre-auth,
+    not module-routed), composed from existing exports. Issue #17.
+18. [ ] Role page (03) — `examples/RolePage.tsx`, module General. Accept:
+    real Shell-hosted page, existing exports only, matches reference tabs/
+    content structure. Issue #17.
+19. [ ] Inbox (04) — `examples/Inbox.tsx`, module General. Same Accept
+    pattern as item 18. Issue #17.
+20. [ ] Notifications (05) — `examples/Notifications.tsx`, module General.
+    Same Accept pattern as item 18. Issue #17.
+21. [ ] Profile (07) — `examples/Profile.tsx`, module General. Same Accept
+    pattern as item 18. Issue #17.
+22. [ ] Help (08) — `examples/Help.tsx`, module General. Same Accept
+    pattern as item 18. Issue #17.
+23. [ ] Customers (09) — `examples/Customers.tsx`, module Sales. Same
+    Accept pattern as item 18. Issue #17.
+24. [ ] Sales order — list (10) — `examples/SalesOrderList.tsx`, module
+    Sales; needs a NAV label reconciliation with the existing "Sales
+    order" (detail) route before wiring — resolved when this item builds,
+    not a blocker on earlier items. Issue #17.
+25. [ ] Delivery — list view (12) — `examples/Delivery.tsx`, module Sales;
+    Board/Map/Calendar view-toggle explicitly deferred. Issue #17.
+26. [ ] Invoice (13) — `examples/Invoice.tsx`, module Sales. Same Accept
+    pattern as item 18. Issue #17.
+27. [ ] Approvals (16) — `examples/Approvals.tsx`, module General (the
+    cross-module queue screen). Same Accept pattern as item 18. Issue #17.
+28. [ ] Admin overview (21) — `examples/AdminOverview.tsx`, module
+    Administration. Same Accept pattern as item 18. Issue #17.
+29. [ ] Users and roles (22) — `examples/UsersAndRoles.tsx`, module
+    Administration; spans NAV's separate "Users"/"Roles" entries, resolved
+    when this item builds. Issue #17.
+30. [ ] Builder — forms (23) — `examples/BuilderForms.tsx`, module
+    Builder; static 3-pane layout, no drag-and-drop. Issue #17.
+31. [ ] Builder — workflow (24) — `examples/BuilderWorkflow.tsx`, module
+    Builder; static step list, no drag/diagram. Issue #17.
+32. [ ] Settings (25) — `examples/Settings.tsx`, module Settings. Same
+    Accept pattern as item 18. Issue #17.
+33. [ ] Rebuild `preview/client.tsx`'s routing to host every item above
+    plus the 3 already-built pages, replacing the current 3-route preview;
+    expand `examples/AppShell.tsx`'s route registry only where a new
+    module/screen name isn't already in its `NAV` map. Accept: every item
+    17–32's page is reachable via app strip, dock, or command palette in
+    the preview; `pnpm test:browser` green. Issue #17.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
