@@ -1,0 +1,13 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ListReport } from '@busyoffice/design-system/examples/list-report';
+---
+<Base title="List report pattern">
+  <a href="/">&larr; Home</a>
+  <h1>List report</h1>
+  <p>
+    Purchase-orders list sample page. Source:
+    <a href="https://github.com/Busy-Office-Codex/busy-office-ui/blob/main/examples/ListReport.tsx">examples/ListReport.tsx</a>
+  </p>
+  <ListReport client:load />
+</Base>

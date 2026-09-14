@@ -1,0 +1,13 @@
+---
+import Base from '../../layouts/Base.astro';
+import { RecordDetail } from '@busyoffice/design-system/examples/record-detail';
+---
+<Base title="Record detail pattern">
+  <a href="/">&larr; Home</a>
+  <h1>Record detail</h1>
+  <p>
+    Sales-order detail sample page. Source:
+    <a href="https://github.com/Busy-Office-Codex/busy-office-ui/blob/main/examples/RecordDetail.tsx">examples/RecordDetail.tsx</a>
+  </p>
+  <RecordDetail client:load />
+</Base>

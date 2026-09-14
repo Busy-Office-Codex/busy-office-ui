@@ -1,0 +1,10 @@
+# Serves the already-built docs-site static output (docs-site/dist) with nginx. CI builds
+# `dist/` before building this image (see .github/workflows/docs.yml) — this Containerfile only
+# packages it, matching the spirit of this repo's own hand-rolled preview/ server: minimal, no
+# unnecessary layers, no build step inside the image.
+FROM docker.io/library/nginx:1.27-alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY dist/ /usr/share/nginx/html/
+
+EXPOSE 8080

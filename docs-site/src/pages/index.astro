@@ -1,0 +1,44 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const componentEntries = (await getCollection('docs', (entry) => entry.id !== 'design-conventions')).sort((a, b) =>
+  a.id.localeCompare(b.id),
+);
+
+const patterns = [
+  { slug: 'launcher', label: 'Launcher' },
+  { slug: 'list-report', label: 'List report' },
+  { slug: 'record-detail', label: 'Record detail' },
+  { slug: 'dashboard', label: 'Dashboard' },
+];
+---
+<Base title="Busy Office UI">
+  <h1>Busy Office UI</h1>
+  <p>Docs for <code>@busyoffice/design-system</code>, generated from the package's own <code>docs/*.md</code> files, tokens and example compositions.</p>
+
+  <h2>Components</h2>
+  <ul>
+    {componentEntries.map((entry) => (
+      <li><a href={`/components/${entry.id}/`}>{entry.id}</a>{entry.data.category ? ` — ${entry.data.category}` : ''}</li>
+    ))}
+  </ul>
+
+  <h2>Tokens &amp; density</h2>
+  <ul>
+    <li><a href="/tokens/">Tokens</a></li>
+    <li><a href="/density/">Density</a></li>
+  </ul>
+
+  <h2>Patterns</h2>
+  <ul>
+    {patterns.map((pattern) => (
+      <li><a href={`/patterns/${pattern.slug}/`}>{pattern.label}</a></li>
+    ))}
+  </ul>
+
+  <h2>Conventions</h2>
+  <ul>
+    <li><a href="/conventions/">Design conventions</a></li>
+  </ul>
+</Base>

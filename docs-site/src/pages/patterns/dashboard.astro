@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro';
+// Dashboard.tsx has no `@busyoffice/design-system/examples/*` subpath export (only app-shell,
+// list-report and record-detail are in package.json's `exports` map today) and this task must
+// not add one — that's a one-way change to a boundary file (AGENTS.md/LOOP.md), not something a
+// docs-site batch can decide on its own. Pre-compiled by scripts/build-examples.mjs (see that
+// file) into src/generated/dashboard.js instead — raw source can't be imported directly, since
+// it calls stylex.defineVars(), which only works compiled. Flagged for owner review.
+import { Dashboard } from '../../generated/dashboard.js';
+import '../../generated/examples.css';
+---
+<Base title="Dashboard pattern">
+  <a href="/">&larr; Home</a>
+  <h1>Dashboard</h1>
+  <p>
+    KPI dashboard sample page. Source:
+    <a href="https://github.com/Busy-Office-Codex/busy-office-ui/blob/main/examples/Dashboard.tsx">examples/Dashboard.tsx</a>
+  </p>
+  <Dashboard client:load />
+</Base>
