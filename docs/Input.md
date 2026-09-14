@@ -3,6 +3,7 @@ category: forms
 tests:
   - test/browser/compact-controls.spec.ts
   - test/browser/focus-ring-and-placeholder.spec.ts
+  - test/browser/page-composition.spec.ts
   - test/components.test.ts
 ---
 

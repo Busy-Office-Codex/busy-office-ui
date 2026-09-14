@@ -229,6 +229,13 @@ function ShimmerBar({
   return <div data-testid={testId} style={{ height, borderRadius: radius, background: '#e2e8f0', width }} />;
 }
 
+// ROADMAP item 14 (2026-09-14 design review, confirmed LOW finding): this stat tile used to be a
+// hand-rolled `<div>` (padding 14, transparent background, no shadow) while RecordDetail's summary
+// cards and Dashboard's KPI tiles both already used the real `Card` component (padding 16, white
+// background, shadow) — one tile implementation across all three sample pages now. No `onClick`,
+// so `Card` renders as a static, non-interactive tile (its own behavior, not a new prop here).
+// `Card`'s 16px padding vs. the reference's measured 14px is an accepted, disclosed deviation
+// (see docs/ListReport.md) — not worth a new `Card` padding variant/prop for a 2px difference.
 function StatTile({
   label,
   value,
@@ -241,7 +248,7 @@ function StatTile({
   loading: boolean;
 }) {
   return (
-    <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <Card>
       <Text variant="caption" as="span">
         {label}
       </Text>
@@ -250,7 +257,7 @@ function StatTile({
       ) : (
         <Text variant="heading">{value}</Text>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -323,10 +330,13 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
   return (
     <div
       style={{
-        minHeight: '100vh',
         background: '#f8fafc',
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 32,
+        // ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): the reference
+        // (`templates/erp-skeleton/ErpSkeleton.dc.html`, "14 · Purchase order") uses 24px content
+        // padding, not this page's old 32px — one shared content frame across all three sample
+        // pages (see RecordDetail.tsx/Dashboard.tsx for the matching change).
+        padding: 24,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',

@@ -7,7 +7,14 @@ const previewDirectory = path.dirname(fileURLToPath(import.meta.url));
 const distDirectory = path.join(previewDirectory, 'dist');
 const host = '127.0.0.1';
 const port = Number(process.env.BUSYOFFICE_UI_PREVIEW_PORT ?? '4174');
-const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Busy Office UI preview</title><link rel="stylesheet" href="/client.css"><link rel="stylesheet" href="/stylex.css"></head><body><div id="root"></div><script type="module" src="/client.js"></script></body></html>`;
+// ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): the UA default stylesheet
+// gives `body` an 8px margin on every side — never reset here before — which added ~16px to every
+// vertical (and horizontal) measurement taken against this preview host that has nothing to do
+// with the actual design system being measured (e.g. it was silently baked into the sample pages'
+// heading x-position and `document.scrollingElement.scrollHeight`). `body{margin:0}` removes it;
+// this is the preview host's own inline HTML shell, not a design-system export, so it's the right
+// place for a host-level reset.
+const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Busy Office UI preview</title><style>body{margin:0}</style><link rel="stylesheet" href="/client.css"><link rel="stylesheet" href="/stylex.css"></head><body><div id="root"></div><script type="module" src="/client.js"></script></body></html>`;
 const contentTypes = { '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2' };
 
 createServer(async (request, response) => {

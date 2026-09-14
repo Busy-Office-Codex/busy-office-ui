@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 import { useState, type ReactNode } from 'react';
 import { Button, Text } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
-import { color } from '../src/tokens.stylex.js';
+import { color, radius } from '../src/tokens.stylex.js';
 import { Launcher } from './Launcher.js';
 
 // Only interactive element in this file that needs hover/active/focus-visible pseudo-classes —
@@ -163,7 +163,34 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
 
   return (
     <>
-      <div style={{ padding: '8px 20px', background: color.bgCanvas }}>
+      {/* ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): this banner used
+          to sit in normal document flow ABOVE `Shell`, adding its own height to every page's
+          `document.scrollingElement.scrollHeight` for no design-system reason (it's host-preview
+          chrome, not page content). `position: fixed` takes it out of the vertical flow entirely
+          (the ROADMAP's own wording) — a small corner label instead of a full-width banner, so it
+          no longer contributes to scroll height and doesn't compete with Shell's own command bar
+          for the same vertical space. `pointerEvents: 'none'` is load-bearing, not decorative: the
+          app dock spans nearly the full viewport width at narrow breakpoints (confirmed live — a
+          full `pnpm build:preview`/`pnpm preview` run of this repo's existing narrow-viewport
+          modal-focus.spec.ts test), so a fixed bottom-left label without it silently intercepted
+          clicks meant for the dock's "Sales" tile underneath. A purely informational label needs
+          no pointer interaction of its own, so this is a safe, permanent way to guarantee it never
+          blocks a click at any viewport width, not just the 1280px one this ROADMAP item's own
+          tests use. */}
+      <div
+        style={{
+          position: 'fixed',
+          left: 12,
+          bottom: 12,
+          zIndex: 1,
+          pointerEvents: 'none',
+          padding: '4px 10px',
+          borderRadius: radius.pill,
+          background: color.bgSurface,
+          border: `1px solid ${color.border}`,
+          boxShadow: '0 1px 3px rgba(15,23,42,.08)',
+        }}
+      >
         <Text variant="caption">Preview — sample data; commands, counts and app destinations are not connected.</Text>
       </div>
       <Shell
