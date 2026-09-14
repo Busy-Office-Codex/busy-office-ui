@@ -63,7 +63,7 @@ export function Profile() {
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ maxWidth: 1080, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           {/* Decorative placeholder avatar — same pattern as AppShell.tsx's account-slot avatar
               div, sized up for a header rather than a command-bar slot. */}
@@ -83,12 +83,12 @@ export function Profile() {
         </div>
 
         <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ flex: '2 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
             <FilterTabs tabs={TABS} selected="Details" />
 
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(200px, 1fr))', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
                   <Input label="Full name" defaultValue={PROFILE.fullName} />
                   <Input label="Job title" defaultValue={PROFILE.jobTitle} />
                   <Input label="Email" type="email" defaultValue={PROFILE.email} />
@@ -112,7 +112,7 @@ export function Profile() {
             </Card>
           </div>
 
-          <div style={{ width: 280, flexShrink: 0 }}>
+          <div style={{ flex: '1 1 280px', minWidth: 240, maxWidth: 400 }}>
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <Text variant="title">Account summary</Text>

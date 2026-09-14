@@ -153,7 +153,10 @@ export function Delivery() {
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* No page-level `maxWidth` cap — fills whatever width AppShell gives it, same as
+          ListReport.tsx's table pages (see docs/design-conventions.md's "Page width and
+          responsive layout"). */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Text variant="heading">Delivery</Text>
 
         {/* View-mode toggle — only "List" has real content behind it this pass. */}

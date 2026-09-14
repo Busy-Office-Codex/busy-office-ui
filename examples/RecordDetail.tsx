@@ -44,12 +44,11 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      {/* `margin: 0`, not `'0 auto'` — this inner wrapper's `maxWidth` still caps line length on
-          wide viewports, but no longer re-centers the content away from the outer wrapper's own
-          left-aligned padding above (the reference is left-aligned, not centered; see
-          ListReport.tsx, which has no inner max-width wrapper at all, for the page this left edge
-          must match). */}
-      <div style={{ maxWidth: 960, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* `margin: 0`, not `'0 auto'` — left-aligns instead of centering, matching every other
+          sample page's left edge (see ListReport.tsx, which has no inner max-width wrapper at
+          all). No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
+          docs/design-conventions.md's "Page width and responsive layout"). */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Text variant="heading">SO-1042 · Northwind Traders</Text>

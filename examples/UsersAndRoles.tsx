@@ -110,13 +110,16 @@ export function UsersAndRoles() {
       }}
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligns, matching every other sample page's content
-          frame. `maxWidth: 1200` is slightly wider than RolePage.tsx/Dashboard.tsx's 1120 — this
-          page's right pane holds a 7-column matrix table, needing a bit more room. */}
-      <div style={{ maxWidth: 1200, margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          frame. No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
+          docs/design-conventions.md's "Page width and responsive layout"); the role list and the
+          permissions editor below use flexible bases so the row wraps to a stacked mobile layout
+          on its own, and the editor's 7-column matrix table gets more room to breathe on a wide
+          desktop instead of being capped alongside it. */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Text variant="heading">Users and roles</Text>
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div style={{ flex: '0 0 260px', minWidth: 240, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ flex: '1 1 260px', minWidth: 240, maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
             <Button type="button" variant="primary" style={{ width: '100%', justifyContent: 'center' }}>
               + New
             </Button>
@@ -137,7 +140,7 @@ export function UsersAndRoles() {
             </div>
           </div>
 
-          <div style={{ flex: '1 1 480px', minWidth: 360, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '3 1 480px', minWidth: 360, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Density value="compact">
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

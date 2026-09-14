@@ -16,11 +16,12 @@ import { FilterTabs } from './filterTabs.js';
  * content inside `AppShell` (module="General", route "Notifications" — already present in
  * AppShell.tsx's `NAV.General`) — see AppShell.tsx.
  *
- * Two-column below the header/tabs (list + a fixed-width side panel), same pattern as
- * BuilderForms.tsx/Approvals.tsx's main-pane/side-panel split — this page's own single content
- * column (the notification list) doesn't need the full page width, but the "Notification
- * channels" preferences card does have a natural place to live alongside it instead of stacked
- * below, once the page isn't capped to a narrow single-column width.
+ * Full-width, fluid two-column below the header/tabs (list + a side panel), same pattern as
+ * BuilderForms.tsx/Approvals.tsx's main-pane/side-panel split. No page-level `maxWidth` cap —
+ * the row uses `flexWrap` with flexible (not fixed) column bases, so it fills whatever width
+ * `AppShell` gives it on a wide desktop, and the "Notification channels" panel wraps onto its
+ * own full-width row below the list once the viewport is too narrow for both side by side
+ * (mobile-safe without any `@media` query — see docs/design-conventions.md's page-width note).
  *
  * Only "Unread" is selected, and — matching Profile.tsx's structural-first-pass scope — the
  * other tabs ("Approvals" / "Orders" / "Finance" / "System") render as present-but-inactive
@@ -153,7 +154,7 @@ export function Notifications() {
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ maxWidth: 1080, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <Density value="compact">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Text variant="heading">Notifications</Text>
@@ -170,7 +171,7 @@ export function Notifications() {
         <FilterTabs tabs={TABS} selected="Unread" />
 
         <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 480px', minWidth: 320 }}>
+          <div style={{ flex: '2 1 480px', minWidth: 320 }}>
             <Density value="compact">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {GROUPS.map((group) => (
@@ -189,7 +190,7 @@ export function Notifications() {
             </Density>
           </div>
 
-          <div style={{ width: 280, flexShrink: 0 }}>
+          <div style={{ flex: '1 1 280px', minWidth: 240, maxWidth: 400 }}>
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <Text variant="title">Notification channels</Text>

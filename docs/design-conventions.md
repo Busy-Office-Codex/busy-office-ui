@@ -40,6 +40,17 @@ One-line test: is it a thing you click to *do* something, standing next to peers
 
 For any layout or spacing outside these components (page structure, grids, gaps), use plain inline styles or your own CSS — this design system does not yet ship layout primitives or a spacing scale the agent can reach for.
 
+### Page width and responsive layout
+
+Every sample page's outer content wrapper is full width — no `maxWidth` cap. It fills whatever width `AppShell`/`Shell` gives the content area, the same way `ListReport.tsx`/`SalesOrderList.tsx`/`Customers.tsx`'s table pages always have. A page never caps its own overall width to force a narrower reading measure; where a narrower measure genuinely helps (a search input, a block of prose), cap that one element, not the page.
+
+A page with more than one content column (a main pane plus a side panel, or several panes side by side, e.g. `BuilderForms.tsx`) uses a plain flex row — `display: 'flex', flexWrap: 'wrap', gap: <16-24>, alignItems: 'flex-start'` — with **flexible, not fixed**, column widths:
+
+- The primary/main pane gets more flex-grow than a secondary panel (`flex: '2 1 480px'` main vs. `flex: '1 1 280px'` side is the usual ratio; a 3-pane layout like `BuilderForms.tsx` gives the center pane the largest share, e.g. `'3 1 360px'` against `'1 1 220px'` on each side).
+- Every column also sets a `minWidth` floor (so it never collapses illegibly small) and, for narrower side panels, a `maxWidth` ceiling (so it doesn't stretch absurdly wide on an ultra-wide monitor — a 280px-basis panel with `maxWidth: 400` stays a sensible width even as the row's remaining space grows).
+
+This reflows automatically, with no `@media` query: once a row's columns can't fit their flex-basis widths side by side, the browser wraps them onto their own full-width rows — which is exactly what a narrow/mobile viewport needs (each panel becomes a full-width stacked block). Verify a new or changed page at both a wide desktop width and a narrow (~375-400px) mobile width: no column should force horizontal scrolling, and every column should read sensibly at its full-row width once wrapped.
+
 ## Where the truth lives
 
 - `src/components/`: authoritative React prop types and implementation.

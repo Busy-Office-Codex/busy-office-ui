@@ -73,9 +73,9 @@ export function RolePage() {
       }}
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligns, matching every other sample page's content
-          frame. `maxWidth: 1120` matches Dashboard.tsx/AdminOverview.tsx — the other pages whose
-          content is a KPI/card grid rather than a single form or record. */}
-      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          frame. No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
+          docs/design-conventions.md's "Page width and responsive layout"). */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <Text variant="heading">{ROLE.name}</Text>

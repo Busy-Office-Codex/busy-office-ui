@@ -74,11 +74,11 @@ export function Settings() {
       }}
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligns instead of centering, matching every other
-          sample page's left edge (see RecordDetail.tsx). `maxWidth: 1080` matches
-          UsersAndRoles.tsx's two-panel width — enough for the settings-form column plus a
-          fixed-width "Recent changes" side panel, without the form itself stretching past a
-          single-column read. */}
-      <div style={{ maxWidth: 1080, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          sample page's left edge (see RecordDetail.tsx). No page-level `maxWidth` cap — fills
+          whatever width AppShell gives it (see docs/design-conventions.md's "Page width and
+          responsive layout"); the settings-form column and "Recent changes" side panel below
+          use flexible bases so the row wraps to a stacked mobile layout on its own. */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <Density value="compact">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Text variant="heading">General</Text>
@@ -89,7 +89,7 @@ export function Settings() {
         </Density>
 
         <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ flex: '2 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <Text variant="title">Company</Text>
@@ -172,7 +172,7 @@ export function Settings() {
             </Card>
           </div>
 
-          <div style={{ width: 300, flexShrink: 0 }}>
+          <div style={{ flex: '1 1 300px', minWidth: 260, maxWidth: 420 }}>
             <Card>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <Text variant="title">Recent changes</Text>

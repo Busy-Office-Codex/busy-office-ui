@@ -66,22 +66,23 @@ export function Help() {
         boxSizing: 'border-box',
       }}
     >
-      {/* `margin: 0`, left-aligned like every other sample page's content frame. `maxWidth: 1120`
-          matches UsersAndRoles.tsx's two-panel width — wide enough for the main setup column plus
-          a fixed side panel of link sections (see below), rather than either column having to
-          fight the other for room. */}
-      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* `margin: 0`, left-aligned, no page-level `maxWidth` cap — fills whatever width AppShell
+          gives it, same as ListReport.tsx's table pages (see docs/design-conventions.md's "Page
+          width and responsive layout"). */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Text variant="heading">Help</Text>
           <Text variant="caption">Search articles, finish setup, or contact support.</Text>
         </div>
 
         {/* Two-column below the header: a main setup column (search, checklist, guided tour) and
-            a fixed-width side panel for the link-list sections — same main-pane/side-panel split
-            as BuilderForms.tsx/UsersAndRoles.tsx, so the link sections read as reference material
-            alongside the task at hand rather than a grid the reader has to scroll past first. */}
+            a side panel for the link-list sections — same main-pane/side-panel split as
+            BuilderForms.tsx/UsersAndRoles.tsx, so the link sections read as reference material
+            alongside the task at hand rather than a grid the reader has to scroll past first.
+            Flexible (not fixed) column bases wrap to full-width stacked rows on a narrow/mobile
+            viewport — no `@media` query needed. */}
         <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ flex: '2 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div style={{ maxWidth: 480 }}>
               <Input aria-label="Search help articles" placeholder="Search help articles…" size="search" />
             </div>
@@ -122,7 +123,7 @@ export function Help() {
             </Card>
           </div>
 
-          <div style={{ width: 300, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '1 1 300px', minWidth: 260, maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {LINK_SECTIONS.map((section) => (
               <Card key={section.title}>
                 <Text variant="title">{section.title}</Text>

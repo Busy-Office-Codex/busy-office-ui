@@ -87,8 +87,11 @@ export function BuilderForms() {
         <FilterTabs tabs={TABS} selected="Design" />
       </div>
 
+      {/* Flexible (not fixed) column bases — see docs/design-conventions.md's "Page width and
+          responsive layout" — so this 3-pane row wraps to full-width stacked panes on a narrow/
+          mobile viewport with no `@media` query needed. */}
       <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div style={{ width: 220, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ flex: '1 1 220px', minWidth: 200, maxWidth: 280, display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Input aria-label="Search palette" placeholder="Search fields & blocks…" size="search" />
           {PALETTE_GROUPS.map((group) => (
             <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -114,7 +117,7 @@ export function BuilderForms() {
           ))}
         </div>
 
-        <div style={{ flex: 1, minWidth: 320 }}>
+        <div style={{ flex: '3 1 360px', minWidth: 320 }}>
           <Card>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <Text variant="title">Sales order</Text>
@@ -160,7 +163,7 @@ export function BuilderForms() {
           </Card>
         </div>
 
-        <div style={{ width: 260, flexShrink: 0 }}>
+        <div style={{ flex: '1 1 260px', minWidth: 240, maxWidth: 340 }}>
           <Card>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <Text variant="title">Properties</Text>
