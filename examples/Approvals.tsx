@@ -209,7 +209,7 @@ export function Approvals() {
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Density value="compact">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -232,7 +232,7 @@ export function Approvals() {
           <div
             role="region"
             aria-label="Approval queue"
-            style={{ flex: '0 1 380px', minWidth: 280, display: 'flex', flexDirection: 'column', gap: 12 }}
+            style={{ flex: '1 1 380px', minWidth: 340, maxWidth: 500, display: 'flex', flexDirection: 'column', gap: 12 }}
           >
             {QUEUE.map((item) => (
               <Card
@@ -254,7 +254,7 @@ export function Approvals() {
             ))}
           </div>
 
-          <div style={{ flex: '1 1 420px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '2 1 420px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Card>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <Text variant="title">{selected.title}</Text>

@@ -131,7 +131,11 @@ export function Inbox() {
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
+          docs/design-conventions.md's "Page width and responsive layout"); the thread-list and
+          detail-pane columns below use flexible bases so the row wraps to a stacked mobile
+          layout on its own. */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Density value="compact">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Text variant="heading">Inbox</Text>
@@ -149,7 +153,7 @@ export function Inbox() {
         </Density>
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div style={{ flex: '0 1 360px', minWidth: 280, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ flex: '1 1 360px', minWidth: 320, maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {visibleThreads.map((thread) => (
               <Card key={thread.id} selected={thread.id === SELECTED_THREAD_ID}>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
@@ -181,7 +185,7 @@ export function Inbox() {
             )}
           </div>
 
-          <div style={{ flex: '1 1 380px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '2 1 380px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Card>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <Text variant="title">SO-1042 · Northwind Traders</Text>
@@ -189,7 +193,7 @@ export function Inbox() {
                   Awaiting approval
                 </Chip>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(140px, 1fr))', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <Text variant="caption" as="span">
                     Order total

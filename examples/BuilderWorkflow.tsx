@@ -196,9 +196,11 @@ export function BuilderWorkflow() {
       }}
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligns, matching every other sample page's content
-          frame. `maxWidth: 1120` matches RolePage.tsx/Dashboard.tsx/AdminOverview.tsx — the other
-          pages whose content is wider than a single form column. */}
-      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          frame. No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
+          docs/design-conventions.md's "Page width and responsive layout"); the step sequence and
+          "Approval step config" side panel below use flexible bases so the row wraps to a stacked
+          mobile layout on its own. */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <Density value="compact">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Text variant="heading">SO approval &gt; 10k</Text>
@@ -231,7 +233,7 @@ export function BuilderWorkflow() {
             </ol>
           </div>
 
-          <div style={{ flex: '1 1 280px', minWidth: 260 }}>
+          <div style={{ flex: '1 1 280px', minWidth: 260, maxWidth: 400 }}>
             <Card>
               <Text variant="title">Approval step config</Text>
               <Text variant="caption">Configures the APPROVAL step — Manager → Finance.</Text>

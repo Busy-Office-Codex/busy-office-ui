@@ -26,8 +26,10 @@ export function Dashboard() {
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligns instead of centering, so this page's left edge
           matches ListReport.tsx's (no inner max-width wrapper) and RecordDetail.tsx's (same fix)
-          at the same x position. */}
-      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 32 }}>
+          at the same x position. No page-level `maxWidth` cap — fills whatever width AppShell
+          gives it (see docs/design-conventions.md's "Page width and responsive layout"); the KPI
+          cards already reflow on their own via their `repeat(auto-fit, minmax(...))` grid. */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 32 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Text variant="heading">Good morning, Priya</Text>
           <Text variant="body">Here's what needs your attention today.</Text>

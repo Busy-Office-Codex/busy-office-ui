@@ -47,13 +47,13 @@ export function AdminOverview() {
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligned, matching the other sample pages'
           content frame rather than centering. */}
-      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Text variant="heading">Administration</Text>
           <Text variant="body">Plan: Enterprise · 148 seats · 3 companies</Text>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
           {ADMIN_AREAS.map((area) => (
             <Card key={area.label}>
               <Text variant="title">{area.label}</Text>

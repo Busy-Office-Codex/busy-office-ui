@@ -84,9 +84,11 @@ export function Invoice() {
       }}
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligns, matching every other sample page's content
-          frame. `maxWidth: 1120` matches RolePage.tsx/Dashboard.tsx — the other pages whose
-          content is wider than a single form/record. */}
-      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          frame. No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
+          docs/design-conventions.md's "Page width and responsive layout"); the invoice document
+          card and the sidebar panels below use flexible bases so the row wraps to a stacked
+          mobile layout on its own. */}
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -119,7 +121,7 @@ export function Invoice() {
         </div>
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div style={{ flex: '1 1 560px', minWidth: 320 }}>
+          <div style={{ flex: '2 1 560px', minWidth: 320 }}>
             <Card>
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 16 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -217,7 +219,7 @@ export function Invoice() {
             </Card>
           </div>
 
-          <div style={{ flex: '0 1 320px', minWidth: 280, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '1 1 320px', minWidth: 280, maxWidth: 440, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Card>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                 <Text variant="title">Payment status</Text>
