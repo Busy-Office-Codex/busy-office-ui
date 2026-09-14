@@ -35,6 +35,34 @@ function isInternal(href) {
   return href.startsWith('/');
 }
 
+/**
+ * Does `relPath` (e.g. "components/Density/index.html") exist in `dist/` with that exact
+ * case? `stat`/`readdir` alone aren't enough — a case-insensitive filesystem (the macOS
+ * default) resolves "components/Density" to an on-disk "components/density" without
+ * complaining, masking a link that 404s on a case-sensitive host (every CI runner, gh-pages,
+ * most production static hosts). Walk it one path segment at a time, comparing against the
+ * real directory listing, so this check catches the same thing on every filesystem.
+ */
+async function existsWithExactCase(relPath) {
+  const segments = relPath.split('/').filter(Boolean);
+  let dir = distDir;
+  for (const [index, segment] of segments.entries()) {
+    let entries;
+    try {
+      entries = await readdir(dir);
+    } catch {
+      return false;
+    }
+    if (!entries.includes(segment)) return false;
+    dir = path.join(dir, segment);
+    if (index === segments.length - 1) {
+      const info = await stat(dir);
+      return info.isFile();
+    }
+  }
+  return false;
+}
+
 /** Does `target` (a same-origin absolute path, e.g. "/components/Button/") exist in `dist/`? */
 async function targetExists(target) {
   const [pathname] = target.split('#');
@@ -44,12 +72,7 @@ async function targetExists(target) {
     ? ['index.html']
     : [relative, path.join(relative, 'index.html'), `${relative}.html`];
   for (const candidate of candidates) {
-    try {
-      const info = await stat(path.join(distDir, candidate));
-      if (info.isFile()) return true;
-    } catch {
-      // try next candidate
-    }
+    if (await existsWithExactCase(candidate)) return true;
   }
   return false;
 }
