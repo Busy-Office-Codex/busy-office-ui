@@ -73,7 +73,13 @@ const NAV: Record<AppShellModule, string[]> = {
   Purchase: ['Purchase orders', 'Suppliers', 'Inventory', 'Approvals', 'Receiving'],
   Finance: ['Overview', 'Ledger', 'Receivables', 'Payables', 'Reports'],
   BI: ['Dashboards', 'Explore', 'Datasets', 'Schedules'],
-  Administration: ['Overview', 'Users', 'Roles', 'Companies', 'Integrations', 'Audit log'],
+  // ROADMAP M6 (issue #17, batch 4): the reference's "22 · Users and roles" screen is one
+  // unified two-pane role editor covering both concepts together, not two separate screens —
+  // rather than force it onto just 'Users' or just 'Roles' (leaving the other stranded, or
+  // pretending they're independent when the reference treats them as one), added as its own
+  // distinct entry. 'Users' and 'Roles' stay as separate, still-unbuilt placeholders (same as
+  // 'Companies'/'Integrations'/'Audit log' in this same module) — not renamed or removed.
+  Administration: ['Overview', 'Users and roles', 'Users', 'Roles', 'Companies', 'Integrations', 'Audit log'],
   Builder: ['Pages', 'Forms', 'Workflows', 'Fields', 'Publish'],
   Settings: ['General', 'Organization', 'Numbering', 'Tax', 'Email', 'Security'],
 };
