@@ -33,13 +33,32 @@ const checkboxStyles = stylex.create({
   checkbox: {
     width: '16px',
     height: '16px',
+    // A browser's native checkbox widget (appearance: auto, the default) honors width/height but
+    // silently ignores border-radius/border-color/background-color — verified directly: without
+    // `appearance: 'none'` this rendered a real 16x16 box (that assertion passed) but a flat 0px
+    // border-radius (that assertion failed) regardless of the declared 4px. `appearance: none`
+    // fixes that, at the cost of also discarding the native checked-state tick — replaced below
+    // with a solid-fill `:checked` treatment (same visual language as filter `Chip`'s
+    // selected-fills-solid pattern elsewhere in this design system), not a redrawn glyph; the
+    // element is still a real `<input type="checkbox">`, so `:checked`/keyboard/form semantics
+    // and screen-reader announcement are unaffected — only the paint changes.
+    appearance: 'none',
+    margin: 0,
+    cursor: 'pointer',
     // Off this package's 4px+ radius scale on the low end (`radius.sm` is 6px, no 4px token) —
     // a literal matching the reference exactly, same category as other hand-measured literals
     // already in this codebase (e.g. the badge's `1px 6px` padding from ROADMAP item 13).
     borderRadius: '4px',
     borderStyle: 'solid',
     borderWidth: '1px',
-    borderColor: color.borderStrong,
+    borderColor: {
+      default: color.borderStrong,
+      ':checked': color.action,
+    },
+    backgroundColor: {
+      default: color.bgSurface,
+      ':checked': color.action,
+    },
     outlineStyle: 'solid',
     outlineOffset: '2px',
     outlineColor: {

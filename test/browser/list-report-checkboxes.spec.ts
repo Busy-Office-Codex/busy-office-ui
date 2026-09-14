@@ -30,6 +30,17 @@ test('a per-row selection checkbox renders at 16x16, radius 4, with the borderSt
   await expect(checkbox).toHaveCSS('border-color', 'rgb(203, 213, 225)'); // color.borderStrong
 });
 
+test('a checked checkbox fills solid, since appearance:none (required for the 4px radius) also discards the native tick', async ({ page }) => {
+  await page.goto('/#examples');
+
+  const checkbox = page.getByRole('checkbox', { name: 'Select PO-1042', exact: true });
+  await expect(checkbox).toHaveCSS('background-color', 'rgb(255, 255, 255)'); // color.bgSurface, unchecked
+  await checkbox.check();
+  await expect(checkbox).toBeChecked();
+  await expect(checkbox).toHaveCSS('background-color', 'rgb(15, 23, 42)'); // color.action, checked
+  await expect(checkbox).toHaveCSS('border-color', 'rgb(15, 23, 42)');
+});
+
 test('a row-selection checkbox shows the shared focus-visible ring', async ({ page }) => {
   await page.goto('/#examples');
 
