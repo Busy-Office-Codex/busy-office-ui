@@ -75,22 +75,29 @@ required three-lens verify review (this batch closed M5) found and fixed a
 real gap before merge — see item 16 below.
 
 **M6 — Sample pages for every desktop screen in the ERP skeleton reference —
-items 17–33, issue #17 (`agreed`, project owner, 2026-09-14).** Owner-directed
-(2026-09-14): the Claude Design project's `templates/erp-skeleton/
-ErpSkeleton.dc.html` ("a gray wireframe canvas of every ERP page") has 24
-distinct desktop screens; only 3 were mirrored before this milestone
-(`Launcher`≈Home, `RecordDetail`≈Sales order detail, `ListReport`≈Purchase
-order). 16 are buildable from existing components; 5 (Inventory, Finance,
-Reports, BI dashboard, BI explore) are blocked on a proposed `Chart`
-primitive (issue #16, `proposed` — not built speculatively, per the owner's
-explicit "propose separately" decision) and are not items in this
-milestone. Structural first pass, per owner decision: real components,
-correct composition and content matching the reference's own labels/data —
-not independently pixel-measured or contrast-audited (a later, separate
-fidelity pass, screen-by-screen, the way item 12 did it). Also expands
-`AppShell.tsx`'s route registry and rebuilds `preview/client.tsx`'s routing
-to actually host every page, replacing the prior 3-route preview — the
-"redo preview" half of the request.
+complete.** Items 17–33, issue #17 (`agreed`, project owner, 2026-09-14).
+Owner-directed (2026-09-14): the Claude Design project's `templates/
+erp-skeleton/ErpSkeleton.dc.html` ("a gray wireframe canvas of every ERP
+page") has 24 distinct desktop screens; only 3 were mirrored before this
+milestone (`Launcher`≈Home, `RecordDetail`≈Sales order detail,
+`ListReport`≈Purchase order). 16 buildable from existing components landed
+across 4 batches; 5 (Inventory, Finance, Reports, BI dashboard, BI explore)
+stayed blocked on a proposed `Chart` primitive (issue #16, still
+`proposed`) and were never items in this milestone. Structural first pass
+throughout, per owner decision: real components, correct composition and
+content matching the reference's own labels/data — not independently
+pixel-measured or contrast-audited (a later, separate fidelity pass,
+screen-by-screen, the way item 12 did it, remains open). `AppShell.tsx`'s
+route registry and `preview/client.tsx`'s routing were rebuilt
+incrementally batch by batch — the prior 3-route preview is now 20 real
+routes plus `#login`'s standalone mount, and General/Sales/Administration/
+Builder each gained real app-strip siblings for the first time (closing a
+previously disclosed gap in `docs/Shell.md`/`test/browser/shell-chrome-
+color.spec.ts`). Every batch that closed the milestone (batch 4) went
+through this repo's required 3-lens review (spec-match, contrast/
+accessibility, simplicity); the simplicity lens found and fixed one real
+cross-milestone duplication (`examples/filterTabs.tsx`, extracted from 9
+call sites across 8 files) before merge.
 
 After M6, or once its scope is exhausted, stop expanding the framework: new
 work starts only from a request that passes the Objective tests.
@@ -290,18 +297,32 @@ issues.
     document layout: an invoice `Table` with subtotal/tax/total, and a
     sidebar of payment status, payments received, linked records, and a
     history log. Issue #17.
-27. [ ] Approvals (16) — `examples/Approvals.tsx`, module General (the
-    cross-module queue screen). Same Accept pattern as item 18. Issue #17.
+27. [x] Approvals (16) — `examples/Approvals.tsx`, module General (the
+    cross-module queue screen, now General's 6th real route). Category
+    tabs, a real click-to-select queue list, and a detail pane with
+    Approve/Reject/Request changes actions. Issue #17.
 28. [x] Admin overview (21) — `examples/AdminOverview.tsx`, module
     Administration. A 9-card admin-area grid plus a recent-activity panel
     with a status `Chip`. Issue #17.
-29. [ ] Users and roles (22) — `examples/UsersAndRoles.tsx`, module
-    Administration; spans NAV's separate "Users"/"Roles" entries, resolved
-    when this item builds. Issue #17.
-30. [ ] Builder — forms (23) — `examples/BuilderForms.tsx`, module
-    Builder; static 3-pane layout, no drag-and-drop. Issue #17.
-31. [ ] Builder — workflow (24) — `examples/BuilderWorkflow.tsx`, module
-    Builder; static step list, no drag/diagram. Issue #17.
+29. [x] Users and roles (22) — `examples/UsersAndRoles.tsx`, module
+    Administration, route label "Users and roles" — a new NAV entry
+    (the reference screen is one unified editor covering both concepts;
+    NAV's separate "Users"/"Roles" stay as unbuilt placeholders,
+    untouched). A role list plus a real 6×6 (36-cell) permissions matrix
+    `Table` of individually-labeled checkboxes. Issue #17.
+30. [x] Builder — forms (23) — `examples/BuilderForms.tsx`, module
+    Builder. Static 3-pane layout (field/layout/block palette, a form
+    preview, a field-properties panel) — no drag-and-drop, no new
+    dependency. Issue #17.
+31. [x] Builder — workflow (24) — `examples/BuilderWorkflow.tsx`, module
+    Builder. A static vertical step-flow (trigger → condition → approval
+    → actions) with an approval-step config panel — no drag/diagram
+    library. A required 3-lens review (this batch closed M6) found the
+    config panel was wired with more interactivity than its own "static"
+    docstring and its sibling BuilderForms.tsx's Properties panel both
+    called for; simplified to match before merge, along with extracting
+    the filter-Chip-as-tabs pattern (by then duplicated 9 times across 8
+    files) to `examples/filterTabs.tsx`. Issue #17.
 32. [x] Settings (25) — `examples/Settings.tsx`, module Settings, route
     label "General" (matching `NAV.Settings`'s own first entry and the
     reference's own header). Company fields, four `Dropdown` value
@@ -310,12 +331,16 @@ issues.
     Modules toggle rows sharing `examples/checkboxStyles.ts` with
     ListReport.tsx (extracted once this file became its second real
     consumer — a batch-1 review finding, fixed before merge). Issue #17.
-33. [ ] Rebuild `preview/client.tsx`'s routing to host every item above
-    plus the 3 already-built pages, replacing the current 3-route preview;
-    expand `examples/AppShell.tsx`'s route registry only where a new
-    module/screen name isn't already in its `NAV` map. Accept: every item
-    17–32's page is reachable via app strip, dock, or command palette in
-    the preview; `pnpm test:browser` green. Issue #17.
+33. [x] Rebuilt `preview/client.tsx`'s routing to host every item above
+    plus the 3 pre-M6 pages — done incrementally, batch by batch,
+    replacing the original 3-route preview with 20 real routes (General
+    6, Sales 5, Administration 2, Builder 2, Settings 1, Purchase 1, BI
+    1) plus `#login`'s standalone mount, rather than one big-bang rewrite
+    at the end. `AppShell.tsx`'s `NAV` map expanded twice (`"Sales
+    orders"`, `"Users and roles"`), each purely additive. Every item
+    17–32's page confirmed reachable via app strip and/or command
+    palette (verified route-by-route by a required milestone-closing
+    review); `pnpm test:browser` 77/77 green. Issue #17.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
