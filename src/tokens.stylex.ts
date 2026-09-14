@@ -11,6 +11,15 @@ export const color = stylex.defineVars({
   bgSurface: '#ffffff',
   bgSubtle: '#f1f5f9',
   border: '#e2e8f0',
+  // Same literal as `bgSubtle` above — deliberately, not a copy/paste accident. ROADMAP item 12
+  // (2026-09-14 design review): `Table`'s frame border (`border`, #e2e8f0) and its body row
+  // separators need to read as visually distinct, so row separators get their own semantic name
+  // at the lighter value the reference actually uses (`Table.dc.html`: frame #e2e8f0, row
+  // separator #f1f5f9) — which happens to be the same hex this scale already uses for subtle
+  // surface fills. Naming it for its *use* (a subtle border) rather than reusing `bgSubtle` keeps
+  // a future change to either one (e.g. a surface-fill vs. a hairline needing to diverge) from
+  // silently dragging the other along.
+  borderSubtle: '#f1f5f9',
   borderStrong: '#cbd5e1',
   textPrimary: '#0f172a',
   textSecondary: '#475569',

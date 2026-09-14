@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 import {
   Button,
@@ -14,6 +15,43 @@ import {
   TableRow,
   Text,
 } from '../src/index.js';
+import { color } from '../src/tokens.stylex.js';
+
+// ROADMAP item 12 (2026-09-14 design review, confirmed LOW finding): the row-selection
+// checkboxes were bare native `<input type="checkbox">` — unstyled, browser-default appearance
+// (13x13px, square corners, UA accent color). The reference (`templates/erp-skeleton/
+// Table.dc.html`) draws them at 16x16, radius 4, `border #cbd5e1`. Scoped to this file
+// deliberately, not a new `Checkbox` export — this repo's Objective 2 "Proven Reuse" test wants
+// two named consumers before a shared component earns its keep, and this file is currently the
+// only one. `:focus-visible` is a CSS pseudo-class a plain React `style` object can't express, so
+// — same precedent as examples/AppShell.tsx's notification button — a small scoped
+// `stylex.create` block handles just these two checkboxes; the outline treatment matches the
+// shared focus ring every other focusable control in this repo uses (Button/Input/Dropdown/Chip/
+// AppShell's notification button): 2px `color.focusRing` outline, 2px offset, `:focus-visible`
+// only.
+const checkboxStyles = stylex.create({
+  checkbox: {
+    width: '16px',
+    height: '16px',
+    // Off this package's 4px+ radius scale on the low end (`radius.sm` is 6px, no 4px token) —
+    // a literal matching the reference exactly, same category as other hand-measured literals
+    // already in this codebase (e.g. the badge's `1px 6px` padding from ROADMAP item 13).
+    borderRadius: '4px',
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    borderColor: color.borderStrong,
+    outlineStyle: 'solid',
+    outlineOffset: '2px',
+    outlineColor: {
+      default: 'transparent',
+      ':focus-visible': color.focusRing,
+    },
+    outlineWidth: {
+      default: 0,
+      ':focus-visible': '2px',
+    },
+  },
+});
 
 type Order = {
   po: string;
@@ -396,7 +434,13 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
             <TableHead>
               <TableRow>
                 <TableHeaderCell>
-                  <input type="checkbox" aria-label="Select all rows" checked={allVisibleSelected} onChange={toggleAll} />
+                  <input
+                    type="checkbox"
+                    aria-label="Select all rows"
+                    checked={allVisibleSelected}
+                    onChange={toggleAll}
+                    {...stylex.props(checkboxStyles.checkbox)}
+                  />
                 </TableHeaderCell>
                 <TableHeaderCell>PO #</TableHeaderCell>
                 <TableHeaderCell>Supplier</TableHeaderCell>
@@ -416,6 +460,7 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
                       aria-label={`Select ${order.po}`}
                       checked={selected.has(order.po)}
                       onChange={() => toggleOne(order.po)}
+                      {...stylex.props(checkboxStyles.checkbox)}
                     />
                   </TableCell>
                   <TableCell>{order.po}</TableCell>

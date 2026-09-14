@@ -3,6 +3,7 @@ category: data-display
 tests:
   - test/browser/focus-ring-and-placeholder.spec.ts
   - test/browser/design-fidelity-fixes.spec.ts
+  - test/browser/table-row-uniformity.spec.ts
   - test/state-channels.test.ts
   - test/components.test.ts
 ---
