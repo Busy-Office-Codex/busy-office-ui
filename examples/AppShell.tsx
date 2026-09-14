@@ -84,11 +84,11 @@ const PINNED: readonly { label: string; module: AppShellModule; screen?: string;
   { label: 'Finance', module: 'Finance' },
   // `screen` deliberately doesn't exist in `NAV.General` — this pinned app's `routeId` resolves
   // to `undefined` below, so its dock tile renders `disabled` (same mechanism as any host's
-  // stale/permission-revoked pinned app). Exists so a real disabled-tile-with-a-count case is
-  // present in the sample data for ROADMAP item 13's badge-dims-with-disabled-tile browser test
-  // to target — before this, every counted pinned app in this sample happened to resolve to an
-  // enabled route, so that interaction was untested (docs/Shell.md already discloses the same
-  // kind of sample-data gap for the app strip's own inactive-item case).
+  // stale/permission-revoked pinned app). A disabled-tile-with-a-count case already existed in
+  // this sample data (the `My work`/`Approvals`/`Inbox` tiles above are disabled too, since
+  // `preview/client.tsx`'s 3-route registry has no `General`-module routes for any of them) —
+  // this entry exists to give ROADMAP item 13's badge-dims-with-disabled-tile browser test a
+  // dedicated, self-explanatory target instead of relying on that incidental side effect.
   { label: 'Archived', module: 'General', screen: 'Archived reports', count: 3 },
 ];
 

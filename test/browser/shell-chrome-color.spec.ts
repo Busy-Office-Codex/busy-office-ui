@@ -26,10 +26,12 @@ test('Shell root sets color:textPrimary, so the brand label does not inherit UA 
 // launcher overlay is shown, aria-current included.
 test('the app-strip item renders inactive (color.textSecondary) styling while the launcher is open', async ({ page }) => {
   await page.goto('/#examples');
-  // .first(): once the launcher opens, DefaultHome renders its own "Purchase orders" destination
-  // tile (a second, genuinely different button with the identical accessible name) — the app-strip
-  // button stays the first "Purchase orders" match in DOM order, since the strip (Shell.tsx's
-  // stripRoutes.map) renders before the content area's launcher view (DefaultHome) in the JSX tree.
+  // .first(): once the launcher opens, examples/AppShell.tsx's `home` slot (Launcher, its own
+  // AppTile grid — not Shell's built-in DefaultHome fallback, which this sample host never
+  // renders since it always supplies `home`) shows its own "Purchase orders" destination tile —
+  // a second, genuinely different button with the identical accessible name. The app-strip button
+  // stays the first "Purchase orders" match in DOM order, since the strip (Shell.tsx's
+  // stripRoutes.map) renders before the content area's launcher view in the JSX tree.
   const stripItem = page.getByRole('button', { name: 'Purchase orders', exact: true }).first();
   await expect(stripItem).toHaveAttribute('aria-current', 'page');
 

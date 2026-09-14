@@ -427,7 +427,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
               padding: '0 12px',
               borderRadius: 10,
               border: `1px solid ${color.border}`,
-              background: '#fff',
+              background: color.bgSurface,
               color: color.textTertiary,
               fontFamily: 'inherit',
               fontSize: density.fontSize,
@@ -438,7 +438,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
             <span aria-hidden="true" style={{ width: 13, height: 13, borderRadius: '50%', border: `1.5px solid ${color.textTertiary}`, flexShrink: 0 }} />
             <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Type a command, a record, or an app…</span>
           </button>
-          <span style={{ ...kbd, position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: '#fff', pointerEvents: 'none' }}>⌘K</span>
+          <span style={{ ...kbd, position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: color.bgSurface, pointerEvents: 'none' }}>⌘K</span>
         </div>
         <div style={{ flex: 1 }} />
         {account}
@@ -555,7 +555,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
               }}
             >
               {[0, 1, 2, 3].map((dot) => (
-                <span key={dot} aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />
+                <span key={dot} aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: color.textOnInk }} />
               ))}
             </button>
           </div>
@@ -578,7 +578,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
                   height: 44,
                   borderRadius: 12,
                   border: `1px solid ${color.border}`,
-                  background: '#fff',
+                  background: color.bgSurface,
                   color: color.textPrimary,
                   fontFamily: 'inherit',
                   fontSize: 15,
