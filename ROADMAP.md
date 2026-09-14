@@ -239,10 +239,13 @@ issues.
     resolve, zero stale prop references outside intentional history
     sentences. Serves: Objective 1 (simplicity — one way to get compact
     sizing, not two). Issue #15 (`agreed`, project owner, 2026-09-14).
-17. [ ] Login (01) — update `examples/Login.tsx` to the fuller erp-skeleton
-    version (workspace switcher, SSO, MFA row, brand panel) rather than a
-    second file. Accept: real Shell-independent standalone page (pre-auth,
-    not module-routed), composed from existing exports. Issue #17.
+17. [x] Login (01) — `examples/Login.tsx` rebuilt as a two-column screen
+    (workspace switcher, email/password, "Continue with SSO", a
+    remember-device row, brand panel) mirroring the fuller erp-skeleton
+    reference, replacing the simpler `templates/login`-based version —
+    one login example, not two. Standalone, reachable via `#login` (not
+    Shell-routed — it precedes the shell conceptually). Built by one of 4
+    parallel workflow agents (isolated worktrees). Issue #17.
 18. [ ] Role page (03) — `examples/RolePage.tsx`, module General. Accept:
     real Shell-hosted page, existing exports only, matches reference tabs/
     content structure. Issue #17.
@@ -250,8 +253,12 @@ issues.
     pattern as item 18. Issue #17.
 20. [ ] Notifications (05) — `examples/Notifications.tsx`, module General.
     Same Accept pattern as item 18. Issue #17.
-21. [ ] Profile (07) — `examples/Profile.tsx`, module General. Same Accept
-    pattern as item 18. Issue #17.
+21. [x] Profile (07) — `examples/Profile.tsx`, module General. Avatar/name
+    header, a filter-`Chip`-as-tabs row (no `Tab` component in this
+    package — reuses the same selection affordance Shell's palette
+    category row already does), 8-field settings form. Reachable via the
+    command palette (`general/profile`-style wiring in
+    `preview/client.tsx`). Issue #17.
 22. [ ] Help (08) — `examples/Help.tsx`, module General. Same Accept
     pattern as item 18. Issue #17.
 23. [ ] Customers (09) — `examples/Customers.tsx`, module Sales. Same
@@ -266,8 +273,9 @@ issues.
     pattern as item 18. Issue #17.
 27. [ ] Approvals (16) — `examples/Approvals.tsx`, module General (the
     cross-module queue screen). Same Accept pattern as item 18. Issue #17.
-28. [ ] Admin overview (21) — `examples/AdminOverview.tsx`, module
-    Administration. Same Accept pattern as item 18. Issue #17.
+28. [x] Admin overview (21) — `examples/AdminOverview.tsx`, module
+    Administration. A 9-card admin-area grid plus a recent-activity panel
+    with a status `Chip`. Issue #17.
 29. [ ] Users and roles (22) — `examples/UsersAndRoles.tsx`, module
     Administration; spans NAV's separate "Users"/"Roles" entries, resolved
     when this item builds. Issue #17.
@@ -275,8 +283,14 @@ issues.
     Builder; static 3-pane layout, no drag-and-drop. Issue #17.
 31. [ ] Builder — workflow (24) — `examples/BuilderWorkflow.tsx`, module
     Builder; static step list, no drag/diagram. Issue #17.
-32. [ ] Settings (25) — `examples/Settings.tsx`, module Settings. Same
-    Accept pattern as item 18. Issue #17.
+32. [x] Settings (25) — `examples/Settings.tsx`, module Settings, route
+    label "General" (matching `NAV.Settings`'s own first entry and the
+    reference's own header). Company fields, four `Dropdown` value
+    pickers (deliberately `active={false}` — these are value pickers, not
+    narrowed filters, see docs/design-conventions.md's `active` contract),
+    Modules toggle rows sharing `examples/checkboxStyles.ts` with
+    ListReport.tsx (extracted once this file became its second real
+    consumer — a batch-1 review finding, fixed before merge). Issue #17.
 33. [ ] Rebuild `preview/client.tsx`'s routing to host every item above
     plus the 3 already-built pages, replacing the current 3-route preview;
     expand `examples/AppShell.tsx`'s route registry only where a new
