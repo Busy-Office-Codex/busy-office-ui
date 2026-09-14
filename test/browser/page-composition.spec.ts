@@ -129,7 +129,7 @@ test('the Purchase-orders stat tile renders as a real Card, not the old hand-rol
 test('Input renders at its declared height (border-box), at both compact and default size', async ({ page }) => {
   await page.goto('/#examples');
 
-  // Compact: examples/ListReport.tsx's toolbar search field, size="compact", declares 36px.
+  // Compact: examples/ListReport.tsx's toolbar search field, size="search", declares 36px.
   const compactInput = page.getByPlaceholder('Search POs…');
   await expect(compactInput).toHaveCSS('box-sizing', 'border-box');
   const compactHeight = await compactInput.evaluate((element) => (element as HTMLElement).offsetHeight);

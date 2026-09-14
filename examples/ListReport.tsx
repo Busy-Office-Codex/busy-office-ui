@@ -366,7 +366,7 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
             placeholder="Search POs…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            size="compact"
+            size="search"
           />
         </div>
         <Dropdown

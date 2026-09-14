@@ -1,30 +1,29 @@
 import { expect, test } from '@playwright/test';
 
-// examples/ListReport.tsx (the preview's default route) uses size="compact" on its toolbar
-// Button/Input and density="compact" on its Table — the compact-side comparison below.
+// examples/ListReport.tsx (the preview's default route) wraps its toolbar Button/Input and its
+// Table in `<Density value="compact">` regions — the compact-side comparisons below. `Button`'s
+// compact/Table's compact prop overrides were removed (ROADMAP item 16); `Density` reads the
+// same `density` alias group values they used to hardcode, so the numbers below are unchanged.
 //
-// ROADMAP item 10 (density tiers) changed these numbers: `size`/`density="compact"` are now
-// per-instance overrides onto the shared `density` alias group (deprecated, see docs/Button.md,
-// docs/Input.md, docs/Table.md), and the *default* ("comfortable") tier is not the same number
-// the old hard-coded default was. Button's compact override moved from 32px to the compact
-// tier's own controlHeight literal (28px); Button's default (ambient, comfortable) moved from
-// 40px to 36px. Input's compact override is unchanged (36px — independently matched to the ERP
-// reference, deliberately kept as-is rather than pulled onto the compact rowHeight tier, see
-// docs/Input.md); Input's default (ambient, comfortable) moved from 44px to 40px (Input reads
-// `rowHeight`, not `controlHeight` — see tokens.stylex.ts). Table's compact cell font-size moved
-// from `font.sizeCaption` (12.5px, a metadata-only token as of this task) to the compact tier's
-// own `fontSize` literal (13px, `font.sizeControl`).
+// ROADMAP item 10 (density tiers) established these numbers, before item 16 moved Button/Table
+// off literal `size`/`density="compact"` per-instance overrides onto `Density` regions (the
+// numbers themselves didn't change): Button's compact controlHeight is 28px, default
+// (ambient, comfortable) is 36px. Input's `size="search"` (renamed from `size="compact"` by
+// item 16 — it was never a density override, see docs/Input.md) stays a fixed 36px,
+// independently matched to the ERP reference; Input's default (ambient, comfortable) is 40px
+// (Input reads `rowHeight`, not `controlHeight` — see tokens.stylex.ts). Table's compact cell
+// font-size is the compact tier's `fontSize` literal (13px, `font.sizeControl`).
 //
 // ROADMAP item 13 (2026-09-14 design review): the command palette's own Close button and search
-// Input, previously the "default-size" comparison point here, are now themselves `size="compact"`
-// (a confirmed finding — the palette rendered its controls larger than the command-bar trigger
-// that opens it). They moved to test/browser/compact-controls.spec.ts's companion assertions
-// below, alongside the new default-size comparisons this change required: Launcher's `AppTile`
-// ghost Button (examples/Launcher.tsx, no `size` prop) and RecordDetail's Reject-modal "Comment"
+// Input, previously the "default-size" comparison point here, render compact too (a confirmed
+// finding — the palette rendered its controls larger than the command-bar trigger that opens
+// it). They moved to test/browser/compact-controls.spec.ts's companion assertions below,
+// alongside the new default-size comparisons this change required: Launcher's `AppTile` ghost
+// Button (examples/Launcher.tsx, no `size` prop) and RecordDetail's Reject-modal "Comment"
 // Input (examples/RecordDetail.tsx, no `size` prop) — both untouched by ROADMAP item 13 and
 // still genuinely ambient/comfortable-sized.
 
-test('Button size="compact" renders at the compact height, default stays 36px', async ({ page }) => {
+test('Button in a Density value="compact" region renders at the compact height, default stays 36px', async ({ page }) => {
   await page.goto('/#examples');
 
   const compactButton = page.getByRole('button', { name: 'From requisition', exact: true });
@@ -35,7 +34,7 @@ test('Button size="compact" renders at the compact height, default stays 36px', 
   await expect(defaultButton).toHaveCSS('height', '36px');
 });
 
-test('Input size="compact" renders at the compact height, default stays 40px', async ({ page }) => {
+test('Input size="search" renders at its fixed height, default stays 40px', async ({ page }) => {
   await page.goto('/#examples');
 
   const compactInput = page.getByPlaceholder('Search POs…');
@@ -58,7 +57,7 @@ test('the command palette itself uses compact controls (ROADMAP item 13): its se
   await expect(close).toHaveCSS('height', '28px');
 });
 
-test('Table density="compact" shrinks cell text off the body-size default', async ({ page }) => {
+test('Table in a Density value="compact" region shrinks cell text off the body-size default', async ({ page }) => {
   await page.goto('/#examples');
 
   const cell = page.getByRole('cell', { name: 'PO-1042', exact: true });

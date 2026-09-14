@@ -44,17 +44,6 @@ const styles = stylex.create({
       ':focus-visible': '2px',
     },
   },
-  // `size="compact"` (deprecated, ROADMAP item 10 — docs/Button.md) is a per-instance
-  // override: it must force the compact tier's own numbers regardless of the ambient density,
-  // since a compact Button inside a comfortable/spacious `Density` region still has to render
-  // compact. So it hardcodes the compact tier's literal values rather than reading
-  // `density.controlHeight`/`density.fontSize` (which would just track whatever tier is
-  // ambient, defeating the "always compact" contract of this prop).
-  compact: {
-    minHeight: '1.75rem', // compact tier controlHeight (28px @ 16px root)
-    paddingInline: space.space4,
-    fontSize: font.sizeControl, // compact tier fontSize (13px) — was font.sizeCaption (12.5px)
-  },
   primary: {
     backgroundColor: {
       default: color.action,
@@ -94,13 +83,11 @@ const styles = stylex.create({
 });
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-export type ButtonSize = 'default' | 'compact';
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
-  size?: ButtonSize;
 };
 
-export function Button({ variant = 'primary', size = 'default', ...rest }: ButtonProps) {
-  return <button {...rest} {...stylex.props(styles.base, styles[variant], size === 'compact' && styles.compact)} />;
+export function Button({ variant = 'primary', ...rest }: ButtonProps) {
+  return <button {...rest} {...stylex.props(styles.base, styles[variant])} />;
 }

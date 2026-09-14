@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import type { HTMLAttributes, ReactNode, TdHTMLAttributes, ThHTMLAttributes } from 'react';
-import { color, compactDensity, density, font } from '../tokens.stylex.js';
+import { color, density, font } from '../tokens.stylex.js';
 
 const styles = stylex.create({
   table: {
@@ -78,26 +78,11 @@ const styles = stylex.create({
   },
 });
 
-export type TableDensity = 'default' | 'compact';
+export type TableProps = HTMLAttributes<HTMLTableElement> & { children: ReactNode };
 
-export type TableProps = HTMLAttributes<HTMLTableElement> & { children: ReactNode; density?: TableDensity };
-
-export function Table({ children, density: densityProp = 'default', ...rest }: TableProps) {
+export function Table({ children, ...rest }: TableProps) {
   return (
-    <table
-      {...rest}
-      // `density="compact"` (deprecated, ROADMAP item 10 — docs/Table.md) is a per-instance
-      // override with the same "must force compact regardless of ambient density" contract as
-      // Button/Input's `size="compact"`, but implemented differently: rather than duplicating
-      // literal compact numbers in `headerCell`/`cell`/`row` above, it applies the same
-      // `compactDensity` theme the `Density` component itself uses, directly to the `<table>`
-      // element. Header/body cells and rows read the `density` aliases ambiently either way, so
-      // this reaches them through the ordinary CSS custom-property cascade — one mechanism,
-      // not two. (A nested Button/Chip/etc. inside a compact table's cell would also pick up
-      // compact ambient sizing this way, same as nesting a real `Density` region would; that's
-      // an intentional consequence of reusing the mechanism, not a special case for Table.)
-      {...stylex.props(styles.table, densityProp === 'compact' && compactDensity)}
-    >
+    <table {...rest} {...stylex.props(styles.table)}>
       {children}
     </table>
   );

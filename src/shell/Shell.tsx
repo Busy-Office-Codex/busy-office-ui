@@ -209,7 +209,7 @@ function CommandPalette({ commands, onClose }: { commands: readonly ShellCommand
                 // `role="option"` children of a `role="listbox"`, so this deliberately doesn't
                 // replicate Dropdown's full listbox structure.
                 aria-activedescendant={highlightedCommand ? optionId(highlightedCommand.id) : undefined}
-                size="compact"
+                size="search"
                 autoFocus
               />
             </div>

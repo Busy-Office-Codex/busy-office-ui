@@ -60,17 +60,20 @@ const styles = stylex.create({
       color: color.textTertiary,
     },
   },
-  // `size="compact"` (deprecated, ROADMAP item 10 — docs/Input.md) is a per-instance
-  // override, same contract as Button's `compact` (see there): it must force compact
-  // regardless of ambient density, so it hardcodes a literal rather than reading
-  // `density.rowHeight`. Its height stays the exact number it was before this task (36px,
-  // independently chosen to match the ERP skeleton reference's own measured search-bar
-  // height — docs/Input.md) rather than adopting the rowHeight compact tier's 32px, so this
-  // specific, already-deliberate match to the reference isn't disturbed by an unrelated tier
-  // renumbering.
-  fieldCompact: {
-    minHeight: '2.25rem', // 36px @ 16px root — unchanged by this task
-    fontSize: font.sizeControl, // 13px — was font.sizeCaption (12.5px)
+  // `size="search"` (ROADMAP item 16 — docs/Input.md) is a fixed, reference-matched style for
+  // a search-bar-shaped field (Shell's command palette, ListReport's PO search) — not a
+  // density-tier override. Its height (2.25rem, 36px @ 16px root) is independently chosen to
+  // match the ERP skeleton reference's own measured search-bar height, and happens to equal
+  // `density.controlHeight`'s comfortable default (a real coincidence: this system's ordinary
+  // "comfortable button height" and its reference's "search bar height" are the same number) —
+  // it does not read `density.rowHeight` at all, by design, so it stays fixed regardless of
+  // ambient density (unlike Button/Table's old `compact` overrides, which this milestone
+  // removed in favor of the ambient `Density` region — this one is intentionally NOT a density
+  // override and was never migrated to one, since neither real call site ever wanted the
+  // rowHeight-family compact tier).
+  fieldSearch: {
+    minHeight: '2.25rem', // 36px @ 16px root
+    fontSize: font.sizeControl, // 13px
   },
   fieldError: {
     borderColor: {
@@ -92,10 +95,10 @@ const styles = stylex.create({
   },
 });
 
-export type InputSize = 'default' | 'compact';
+export type InputSize = 'default' | 'search';
 
 // Omits the native `size` attribute (visible width in characters) to reuse the name for our own
-// compact/default sizing, consistent with Button's `size` prop.
+// default/search sizing, consistent with Button's `size` prop.
 export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   label?: string;
   error?: string;
@@ -112,7 +115,7 @@ export function Input({ label, error, id, disabled, size = 'default', ...rest }:
         styles.field,
         Boolean(error) && styles.fieldError,
         disabled && styles.fieldDisabled,
-        size === 'compact' && styles.fieldCompact,
+        size === 'search' && styles.fieldSearch,
       )}
     />
   );
