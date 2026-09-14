@@ -12,6 +12,10 @@ import { RolePage } from '../examples/RolePage.js';
 import { Inbox } from '../examples/Inbox.js';
 import { Notifications } from '../examples/Notifications.js';
 import { Help } from '../examples/Help.js';
+import { Customers } from '../examples/Customers.js';
+import { SalesOrderList } from '../examples/SalesOrderList.js';
+import { Delivery } from '../examples/Delivery.js';
+import { Invoice } from '../examples/Invoice.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -34,6 +38,13 @@ const routes = [
   { id: 'inbox', module: 'General', label: 'Inbox' },
   { id: 'notifications', module: 'General', label: 'Notifications' },
   { id: 'help', module: 'General', label: 'Help' },
+  // Batch 3: Sales' first real siblings alongside the existing detail route (label 'Sales
+  // order', singular — RecordDetail.tsx, kept as-is). 'Sales orders' (plural) is a distinct
+  // NAV entry for the list view — see examples/AppShell.tsx's NAV.Sales comment.
+  { id: 'customers', module: 'Sales', label: 'Customers' },
+  { id: 'sales-order-list', module: 'Sales', label: 'Sales orders' },
+  { id: 'delivery', module: 'Sales', label: 'Delivery' },
+  { id: 'invoice', module: 'Sales', label: 'Invoice' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -47,6 +58,10 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   inbox: <Inbox />,
   notifications: <Notifications />,
   help: <Help />,
+  customers: <Customers />,
+  'sales-order-list': <SalesOrderList />,
+  delivery: <Delivery />,
+  invoice: <Invoice />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */
