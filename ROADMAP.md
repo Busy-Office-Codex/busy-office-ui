@@ -120,15 +120,14 @@ issues.
     keyboard-highlighted options carry a real indicator instead of a
     1.11:1 tint; the listbox keeps a focus-visible ring while open. Issue
     #12 (`agreed`) — `e422e07`.
-12. [ ] **Table aligned to the reference and AA.** Accept: header cells
-    measure ≥4.5:1 against the head background (the reference recipe —
-    `textSecondary` on `bgCanvas`, uppercase, `.04em`); row separators use a
-    `borderSubtle` token lighter than the frame; every status `Chip` renders
-    the same height regardless of tone (rows are uniform — a test asserts
-    all rows in the sample table are equal); the sample table's row-selection
-    checkboxes are 16px, radius 4, `borderStrong`, with the shared focus ring
-    (styled in the example — no `Checkbox` export until a second consumer
-    exists). Serves: accessibility; Objective 2.
+12. [x] Table aligned to the reference and AA — header cells now
+    `textSecondary` on `bgCanvas` (was `textTertiary`/`bgSubtle`,
+    4.34:1 → 7.24:1 AA); new `color.borderSubtle` token for row
+    separators; `Chip`'s danger tone fixed to `border-box` so every
+    row is uniform height; `ListReport`'s selection checkboxes styled
+    (16px, radius 4, `borderStrong`, shared focus ring — no `Checkbox`
+    export, single consumer). Issue #12 (`agreed`) — `7c3069b`, fixed
+    `36f5045`, `d19ecee`.
 13. [x] Shell chrome on tokens — root `color: textPrimary`; dock count
     badge rebuilt inside the tile button at reference size (dims with a
     disabled tile, part of its accessible name); palette gets compact
