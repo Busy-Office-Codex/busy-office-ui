@@ -47,16 +47,21 @@ traced, with measurements, to ink weight, vertical budget and a missing
 The full gate suite (including `pnpm test:browser`, 76/76) passed at each
 batch head before merging into `main`; the Claude Design project is re-synced
 (`/design-sync`, 2026-09-14 — the new `Density` component plus 10
-density-wired components re-verified). **`0.4.0` recommended for the whole
-of M3** (items 10–14: the density tier, filter/action hierarchy, Table
-alignment, Shell chrome on tokens, page composition) — cutting the tag is
-the owner's call.
+density-wired components re-verified). **`0.4.0` cut and released** for the
+whole of M3 (items 10–14: the density tier, filter/action hierarchy, Table
+alignment, Shell chrome on tokens, page composition), owner approval
+2026-09-14.
 
-Item 15 (docs website) is proposed, not in M3 — it starts only from an agreed
-`[UI request]` (#13) and after M3, so it documents a system that has stopped
-moving.
+**M4 — Docs website for `@busyoffice/design-system` — item 15, issue #14
+(`agreed`, project owner, 2026-09-14).** The framework stopped expanding
+after M3 (no new component, prop or export cleared the Objective tests in
+the open backlog); item 15 documents the system that has stopped moving
+instead of adding to it. Scope and Accept carried on #13: Astro; pages
+generated from `docs/*.md` with a live demo per page built from the package;
+tokens + density pages; the four sample screens as patterns; a CI job that
+builds and deploys the site on every push to `main`; a link check passes.
 
-After M3, stop expanding the framework: new work starts only from a request
+After M4, stop expanding the framework: new work starts only from a request
 that passes the Objective tests.
 
 ## Items
@@ -148,14 +153,16 @@ issues.
     deviation); `Input` `border-box` (`Chip`'s `filter` variant
     investigated, already `border-box` by UA default — no bug, no fix).
     Issue #12 (`agreed`) — `d5e5047`, fixed `edb62ee`.
-15. [?] **Docs website.** Astro v1 deployed from CI on every push to `main`
+15. [ ] **Docs website.** Astro v1 deployed from CI on every push to `main`
     (Cloudflare Pages from the private repo, or the container image if no
     account): one page per `docs/*.md` with its live demo, tokens and density
     pages, the four sample screens as patterns, conventions; no search,
     versioning or build-time check scripts in v1. Accept: a CI job builds and
     deploys the site on every `main` push; every `docs/*.md` page renders
     with a live demo; a link check passes. Serves: intent.md
-    "documentation". Needs: issue #13 agreed and the hosting choice made.
+    "documentation". Needs: hosting choice made (Cloudflare Pages if an
+    account exists, else the container route). Issue #13/#14 (`agreed`,
+    project owner, 2026-09-14).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
