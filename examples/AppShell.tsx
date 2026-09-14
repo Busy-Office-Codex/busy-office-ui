@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState, type ReactNode } from 'react';
-import { Button, Text } from '../src/index.js';
+import { Button, Density, Text } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
 import { color, radius } from '../src/tokens.stylex.js';
 import { Launcher } from './Launcher.js';
@@ -215,9 +215,13 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
         }
         account={
           <>
-            <Button type="button" variant="primary" size="compact" style={{ flexShrink: 0 }}>
-              + New ▾
-            </Button>
+            <div style={{ flexShrink: 0 }}>
+              <Density value="compact">
+                <Button type="button" variant="primary">
+                  + New ▾
+                </Button>
+              </Density>
+            </div>
             <button
               type="button"
               aria-label="Notifications, 3 unread"

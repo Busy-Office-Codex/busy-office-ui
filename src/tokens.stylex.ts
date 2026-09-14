@@ -64,9 +64,12 @@ export const font = stylex.defineVars({
   sizeBody: '15px',
   sizeCaption: '12.5px',
   sizeOverline: '11px',
-  // `rem`, added for ROADMAP item 10 (density tiers): the literal per-instance override values
-  // `size="compact"`/`density="compact"` force on controls (sizeControl), and a general
-  // "compact ambient" UI text size for anything reading that isn't a control (sizeUi). Unlike
+  // `rem`, added for ROADMAP item 10 (density tiers): sizeControl backs the compact tier's own
+  // control text size (originally also Button/Table's `size`/`density="compact"` per-instance
+  // overrides, before ROADMAP item 16 removed them in favor of `Density` regions — it still
+  // backs Input's fixed `size="search"` style directly, which was never a density override),
+  // and sizeUi is a general "compact ambient" UI text size for anything reading that isn't a
+  // control. Unlike
   // every other `font` entry above, these two intentionally scale with the root font size — see
   // `density` below, whose own `fontSize` alias's comfortable default equals `sizeUi`.
   // `sizeCaption` (12.5px, px, unchanged) stays metadata-only from here on — captions/labels,
@@ -112,7 +115,9 @@ export const font = stylex.defineVars({
  *
  * This group's own defaults (below) are the comfortable tier. `compactDensity`/
  * `spaciousDensity` (via `stylex.createTheme`) override every value for a `Density`-wrapped
- * subtree, or a component's own literal per-instance override (`size="compact"` etc.).
+ * subtree — the only way to get a non-comfortable tier as of ROADMAP item 16, which removed
+ * Button/Table's own per-instance overrides. `Input`'s `size="search"` is not one of these: a
+ * fixed style, not a density override, that never reads any `density` alias.
  */
 export const density = stylex.defineVars({
   controlHeight: '2.25rem', // 36px @ 16px root

@@ -12,12 +12,12 @@ import {
 /**
  * A dedicated preview route (`/#density-lab`, see client.tsx) for
  * `test/browser/density.spec.ts` (ROADMAP item 10). The default `/#examples` route (the
- * `ListReport` sample page under `AppShell`) has no `Density`-wrapped regions and every
- * `Button`/`Input`/`Table` on it either uses `size="compact"`/`density="compact"` (a literal
- * override, not the ambient default) or the plain default — neither exercises the three tiers'
- * *ambient* values side by side, or nesting. This page exists purely to give those tests real,
- * addressable elements; it isn't part of the package's public example set (`examples/`) and
- * isn't wired into `package.json`'s `exports`.
+ * `ListReport` sample page under `AppShell`) wraps its own compact regions in `<Density
+ * value="compact">` (ROADMAP item 16), each scoped to one part of the page — it doesn't
+ * exercise the three tiers' *ambient* values side by side, or nesting one inside another. This
+ * page exists purely to give those tests real, addressable elements for that; it isn't part of
+ * the package's public example set (`examples/`) and isn't wired into `package.json`'s
+ * `exports`.
  */
 export function DensityLab() {
   return (

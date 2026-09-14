@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 
 // ROADMAP item 10 (density tiers). These target `/#density-lab` (preview/DensityLab.tsx), a
-// dedicated harness — the default `/#examples` sample page has no `Density`-wrapped region and
-// its own Button/Input/Table instances are all either a literal `size="compact"`/
-// `density="compact"` override or the plain default, neither of which exercises the three
-// tiers' *ambient* values or nesting.
+// dedicated harness — the default `/#examples` sample page's `Density`-wrapped regions (ROADMAP
+// item 16) are each scoped to one part of the page, not nested inside one another or shown side
+// by side, so they don't exercise the three tiers' *ambient* values together the way this page
+// does.
 //
 // NOTE for whoever runs `pnpm test:browser`: this file was written and reviewed by an agent
 // that was told not to run the browser suite itself (it only ran `pnpm typecheck`/`pnpm lint`/

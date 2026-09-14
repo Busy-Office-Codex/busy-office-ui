@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { Button } from '../components/Button.js';
 import { Chip } from '../components/Chip.js';
+import { Density } from '../components/Density.js';
 import { Input } from '../components/Input.js';
 import { Text } from '../components/Text.js';
 import { color, density, font, radius } from '../tokens.stylex.js';
@@ -192,30 +193,32 @@ function CommandPalette({ commands, onClose }: { commands: readonly ShellCommand
           fontFamily: FONT_STACK,
         }}
       >
-        <div style={{ padding: '10px 16px', borderBottom: `1px solid ${color.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ flex: 1 }}>
-            <Input
-              placeholder="Search records, run actions, jump to pages…"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={handleSearchKeyDown}
-              // `aria-activedescendant` is valid directly on a plain textbox as of ARIA 1.2 —
-              // exactly this "search box with a live, keyboard-navigable results list" pattern —
-              // so no `role="combobox"`/`aria-controls` scaffolding is added here: the command
-              // rows stay real, individually tabbable `<button>`s (existing browser tests already
-              // target them by role="button" — see test/browser/shell-focus.spec.ts), not
-              // `role="option"` children of a `role="listbox"`, so this deliberately doesn't
-              // replicate Dropdown's full listbox structure.
-              aria-activedescendant={highlightedCommand ? optionId(highlightedCommand.id) : undefined}
-              size="compact"
-              autoFocus
-            />
+        <Density value="compact">
+          <div style={{ padding: '10px 16px', borderBottom: `1px solid ${color.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ flex: 1 }}>
+              <Input
+                placeholder="Search records, run actions, jump to pages…"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                // `aria-activedescendant` is valid directly on a plain textbox as of ARIA 1.2 —
+                // exactly this "search box with a live, keyboard-navigable results list" pattern —
+                // so no `role="combobox"`/`aria-controls` scaffolding is added here: the command
+                // rows stay real, individually tabbable `<button>`s (existing browser tests already
+                // target them by role="button" — see test/browser/shell-focus.spec.ts), not
+                // `role="option"` children of a `role="listbox"`, so this deliberately doesn't
+                // replicate Dropdown's full listbox structure.
+                aria-activedescendant={highlightedCommand ? optionId(highlightedCommand.id) : undefined}
+                size="search"
+                autoFocus
+              />
+            </div>
+            <span style={kbd}>esc</span>
+            <Button type="button" variant="ghost" onClick={onClose} aria-label="Close command palette">
+              Close
+            </Button>
           </div>
-          <span style={kbd}>esc</span>
-          <Button type="button" variant="ghost" size="compact" onClick={onClose} aria-label="Close command palette">
-            Close
-          </Button>
-        </div>
+        </Density>
         {groups.length > 0 && (
           <div style={{ padding: '8px 12px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {categories.map((cat) => (
@@ -444,55 +447,56 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
         {account}
       </div>
 
-      <div
-        style={{
-          height: 44,
-          flex: 'none',
-          background: 'rgba(255, 255, 255, 0.6)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(15, 23, 42, 0.06)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
-          padding: '0 16px',
-          overflowX: 'auto',
-        }}
-      >
-        <div style={{ width: 22, height: 22, borderRadius: 6, background: color.textPrimary, flexShrink: 0, marginRight: 6 }} />
-        <div style={{ marginRight: 10 }}>
-          <Text variant="overline">{valid ? (activeRoute?.module ?? '') : 'Navigation unavailable'}</Text>
+      <Density value="compact">
+        <div
+          style={{
+            height: 44,
+            flex: 'none',
+            background: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(12px)',
+            borderBottom: '1px solid rgba(15, 23, 42, 0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            padding: '0 16px',
+            overflowX: 'auto',
+          }}
+        >
+          <div style={{ width: 22, height: 22, borderRadius: 6, background: color.textPrimary, flexShrink: 0, marginRight: 6 }} />
+          <div style={{ marginRight: 10 }}>
+            <Text variant="overline">{valid ? (activeRoute?.module ?? '') : 'Navigation unavailable'}</Text>
+          </div>
+          {stripRoutes.map((route) => {
+            const active = route.id === activeRoute?.id && !showLauncher;
+            return (
+              <Button
+                key={route.id}
+                type="button"
+                variant={active ? 'secondary' : 'ghost'}
+                aria-current={active ? 'page' : undefined}
+                disabled={route.disabled}
+                onClick={() => navigate(route.id)}
+                // A capsule reads as "a discrete action" (see docs/design-conventions.md's
+                // capsule-vs-rectangle rule); this is a highlight behind existing nav content,
+                // not a new action, so it gets radius.sm like Dropdown's own highlighted menu
+                // item does — not Button's default pill. Applied to both states: 'ghost's own
+                // :hover background would otherwise show a pill-shaped highlight on an inactive
+                // tab, inconsistent with the active tab's rounded-rect.
+                //
+                // `color`: only set on the inactive branch. The active tab is `variant="secondary"`,
+                // whose own `color: color.textPrimary` (Button.tsx) is already correct and shouldn't
+                // be overridden; `ghost` (inactive) also resolves to `color.textPrimary` by default,
+                // but the reference wants inactive strip items specifically at `color.textSecondary`
+                // (Shell.dc.html: "inactive item color #475569, no bg") — an inline `style` color
+                // wins over `ghost`'s class-based color by CSS specificity (inline > class).
+                style={{ flexShrink: 0, fontWeight: active ? 600 : undefined, borderRadius: radius.sm, color: active ? undefined : color.textSecondary }}
+              >
+                {route.label}
+              </Button>
+            );
+          })}
         </div>
-        {stripRoutes.map((route) => {
-          const active = route.id === activeRoute?.id && !showLauncher;
-          return (
-            <Button
-              key={route.id}
-              type="button"
-              size="compact"
-              variant={active ? 'secondary' : 'ghost'}
-              aria-current={active ? 'page' : undefined}
-              disabled={route.disabled}
-              onClick={() => navigate(route.id)}
-              // A capsule reads as "a discrete action" (see docs/design-conventions.md's
-              // capsule-vs-rectangle rule); this is a highlight behind existing nav content,
-              // not a new action, so it gets radius.sm like Dropdown's own highlighted menu
-              // item does — not Button's default pill. Applied to both states: 'ghost's own
-              // :hover background would otherwise show a pill-shaped highlight on an inactive
-              // tab, inconsistent with the active tab's rounded-rect.
-              //
-              // `color`: only set on the inactive branch. The active tab is `variant="secondary"`,
-              // whose own `color: color.textPrimary` (Button.tsx) is already correct and shouldn't
-              // be overridden; `ghost` (inactive) also resolves to `color.textPrimary` by default,
-              // but the reference wants inactive strip items specifically at `color.textSecondary`
-              // (Shell.dc.html: "inactive item color #475569, no bg") — an inline `style` color
-              // wins over `ghost`'s class-based color by CSS specificity (inline > class).
-              style={{ flexShrink: 0, fontWeight: active ? 600 : undefined, borderRadius: radius.sm, color: active ? undefined : color.textSecondary }}
-            >
-              {route.label}
-            </Button>
-          );
-        })}
-      </div>
+      </Density>
 
       <div style={{ flex: 1, paddingBottom: 96, position: 'relative' }}>
         {!valid ? (
