@@ -271,16 +271,25 @@ issues.
     disclosed gap (docs/Shell.md, `test/browser/shell-chrome-color.spec.ts`):
     an inactive app-strip item's `:hover` radius is now confirmed directly,
     not just inferred. Issue #17.
-23. [ ] Customers (09) — `examples/Customers.tsx`, module Sales. Same
-    Accept pattern as item 18. Issue #17.
-24. [ ] Sales order — list (10) — `examples/SalesOrderList.tsx`, module
-    Sales; needs a NAV label reconciliation with the existing "Sales
-    order" (detail) route before wiring — resolved when this item builds,
-    not a blocker on earlier items. Issue #17.
-25. [ ] Delivery — list view (12) — `examples/Delivery.tsx`, module Sales;
-    Board/Map/Calendar view-toggle explicitly deferred. Issue #17.
-26. [ ] Invoice (13) — `examples/Invoice.tsx`, module Sales. Same Accept
-    pattern as item 18. Issue #17.
+23. [x] Customers (09) — `examples/Customers.tsx`, module Sales. Search
+    plus four `Dropdown` filters (Segment/Region/Owner/Status), a `Table`
+    of 10 customers, no row selection. Issue #17.
+24. [x] Sales order — list (10) — `examples/SalesOrderList.tsx`, module
+    Sales, route label "Sales orders" (plural) — a new `NAV.Sales` entry
+    added alongside the existing singular "Sales order" (RecordDetail.tsx's
+    detail view, kept untouched). Status tabs, search plus three
+    `Dropdown` filters, a `Table` of 9 orders. Sales now has 5 real
+    routes, its first genuine app-strip sibling set (matching General
+    after item 22). Issue #17.
+25. [x] Delivery — list view (12) — `examples/Delivery.tsx`, module Sales.
+    A view-toggle row (List/Board/Map/Calendar, only List has real
+    content — the other three deferred, present but inert) and status
+    tabs above a `Table`, plus a tracking-timeline detail panel for one
+    delivery. Issue #17.
+26. [x] Invoice (13) — `examples/Invoice.tsx`, module Sales. Two-column
+    document layout: an invoice `Table` with subtotal/tax/total, and a
+    sidebar of payment status, payments received, linked records, and a
+    history log. Issue #17.
 27. [ ] Approvals (16) — `examples/Approvals.tsx`, module General (the
     cross-module queue screen). Same Accept pattern as item 18. Issue #17.
 28. [x] Admin overview (21) — `examples/AdminOverview.tsx`, module

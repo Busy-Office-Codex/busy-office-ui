@@ -32,6 +32,10 @@ be wired into a real feature as-is.
 | `Inbox.tsx` | `templates/erp-skeleton`'s "04 · Inbox" screen | Two-pane thread list + detail: a real `Dropdown` filter, linked-record context `Card`, a message thread, and a reply composer |
 | `Notifications.tsx` | `templates/erp-skeleton`'s "05 · Notifications" screen | Grouped notification list (Today/Yesterday) with inline actions, plus a channel-preferences `Card` |
 | `Help.tsx` | `templates/erp-skeleton`'s "08 · Help" screen | Setup checklist, a guided-tour `Card`, and docs/shortcuts/support link lists |
+| `Customers.tsx` | `templates/erp-skeleton`'s "09 · Customers" screen | Customer list: search plus four `Dropdown` filters, a `Table`, no row selection |
+| `SalesOrderList.tsx` | `templates/erp-skeleton`'s "10 · Sales order — list" screen | Status tabs, search plus three `Dropdown` filters, a `Table` — distinct from `RecordDetail.tsx`'s "Sales order" detail route |
+| `Delivery.tsx` | `templates/erp-skeleton`'s "12 · Delivery" screen | List view (Board/Map/Calendar deferred), status tabs, a `Table`, and a tracking-timeline detail panel |
+| `Invoice.tsx` | `templates/erp-skeleton`'s "13 · Invoice" screen | Two-column document layout: an invoice `Table` with totals, and a sidebar of payment status/history |
 
 **`AppShell.tsx` is the one to read to understand navigation** — it composes
 a real, working command palette (open it with Ctrl/⌘K or its command button)
