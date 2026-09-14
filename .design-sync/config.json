@@ -4,6 +4,7 @@
   "globalName": "BusyOfficeDesignSystem",
   "shape": "package",
   "buildCmd": "pnpm build",
+  "entry": "dist/index.js",
   "cssEntry": "dist/design-system.css",
   "extraFonts": ["fonts/ibm-plex-sans.css"],
   "docsDir": "docs",

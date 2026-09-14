@@ -4,7 +4,8 @@ Repo-specific facts a future sync should not have to rediscover.
 
 ## Build / environment
 
-- Package shape, no Storybook. Entry `dist/index.js` (build with `pnpm build`); `--node-modules ./node_modules`.
+- Package shape, no Storybook. Entry `dist/index.js` (build with `pnpm build`); `--node-modules ./node_modules`. `entry` is also recorded in `.design-sync/config.json` now, so `resync.mjs` picks it up without an explicit `--entry` flag.
+- Run `resync.mjs`/`package-build.mjs` from the staged `.ds-sync/` copy in this repo (`node .ds-sync/resync.mjs ...`), not a fresh skill-directory copy — `.ds-sync/lib/bundle.mjs` needs `esbuild` resolvable via `require`/`import`, which only exists in `.ds-sync/node_modules` (installed there, not hoisted to the repo root the same way).
 - pnpm does not hoist `playwright-core` to the top level, so `package-validate.mjs` cannot import `playwright` from the repo. Install the repo's own version into the staged dir: `(cd .ds-sync && npm i playwright@$(node -p "require('./node_modules/@playwright/test/package.json').version"))`. Chromium builds are cached at `~/Library/Caches/ms-playwright` (macOS default), not `~/.cache/ms-playwright`.
 - Node 26 works (engines `>=22 <27`).
 
