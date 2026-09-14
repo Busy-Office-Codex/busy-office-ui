@@ -59,7 +59,23 @@ tests in the open backlog); item 15 documents the system that has stopped
 moving instead of adding to it — see item 15 below for full scope, the
 hosting decision and the verify-review fixes.
 
-After M4, stop expanding the framework: new work starts only from a request
+**M5 — Remove the deprecated `size`/`density` per-instance overrides — item
+16, issue #15 (`agreed`, project owner, 2026-09-14).** Follow-up to item 10:
+`Button.size`, `Input.size`, `Table.density` were kept as deprecated
+per-instance overrides through M3, explicitly scoped to "survive one
+release" — that release (`v0.4.0`) has shipped. A call-site sweep found the
+props are still live in `src/shell/Shell.tsx` (3 uses) and
+`examples/{AppShell,ListReport,RecordDetail}.tsx` (11 uses total), so this
+is a migration (every call site moves to wrapping its region in
+`<Density value="compact">`) followed by removing the three props from the
+public `.d.ts` surface, not a bare deletion. One open design question
+blocks the start of work: `Input`'s `size="compact"` renders 36px,
+independently matched to the ERP skeleton reference's own measured
+search-bar height, while `Density`'s compact `rowHeight` is 32px —
+migrating Input call sites as-is would shrink them 4px. See issue #15 for
+the three options; the owner's answer becomes part of item 16's Accept.
+
+After M5, stop expanding the framework: new work starts only from a request
 that passes the Objective tests.
 
 ## Items
@@ -181,6 +197,21 @@ issues.
     check clean; all 5 fixed pages and the contrast fix manually confirmed
     live in Chrome. Serves: intent.md "documentation". Issue #13/#14
     (`agreed`, project owner, 2026-09-14).
+16. [ ] **Remove the deprecated `size`/`density` per-instance overrides.**
+    Migrate every live call site (`src/shell/Shell.tsx` x3,
+    `examples/AppShell.tsx` x1, `examples/ListReport.tsx` x4,
+    `examples/RecordDetail.tsx` x6) from `size="compact"`/
+    `density="compact"` to a wrapping `<Density value="compact">` region;
+    then remove `Button.size`, `Input.size`, `Table.density` from the
+    public `.d.ts`; update `docs/{Button,Input,Table}.md` and rebuild
+    docs-site. Accept: no call site anywhere in `src/`, `examples/` or
+    `preview/` references the removed props (grep-verified); the owner's
+    answer to the Input 36px-vs-32px question (issue #15) is applied
+    consistently, not silently defaulted; full gate suite green including
+    `pnpm test:browser`; docs-site rebuilds clean with no reference to the
+    removed props. Serves: Objective 1 (simplicity — one way to get compact
+    sizing, not two). Needs: issue #15 (`agreed`, project owner,
+    2026-09-14) — the Input question resolved before work starts.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
