@@ -16,6 +16,10 @@ import { Customers } from '../examples/Customers.js';
 import { SalesOrderList } from '../examples/SalesOrderList.js';
 import { Delivery } from '../examples/Delivery.js';
 import { Invoice } from '../examples/Invoice.js';
+import { Approvals } from '../examples/Approvals.js';
+import { UsersAndRoles } from '../examples/UsersAndRoles.js';
+import { BuilderForms } from '../examples/BuilderForms.js';
+import { BuilderWorkflow } from '../examples/BuilderWorkflow.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -45,6 +49,12 @@ const routes = [
   { id: 'sales-order-list', module: 'Sales', label: 'Sales orders' },
   { id: 'delivery', module: 'Sales', label: 'Delivery' },
   { id: 'invoice', module: 'Sales', label: 'Invoice' },
+  // Batch 4 (final M6 page-building batch): Administration's first real sibling alongside
+  // Overview; Builder's first two routes; Approvals joins General (now 6 routes).
+  { id: 'approvals', module: 'General', label: 'Approvals' },
+  { id: 'users-and-roles', module: 'Administration', label: 'Users and roles' },
+  { id: 'builder-forms', module: 'Builder', label: 'Forms' },
+  { id: 'builder-workflow', module: 'Builder', label: 'Workflows' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -62,6 +72,10 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   'sales-order-list': <SalesOrderList />,
   delivery: <Delivery />,
   invoice: <Invoice />,
+  approvals: <Approvals />,
+  'users-and-roles': <UsersAndRoles />,
+  'builder-forms': <BuilderForms />,
+  'builder-workflow': <BuilderWorkflow />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */

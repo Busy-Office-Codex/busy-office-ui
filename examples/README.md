@@ -36,6 +36,10 @@ be wired into a real feature as-is.
 | `SalesOrderList.tsx` | `templates/erp-skeleton`'s "10 · Sales order — list" screen | Status tabs, search plus three `Dropdown` filters, a `Table` — distinct from `RecordDetail.tsx`'s "Sales order" detail route |
 | `Delivery.tsx` | `templates/erp-skeleton`'s "12 · Delivery" screen | List view (Board/Map/Calendar deferred), status tabs, a `Table`, and a tracking-timeline detail panel |
 | `Invoice.tsx` | `templates/erp-skeleton`'s "13 · Invoice" screen | Two-column document layout: an invoice `Table` with totals, and a sidebar of payment status/history |
+| `Approvals.tsx` | `templates/erp-skeleton`'s "16 · Approvals" screen | Cross-module approval queue: category tabs, a selectable queue list, and a detail pane with Approve/Reject actions |
+| `UsersAndRoles.tsx` | `templates/erp-skeleton`'s "22 · Users and roles" screen | Two-pane role editor: a role list, and a 6×6 permissions matrix `Table` of real checkboxes |
+| `BuilderForms.tsx` | `templates/erp-skeleton`'s "23 · Builder (forms)" screen | Static 3-pane form editor: a field/layout/block palette, a form preview, and a field-properties panel |
+| `BuilderWorkflow.tsx` | `templates/erp-skeleton`'s "24 · Builder (workflow)" screen | Static vertical step-flow (trigger → condition → approval → actions) with an approval-step config panel |
 
 **`AppShell.tsx` is the one to read to understand navigation** — it composes
 a real, working command palette (open it with Ctrl/⌘K or its command button)
