@@ -114,15 +114,12 @@ issues.
     read it ambiently, `size="compact"`/`density="compact"` kept as deprecated
     per-instance overrides; `sizeControl`(13)/`sizeUi`(14) added to the type
     scale. Issue #12 (`agreed`) — `2dc8370`, fixed `7f50778`.
-11. [ ] **Filter and action hierarchy.** Accept: `Dropdown`'s trigger fills
-    only when a narrowing value is selected (`active`; the default "All …"
-    item does not count) and is otherwise an outline pill with hover and open
-    states (a browser test asserts the four Purchase-orders filters are
-    unfilled at rest, one fills after choosing a non-default value, and the
-    trigger's computed background differs across rest/hover/open); option
-    rows use the density font size, not body; a keyboard-highlighted option
-    carries a ≥3:1 indicator and the trigger keeps its focus ring while
-    open. Serves: Objective 2 (the reference's toolbar); accessibility.
+11. [x] Filter and action hierarchy — `Dropdown` gained an `active?`
+    prop (falls back to `items.some(selected)` when omitted) driving the
+    trigger's fill, separate from real rest/hover/`:active`/open states;
+    keyboard-highlighted options carry a real indicator instead of a
+    1.11:1 tint; the listbox keeps a focus-visible ring while open. Issue
+    #12 (`agreed`) — `e422e07`.
 12. [ ] **Table aligned to the reference and AA.** Accept: header cells
     measure ≥4.5:1 against the head background (the reference recipe —
     `textSecondary` on `bgCanvas`, uppercase, `.04em`); row separators use a
@@ -132,18 +129,14 @@ issues.
     checkboxes are 16px, radius 4, `borderStrong`, with the shared focus ring
     (styled in the example — no `Checkbox` export until a second consumer
     exists). Serves: accessibility; Objective 2.
-13. [ ] **Shell chrome on tokens.** Accept: `Shell`'s root sets
-    `color: textPrimary` (the brand label no longer inherits UA black); the
-    dock count badge is drawn by `Shell` at reference size (≤16px tall) inside
-    the tile button so it fades with a disabled tile and is part of its
-    accessible name; the command palette uses compact controls, its group
-    labels and `kbd` hint measure ≥4.5:1 on the glass panel, and Enter runs
-    the highlighted (default: first visible) command via a roving highlight
-    exposed with `aria-activedescendant`; inactive strip tabs use
-    `textSecondary`; the sample host's notification button has hover and the
-    shared focus ring; no raw value remains in `Shell.tsx`/`AppShell.tsx` for
-    which a token exists (a unit test greps the two files against the token
-    values). Serves: Objective 2; accessibility.
+13. [x] Shell chrome on tokens — root `color: textPrimary`; dock count
+    badge rebuilt inside the tile button at reference size (dims with a
+    disabled tile, part of its accessible name); palette gets compact
+    controls, `textSecondary` contrast, and Enter-runs-highlighted-command
+    keyboard support; inactive strip tabs `textSecondary`; notification
+    button gets hover/focus states; a unit test greps `Shell.tsx`/
+    `AppShell.tsx` against `tokens.stylex.ts`'s own literals. Issue #12
+    (`agreed`) — `022034e`, fixed `2835601`, `c95f6ef`.
 14. [ ] **Page composition on the reference frame.** Accept: all three sample
     pages use the reference's 24px content padding with left-aligned
     max-widths (a browser test asserts the page heading's x is equal across
