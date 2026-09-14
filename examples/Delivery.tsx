@@ -1,4 +1,5 @@
 import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
+import { FilterTabs } from './filterTabs.js';
 
 /**
  * A deliveries list + detail page: a view-mode toggle, status-Chip-as-tabs
@@ -156,26 +157,10 @@ export function Delivery() {
         <Text variant="heading">Delivery</Text>
 
         {/* View-mode toggle — only "List" has real content behind it this pass. */}
-        <Density value="compact">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {VIEW_TABS.map((view) => (
-              <Chip key={view} variant="filter" selected={view === 'List'}>
-                {view}
-              </Chip>
-            ))}
-          </div>
-        </Density>
+        <FilterTabs tabs={VIEW_TABS} selected="List" />
 
         {/* Status tabs — filter-Chip-as-tabs, only "Today" selected. */}
-        <Density value="compact">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {STATUS_TABS.map((tab) => (
-              <Chip key={tab} variant="filter" selected={tab === 'Today'}>
-                {tab}
-              </Chip>
-            ))}
-          </div>
-        </Density>
+        <FilterTabs tabs={STATUS_TABS} selected="Today" />
 
         <div
           role="region"

@@ -1,4 +1,5 @@
 import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
+import { FilterTabs } from './filterTabs.js';
 
 /**
  * A role-scoped workspace: role identity header, a filter-Chip-as-tabs row, and — under the
@@ -101,15 +102,7 @@ export function RolePage() {
           </span>
         </div>
 
-        <Density value="compact">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {TABS.map((tab) => (
-              <Chip key={tab} variant="filter" selected={tab === 'My work'}>
-                {tab}
-              </Chip>
-            ))}
-          </div>
-        </Density>
+        <FilterTabs tabs={TABS} selected="My work" />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
           {ROLE_KPIS.map((kpi) => (

@@ -1,11 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
-import { Button, Card, Chip, Density, Text } from '../src/index.js';
+import { Button, Card, Density, Text } from '../src/index.js';
 // This package has no Toggle/Switch export (see examples/Settings.tsx), so each channel row
 // below reuses that same `<label>` + native `<input type="checkbox">` pattern, styled via the
 // shared examples/checkboxStyles.ts examples/ListReport.tsx's row checkboxes also use — one
 // checkbox look across this package's examples, not a fourth one invented for this file.
 import { checkboxStyles } from './checkboxStyles.js';
+import { FilterTabs } from './filterTabs.js';
 
 /**
  * A notifications list page: header actions, a filter-Chip-as-tabs row (see Profile.tsx for why
@@ -160,15 +161,7 @@ export function Notifications() {
           </div>
         </Density>
 
-        <Density value="compact">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {TABS.map((tab) => (
-              <Chip key={tab} variant="filter" selected={tab === 'Unread'}>
-                {tab}
-              </Chip>
-            ))}
-          </div>
-        </Density>
+        <FilterTabs tabs={TABS} selected="Unread" />
 
         <Density value="compact">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
