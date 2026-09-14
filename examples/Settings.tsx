@@ -1,47 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 import { Button, Card, Density, Dropdown, Input, Text } from '../src/index.js';
-import { color } from '../src/tokens.stylex.js';
-
-// Same precedent as examples/ListReport.tsx's row-selection checkboxes: this package has no
-// Toggle/Switch export, so each Modules row below renders as a `<label>` (text + control, giving
-// the checkbox its accessible name for free) wrapping a real native `<input type="checkbox">`,
-// styled minimally in this file's own local scope rather than adding a new package export for a
-// single caller (this repo's Objective 2 "Proven Reuse" test wants two named consumers before a
-// shared component earns its keep). Visual treatment matches ListReport.tsx's `checkboxStyles`
-// exactly (16x16, radius 4, `color.borderStrong` rest border, solid-fill `:checked` state, the
-// same shared `:focus-visible` ring every focusable control in this repo uses) — one checkbox
-// look across this package's examples, not a second one invented for this file.
-const toggleStyles = stylex.create({
-  checkbox: {
-    width: '16px',
-    height: '16px',
-    appearance: 'none',
-    margin: 0,
-    cursor: 'pointer',
-    borderRadius: '4px',
-    borderStyle: 'solid',
-    borderWidth: '1px',
-    borderColor: {
-      default: color.borderStrong,
-      ':checked': color.action,
-    },
-    backgroundColor: {
-      default: color.bgSurface,
-      ':checked': color.action,
-    },
-    outlineStyle: 'solid',
-    outlineOffset: '2px',
-    outlineColor: {
-      default: 'transparent',
-      ':focus-visible': color.focusRing,
-    },
-    outlineWidth: {
-      default: 0,
-      ':focus-visible': '2px',
-    },
-  },
-});
+// This package has no Toggle/Switch export, so each Modules row below renders as a `<label>`
+// (text + control, giving the checkbox its accessible name for free) wrapping a real native
+// `<input type="checkbox">`, styled via the same shared examples/checkboxStyles.ts
+// examples/ListReport.tsx's row-selection checkboxes use (see that file for the full history) —
+// one checkbox look across this package's examples, not a second one invented for this file.
+import { checkboxStyles as toggleStyles } from './checkboxStyles.js';
 
 const BASE_CURRENCY_ITEMS = ['USD', 'EUR', 'GBP'];
 const FISCAL_YEAR_START_ITEMS = ['January', 'April', 'July', 'October'];
