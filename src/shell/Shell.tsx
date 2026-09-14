@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { Button } from '../components/Button.js';
 import { Chip } from '../components/Chip.js';
 import { Input } from '../components/Input.js';
 import { Text } from '../components/Text.js';
-import { density, radius } from '../tokens.stylex.js';
+import { color, density, font, radius } from '../tokens.stylex.js';
 
 export type ShellRoute = {
   id: string;
@@ -83,12 +83,30 @@ function canRestoreFocus(element: HTMLElement): boolean {
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-const kbd = { font: '11px ui-monospace, monospace', border: '1px solid #e2e8f0', borderRadius: 4, padding: '1px 5px', color: '#64748b' } as const;
+// Contrast fix (2026-09-14 design review, confirmed): was `color.textTertiary` (#64748b),
+// which measures ~4.32:1 against the glass panel's actual rendered background (backdrop-filter
+// blur over a translucent fill, not the nominal rgba alone) — under WCAG AA's 4.5:1 body-text
+// threshold. `color.textSecondary` (#475569) clears it. Shared by both the palette's own "esc"
+// hint and the command-bar trigger's "⌘K" hint (the latter sits on a solid white background,
+// so it already passed — reusing the token here keeps one shared constant instead of forking it).
+const kbd = { font: '11px ui-monospace, monospace', border: `1px solid ${color.border}`, borderRadius: 4, padding: '1px 5px', color: color.textSecondary } as const;
 
 function CommandPalette({ commands, onClose }: { commands: readonly ShellCommand[]; onClose: () => void }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
+  // Roving highlight (confirmed finding: typing a query down to one match, then pressing Enter,
+  // ran nothing). Mirrors Dropdown's `highlighted` index + `aria-activedescendant` pattern
+  // (src/components/Dropdown.tsx's `openMenu`/`handleMenuKeyDown`), adapted for a palette whose
+  // rows stay real, individually-focusable `<button>`s (Tab already moves through them, and
+  // several browser tests already target them by role="button" — see
+  // test/browser/shell-focus.spec.ts, test/browser/design-fidelity-fixes.spec.ts), so unlike
+  // Dropdown's `role="option"` items, the highlight lives beside native focus rather than
+  // replacing it: the search Input owns `aria-activedescendant` (a combobox-style textbox
+  // pattern), ArrowUp/ArrowDown move it among the CURRENTLY VISIBLE (filtered) commands without
+  // moving focus off the Input, and Enter runs the highlighted command the same way a click does.
+  const [highlighted, setHighlighted] = useState(0);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const baseId = useId();
 
   const groups = Array.from(new Set(commands.map((command) => command.group).filter((group): group is string => Boolean(group))));
   const categories = ['All', ...groups];
@@ -99,6 +117,34 @@ function CommandPalette({ commands, onClose }: { commands: readonly ShellCommand
   });
   const sections: (string | undefined)[] = groups.filter((group) => category === 'All' || group === category);
   if (category === 'All' && commands.some((command) => !command.group)) sections.push(undefined);
+  // Same order the rows below actually render in (grouped by section, ungrouped last) — the
+  // flat index keyboard nav and `aria-activedescendant` both need.
+  const orderedVisible = sections.flatMap((group) => visible.filter((command) => command.group === group));
+  const highlightedCommand = orderedVisible[highlighted];
+
+  // Defaults the highlight back to the first visible command whenever the query or category
+  // narrows (or widens) the result set, same as Dropdown's `openMenu` picking a fresh index.
+  useEffect(() => {
+    setHighlighted(0);
+  }, [query, category]);
+
+  const optionId = (commandId: string) => `${baseId}-command-${commandId}`;
+
+  const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (orderedVisible.length > 0) setHighlighted((index) => (index + 1) % orderedVisible.length);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (orderedVisible.length > 0) setHighlighted((index) => (index - 1 + orderedVisible.length) % orderedVisible.length);
+    } else if (event.key === 'Enter') {
+      if (highlightedCommand) {
+        event.preventDefault();
+        highlightedCommand.onRun();
+        onClose();
+      }
+    }
+  };
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Tab') return;
@@ -146,12 +192,27 @@ function CommandPalette({ commands, onClose }: { commands: readonly ShellCommand
           fontFamily: FONT_STACK,
         }}
       >
-        <div style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ padding: '10px 16px', borderBottom: `1px solid ${color.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1 }}>
-            <Input placeholder="Search records, run actions, jump to pages…" value={query} onChange={(event) => setQuery(event.target.value)} autoFocus />
+            <Input
+              placeholder="Search records, run actions, jump to pages…"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              // `aria-activedescendant` is valid directly on a plain textbox as of ARIA 1.2 —
+              // exactly this "search box with a live, keyboard-navigable results list" pattern —
+              // so no `role="combobox"`/`aria-controls` scaffolding is added here: the command
+              // rows stay real, individually tabbable `<button>`s (existing browser tests already
+              // target them by role="button" — see test/browser/shell-focus.spec.ts), not
+              // `role="option"` children of a `role="listbox"`, so this deliberately doesn't
+              // replicate Dropdown's full listbox structure.
+              aria-activedescendant={highlightedCommand ? optionId(highlightedCommand.id) : undefined}
+              size="compact"
+              autoFocus
+            />
           </div>
           <span style={kbd}>esc</span>
-          <Button type="button" variant="ghost" onClick={onClose} aria-label="Close command palette">
+          <Button type="button" variant="ghost" size="compact" onClick={onClose} aria-label="Close command palette">
             Close
           </Button>
         </div>
@@ -177,31 +238,65 @@ function CommandPalette({ commands, onClose }: { commands: readonly ShellCommand
               <div key={group ?? 'ungrouped'}>
                 {group && (
                   <div style={{ padding: '6px 20px' }}>
-                    <Text variant="overline">{group}</Text>
+                    {/* Not `<Text variant="overline">`: that variant bakes in `color.textTertiary`
+                        globally (src/components/Text.tsx), which is correct everywhere else but
+                        fails 4.5:1 here against the glass panel's actual rendered background
+                        (confirmed finding, ~4.32:1) — this mirrors Text's overline typographic
+                        spec exactly, just with `color.textSecondary` instead, scoped to this one
+                        glass-panel context instead of changing every overline in the system. */}
+                    <span
+                      style={{
+                        fontSize: font.sizeOverline,
+                        fontWeight: font.weightSemibold,
+                        lineHeight: font.lineHeightCaption,
+                        letterSpacing: font.letterSpacingOverline,
+                        textTransform: 'uppercase',
+                        color: color.textSecondary,
+                      }}
+                    >
+                      {group}
+                    </span>
                   </div>
                 )}
-                {items.map((command) => (
-                  <button
-                    key={command.id}
-                    type="button"
-                    onClick={() => {
-                      command.onRun();
-                      onClose();
-                    }}
-                    style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 12, padding: '8px 20px', background: 'transparent', border: 0, cursor: 'pointer', textAlign: 'left', font: 'inherit' }}
-                  >
-                    <div style={{ width: 20, height: 20, borderRadius: 5, background: '#e2e8f0', flexShrink: 0 }} />
-                    <div style={{ flex: 1 }}>
-                      <Text variant="body">{command.label}</Text>
-                    </div>
-                    {command.hint && <Text variant="caption">{command.hint}</Text>}
-                  </button>
-                ))}
+                {items.map((command) => {
+                  const rowIndex = orderedVisible.findIndex((candidate) => candidate.id === command.id);
+                  const isHighlighted = rowIndex === highlighted;
+                  return (
+                    <button
+                      key={command.id}
+                      id={optionId(command.id)}
+                      type="button"
+                      onMouseEnter={() => setHighlighted(rowIndex)}
+                      onClick={() => {
+                        command.onRun();
+                        onClose();
+                      }}
+                      style={{
+                        display: 'flex',
+                        width: '100%',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '8px 20px',
+                        background: isHighlighted ? 'rgba(15, 23, 42, 0.06)' : 'transparent',
+                        border: 0,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        font: 'inherit',
+                      }}
+                    >
+                      <div style={{ width: 20, height: 20, borderRadius: 5, background: color.border, flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <Text variant="body">{command.label}</Text>
+                      </div>
+                      {command.hint && <Text variant="caption">{command.hint}</Text>}
+                    </button>
+                  );
+                })}
               </div>
             );
           })}
         </div>
-        <div style={{ height: 40, borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', padding: '0 20px', gap: 16, flexShrink: 0 }}>
+        <div style={{ height: 40, borderTop: `1px solid ${color.border}`, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 16, flexShrink: 0 }}>
           <Text variant="caption">tab move</Text>
           <Text variant="caption">↵ run</Text>
           <Text variant="caption">esc close</Text>
@@ -286,7 +381,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
   };
 
   return (
-    <div style={{ fontFamily: FONT_STACK, minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ fontFamily: FONT_STACK, minHeight: '100vh', background: color.bgCanvas, color: color.textPrimary, display: 'flex', flexDirection: 'column' }}>
       <div
         style={{
           height: 52,
@@ -305,7 +400,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
       >
         {brand ?? (
           <>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: '#0f172a', flexShrink: 0 }} />
+            <div style={{ width: 26, height: 26, borderRadius: 7, background: color.textPrimary, flexShrink: 0 }} />
             <span style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>Busy Office</span>
           </>
         )}
@@ -331,16 +426,16 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
               gap: 8,
               padding: '0 12px',
               borderRadius: 10,
-              border: '1px solid #e2e8f0',
+              border: `1px solid ${color.border}`,
               background: '#fff',
-              color: '#64748b',
+              color: color.textTertiary,
               fontFamily: 'inherit',
               fontSize: density.fontSize,
               cursor: 'pointer',
               textAlign: 'left',
             }}
           >
-            <span aria-hidden="true" style={{ width: 13, height: 13, borderRadius: '50%', border: '1.5px solid #64748b', flexShrink: 0 }} />
+            <span aria-hidden="true" style={{ width: 13, height: 13, borderRadius: '50%', border: `1.5px solid ${color.textTertiary}`, flexShrink: 0 }} />
             <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Type a command, a record, or an app…</span>
           </button>
           <span style={{ ...kbd, position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: '#fff', pointerEvents: 'none' }}>⌘K</span>
@@ -363,7 +458,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
           overflowX: 'auto',
         }}
       >
-        <div style={{ width: 22, height: 22, borderRadius: 6, background: '#0f172a', flexShrink: 0, marginRight: 6 }} />
+        <div style={{ width: 22, height: 22, borderRadius: 6, background: color.textPrimary, flexShrink: 0, marginRight: 6 }} />
         <div style={{ marginRight: 10 }}>
           <Text variant="overline">{valid ? (activeRoute?.module ?? '') : 'Navigation unavailable'}</Text>
         </div>
@@ -384,7 +479,14 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
               // item does — not Button's default pill. Applied to both states: 'ghost's own
               // :hover background would otherwise show a pill-shaped highlight on an inactive
               // tab, inconsistent with the active tab's rounded-rect.
-              style={{ flexShrink: 0, fontWeight: active ? 600 : undefined, borderRadius: radius.sm }}
+              //
+              // `color`: only set on the inactive branch. The active tab is `variant="secondary"`,
+              // whose own `color: color.textPrimary` (Button.tsx) is already correct and shouldn't
+              // be overridden; `ghost` (inactive) also resolves to `color.textPrimary` by default,
+              // but the reference wants inactive strip items specifically at `color.textSecondary`
+              // (Shell.dc.html: "inactive item color #475569, no bg") — an inline `style` color
+              // wins over `ghost`'s class-based color by CSS specificity (inline > class).
+              style={{ flexShrink: 0, fontWeight: active ? 600 : undefined, borderRadius: radius.sm, color: active ? undefined : color.textSecondary }}
             >
               {route.label}
             </Button>
@@ -441,7 +543,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
                 flexShrink: 0,
                 borderRadius: 12,
                 border: 0,
-                background: '#0f172a',
+                background: color.action,
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 gridTemplateRows: '1fr 1fr',
@@ -457,42 +559,70 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
               ))}
             </button>
           </div>
-          {pinned.length > 0 && <div style={{ width: 1, height: 36, background: '#e2e8f0', flexShrink: 0 }} />}
+          {pinned.length > 0 && <div style={{ width: 1, height: 36, background: color.border, flexShrink: 0 }} />}
           {pinned.map((app) => {
             const route = app.routeId ? navigation.routes.find((candidate) => candidate.id === app.routeId) : undefined;
             const disabled = !route || route.disabled;
             return (
-              <div key={app.id} style={{ position: 'relative', flexShrink: 0 }}>
-                <button
-                  type="button"
-                  aria-label={app.label}
-                  title={app.label}
-                  disabled={disabled}
-                  onClick={route ? () => navigate(route.id) : undefined}
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
-                    border: '1px solid #e2e8f0',
-                    background: '#fff',
-                    color: '#0f172a',
-                    fontFamily: 'inherit',
-                    fontSize: 15,
-                    fontWeight: 600,
-                    cursor: disabled ? 'not-allowed' : 'pointer',
-                    opacity: disabled ? 0.4 : 1,
-                  }}
-                >
-                  {[...app.label][0]?.toUpperCase()}
-                </button>
+              <button
+                key={app.id}
+                type="button"
+                aria-label={app.count !== undefined ? `${app.label}, ${app.count} unread` : app.label}
+                title={app.label}
+                disabled={disabled}
+                onClick={route ? () => navigate(route.id) : undefined}
+                style={{
+                  position: 'relative',
+                  flexShrink: 0,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  border: `1px solid ${color.border}`,
+                  background: '#fff',
+                  color: color.textPrimary,
+                  fontFamily: 'inherit',
+                  fontSize: 15,
+                  fontWeight: 600,
+                  cursor: disabled ? 'not-allowed' : 'pointer',
+                  opacity: disabled ? 0.4 : 1,
+                }}
+              >
+                {[...app.label][0]?.toUpperCase()}
                 {app.count !== undefined && (
-                  <div style={{ position: 'absolute', top: -6, right: -6 }}>
-                    <Chip variant="status" tone="accent">
-                      {app.count}
-                    </Chip>
-                  </div>
+                  // Bespoke, not `Chip` (docs/Shell.md's disclosed pattern for the palette
+                  // trigger/dock tiles): reference size is ~10px/600 text, padding 1px 6px,
+                  // radius 980, offset -6/-6 (Shell.dc.html dock anatomy) — `Chip`'s smallest
+                  // (`status`) variant is a fixed 24px tall, 60-70% larger than that. A child of
+                  // the tile `<button>` (not a sibling), so it's part of the button's box and
+                  // dims with it for free: `opacity` isn't inherited by the CSS cascade, but an
+                  // ancestor's `opacity < 1` still visually composites every descendant at that
+                  // same reduced opacity (a genuine stacking-context effect, not inheritance) —
+                  // so this span deliberately sets no `opacity` of its own, letting the button's
+                  // `disabled` dimming above apply for free instead of fighting it with an
+                  // explicit `opacity: 1`. `aria-hidden` because the count is already part of the
+                  // button's own `aria-label` above; exposing it again here would double-announce.
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      top: -6,
+                      right: -6,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '1px 6px',
+                      borderRadius: radius.pill,
+                      backgroundColor: color.accent,
+                      color: color.textOnInk,
+                      fontSize: font.sizeOverline,
+                      fontWeight: font.weightSemibold,
+                      lineHeight: '1.2',
+                    }}
+                  >
+                    {app.count}
+                  </span>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>

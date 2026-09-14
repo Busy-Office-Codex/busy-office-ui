@@ -1,7 +1,56 @@
+import * as stylex from '@stylexjs/stylex';
 import { useState, type ReactNode } from 'react';
 import { Button, Text } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
+import { color } from '../src/tokens.stylex.js';
 import { Launcher } from './Launcher.js';
+
+// Only interactive element in this file that needs hover/active/focus-visible pseudo-classes —
+// everything else here is plain inline styles (no other element in this preview host needs a
+// CSS state a plain `style` object can't express). A single small `stylex.create` block, scoped
+// to just this button, is simpler and lower-risk than reinventing pseudo-class support with
+// manual mouse/focus event handlers + local state.
+const notificationButtonStyles = stylex.create({
+  button: {
+    position: 'relative',
+    width: 32,
+    height: 32,
+    flexShrink: 0,
+    borderRadius: 8,
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    // Confirmed finding: this button had identical rest/hover/active styling (no feedback) next
+    // to "+ New", which does. `:hover` background and `:active` border per the finding's minimum;
+    // `borderColor`'s resting value was the raw literal '#e2e8f0', which is `color.border`'s exact
+    // value (ROADMAP item 13's raw-values audit) — using the token here instead since this block
+    // is already being authored fresh.
+    borderColor: {
+      default: color.border,
+      ':active': color.borderStrong,
+    },
+    backgroundColor: {
+      default: color.bgSurface,
+      ':hover': color.bgSubtle,
+    },
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    // Same shared focus-ring treatment as every other focusable control in this repo (see
+    // Button/Input/Dropdown/Chip in src/components/): 2px color.focusRing outline, 2px offset,
+    // only on :focus-visible.
+    outlineStyle: 'solid',
+    outlineOffset: '2px',
+    outlineColor: {
+      default: 'transparent',
+      ':focus-visible': color.focusRing,
+    },
+    outlineWidth: {
+      default: 0,
+      ':focus-visible': '2px',
+    },
+  },
+});
 
 /**
  * Preview composition of the reusable `Shell` (`@busyoffice/design-system/shell`)
@@ -33,6 +82,14 @@ const PINNED: readonly { label: string; module: AppShellModule; screen?: string;
   { label: 'Sales', module: 'Sales' },
   { label: 'Purchasing', module: 'Purchase' },
   { label: 'Finance', module: 'Finance' },
+  // `screen` deliberately doesn't exist in `NAV.General` — this pinned app's `routeId` resolves
+  // to `undefined` below, so its dock tile renders `disabled` (same mechanism as any host's
+  // stale/permission-revoked pinned app). Exists so a real disabled-tile-with-a-count case is
+  // present in the sample data for ROADMAP item 13's badge-dims-with-disabled-tile browser test
+  // to target — before this, every counted pinned app in this sample happened to resolve to an
+  // enabled route, so that interaction was untested (docs/Shell.md already discloses the same
+  // kind of sample-data gap for the app strip's own inactive-item case).
+  { label: 'Archived', module: 'General', screen: 'Archived reports', count: 3 },
 ];
 
 const SAMPLE_COMMANDS: readonly Omit<ShellCommand, 'onRun'>[] = [
@@ -106,7 +163,7 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
 
   return (
     <>
-      <div style={{ padding: '8px 20px', background: '#f8fafc' }}>
+      <div style={{ padding: '8px 20px', background: color.bgCanvas }}>
         <Text variant="caption">Preview — sample data; commands, counts and app destinations are not connected.</Text>
       </div>
       <Shell
@@ -115,9 +172,9 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
         commands={commands}
         brand={
           <>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: '#0f172a', flexShrink: 0 }} />
+            <div style={{ width: 26, height: 26, borderRadius: 7, background: color.textPrimary, flexShrink: 0 }} />
             <span style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>Busy Office</span>
-            <span style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap' }}>Acme Co ▾</span>
+            <span style={{ fontSize: 12, color: color.textTertiary, whiteSpace: 'nowrap' }}>Acme Co ▾</span>
           </>
         }
         account={
@@ -129,24 +186,12 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
               type="button"
               aria-label="Notifications, 3 unread"
               title="Notifications"
-              style={{
-                position: 'relative',
-                width: 32,
-                height: 32,
-                flexShrink: 0,
-                borderRadius: 8,
-                border: '1px solid #e2e8f0',
-                background: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-              }}
+              {...stylex.props(notificationButtonStyles.button)}
             >
-              <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: 4, background: '#94a3b8' }} />
-              <span aria-hidden="true" style={{ position: 'absolute', top: 4, right: 4, width: 7, height: 7, borderRadius: '50%', background: '#0057b8', border: '1.5px solid #fff' }} />
+              <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: 4, background: color.textDisabled }} />
+              <span aria-hidden="true" style={{ position: 'absolute', top: 4, right: 4, width: 7, height: 7, borderRadius: '50%', background: color.accent, border: `1.5px solid ${color.bgSurface}` }} />
             </button>
-            <div style={{ width: 32, height: 32, borderRadius: 999, background: '#e2e8f0', flexShrink: 0 }} />
+            <div style={{ width: 32, height: 32, borderRadius: 999, background: color.border, flexShrink: 0 }} />
           </>
         }
         home={<Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />}
