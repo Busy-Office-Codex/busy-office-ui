@@ -9,6 +9,10 @@ tests:
   - test/browser/focus-ring-and-placeholder.spec.ts
   - test/browser/design-fidelity-fixes.spec.ts
   - test/browser/shell-focus.spec.ts
+  - test/browser/table-header-contrast.spec.ts
+  - test/browser/table-row-separator.spec.ts
+  - test/browser/table-row-uniformity.spec.ts
+  - test/browser/list-report-checkboxes.spec.ts
 ---
 
 `examples/ListReport.tsx` — a filterable purchase-order list page (route id `purchase-orders`, module `Purchase`), composed only from package components (`Button`, `Card`, `Chip`, `Dropdown`, `Input`, `Table`, `Text`). Rebuilt against `templates/erp-skeleton/ErpSkeleton.dc.html`'s "14 · Purchase order" section in the "Busy Office Design System" Claude Design project — a specific business mockup — rather than the generic `templates/list-report` template it previously mirrored. It renders the header, stat-tile strip, and filter/search toolbar unconditionally, and takes a `state?: 'ready' | 'loading' | 'error' | 'forbidden'` prop (default `'ready'`) that controls what appears below the toolbar, in place of the table region. Not for a Claude Design canvas template — its `Dropdown` usage requires real JSX (see `docs/design-conventions.md`); use it as a buildable page composition, not a static template.

@@ -10,7 +10,14 @@ const styles = stylex.create({
     backgroundColor: color.bgSurface,
   },
   head: {
-    backgroundColor: color.bgSubtle,
+    // ROADMAP item 12 (2026-09-14 design review, confirmed HIGH finding): was `color.bgSubtle`
+    // (#f1f5f9), which — paired with the header text's old `color.textTertiary` — measured
+    // 4.34:1, failing WCAG AA's 4.5:1 body-text threshold (11px/600/uppercase does not qualify
+    // for the "large text" 3:1 exemption). `bgCanvas` (#f8fafc) matches the reference
+    // (`templates/erp-skeleton/Table.dc.html`) exactly and, paired with the new `textSecondary`
+    // header color below, measures ~7.24:1 — see docs/Table.md and the header-contrast browser
+    // spec for the computed rgb() values.
+    backgroundColor: color.bgCanvas,
     borderBottomStyle: 'solid',
     borderBottomWidth: '1px',
     borderBottomColor: color.border,
@@ -25,7 +32,11 @@ const styles = stylex.create({
     height: density.rowHeight,
     borderBottomStyle: 'solid',
     borderBottomWidth: '1px',
-    borderBottomColor: color.border,
+    // ROADMAP item 12 (2026-09-14 design review, confirmed MEDIUM finding): was `color.border`
+    // (#e2e8f0) — the exact same value as the table's own outer frame border, so body rows had
+    // no visual distinction from the frame. `borderSubtle` (#f1f5f9) is deliberately lighter,
+    // matching the reference (`Table.dc.html`: frame #e2e8f0, row separators #f1f5f9).
+    borderBottomColor: color.borderSubtle,
   },
   headerCell: {
     textAlign: 'start',
@@ -33,13 +44,23 @@ const styles = stylex.create({
     // header/body boundary at every tier — font size is not (see below).
     paddingBlock: density.cellPaddingY,
     paddingInline: density.cellPaddingX,
-    // NOT density.fontSize: a header cell always renders at the compact `overline` treatment
-    // regardless of density (docs/Table.md) — that was true before this task and stays true.
-    fontSize: font.sizeOverline,
+    // ROADMAP item 12 (2026-09-14 design review): NOT density.fontSize — a header cell still
+    // always renders at a fixed compact treatment regardless of density (only its padding
+    // follows the tier), but that treatment moved off `font.sizeOverline` (11px) specifically to
+    // fix the contrast failure below: `sizeCaption` (12.5px) is this package's closest existing
+    // token to the reference's 12px header text (docs/Table.md and docs/design-conventions.md
+    // updated to describe this corrected size).
+    fontSize: font.sizeCaption,
     fontWeight: font.weightSemibold,
-    letterSpacing: font.letterSpacingOverline,
+    // Was `font.letterSpacingOverline` (.06em) — no token exists for the reference's exact
+    // `.04em`, so it's a literal here, same category as other hand-measured literals already in
+    // this codebase (e.g. the badge's `1px 6px` padding from ROADMAP item 13).
+    letterSpacing: '0.04em',
     textTransform: 'uppercase',
-    color: color.textTertiary,
+    // Was `color.textTertiary` (#64748b) — the confirmed HIGH contrast finding. `textSecondary`
+    // (#475569) exactly matches the reference and, on the new `bgCanvas` head background above,
+    // measures ~7.24:1 — comfortably over WCAG AA's 4.5:1 body-text threshold.
+    color: color.textSecondary,
   },
   cell: {
     paddingBlock: density.cellPaddingY,
