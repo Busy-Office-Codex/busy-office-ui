@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // examples/ListReport.tsx (the preview's default route) uses size="compact" on its toolbar
-// Button/Input and density="compact" on its Table. The command palette's own Close button and
-// search Input are untouched, so they're the default-size comparison.
+// Button/Input and density="compact" on its Table — the compact-side comparison below.
 //
 // ROADMAP item 10 (density tiers) changed these numbers: `size`/`density="compact"` are now
 // per-instance overrides onto the shared `density` alias group (deprecated, see docs/Button.md,
@@ -15,6 +14,15 @@ import { expect, test } from '@playwright/test';
 // `rowHeight`, not `controlHeight` — see tokens.stylex.ts). Table's compact cell font-size moved
 // from `font.sizeCaption` (12.5px, a metadata-only token as of this task) to the compact tier's
 // own `fontSize` literal (13px, `font.sizeControl`).
+//
+// ROADMAP item 13 (2026-09-14 design review): the command palette's own Close button and search
+// Input, previously the "default-size" comparison point here, are now themselves `size="compact"`
+// (a confirmed finding — the palette rendered its controls larger than the command-bar trigger
+// that opens it). They moved to test/browser/compact-controls.spec.ts's companion assertions
+// below, alongside the new default-size comparisons this change required: Launcher's `AppTile`
+// ghost Button (examples/Launcher.tsx, no `size` prop) and RecordDetail's Reject-modal "Comment"
+// Input (examples/RecordDetail.tsx, no `size` prop) — both untouched by ROADMAP item 13 and
+// still genuinely ambient/comfortable-sized.
 
 test('Button size="compact" renders at the compact height, default stays 36px', async ({ page }) => {
   await page.goto('/#examples');
@@ -22,8 +30,8 @@ test('Button size="compact" renders at the compact height, default stays 36px', 
   const compactButton = page.getByRole('button', { name: 'From requisition', exact: true });
   await expect(compactButton).toHaveCSS('height', '28px');
 
-  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
-  const defaultButton = page.getByRole('button', { name: 'Close command palette', exact: true });
+  await page.getByRole('button', { name: 'Open launcher', exact: true }).click();
+  const defaultButton = page.getByRole('button', { name: 'Customers', exact: true });
   await expect(defaultButton).toHaveCSS('height', '36px');
 });
 
@@ -33,9 +41,21 @@ test('Input size="compact" renders at the compact height, default stays 40px', a
   const compactInput = page.getByPlaceholder('Search POs…');
   await expect(compactInput).toHaveCSS('height', '36px');
 
-  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
-  const defaultInput = page.getByPlaceholder('Search records, run actions, jump to pages…');
+  await page.getByRole('button', { name: 'Sales', exact: true }).click(); // dock tile -> Sales order page
+  await page.getByRole('button', { name: 'Reject', exact: true }).click();
+  const defaultInput = page.getByPlaceholder('Required for a rejection');
   await expect(defaultInput).toHaveCSS('height', '40px');
+});
+
+test('the command palette itself uses compact controls (ROADMAP item 13): its search Input and Close button both render at the compact height', async ({ page }) => {
+  await page.goto('/#examples');
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+
+  const search = page.getByPlaceholder('Search records, run actions, jump to pages…');
+  await expect(search).toHaveCSS('height', '36px');
+
+  const close = page.getByRole('button', { name: 'Close command palette', exact: true });
+  await expect(close).toHaveCSS('height', '28px');
 });
 
 test('Table density="compact" shrinks cell text off the body-size default', async ({ page }) => {

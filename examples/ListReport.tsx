@@ -303,21 +303,25 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
           label={`Supplier · ${supplierFilter}`}
           items={SUPPLIER_ITEMS.map((label) => ({ label, selected: label === supplierFilter }))}
           onSelect={setSupplierFilter}
+          active={supplierFilter !== SUPPLIER_ITEMS[0]}
         />
         <Dropdown
           label={`Status · ${statusFilter}`}
           items={STATUS_ITEMS.map((label) => ({ label, selected: label === statusFilter }))}
           onSelect={setStatusFilter}
+          active={statusFilter !== STATUS_ITEMS[0]}
         />
         <Dropdown
           label={`Buyer · ${buyerFilter}`}
           items={BUYER_ITEMS.map((label) => ({ label, selected: label === buyerFilter }))}
           onSelect={setBuyerFilter}
+          active={buyerFilter !== BUYER_ITEMS[0]}
         />
         <Dropdown
           label={`Expected · ${expectedFilter}`}
           items={EXPECTED_ITEMS.map((label) => ({ label, selected: label === expectedFilter }))}
           onSelect={setExpectedFilter}
+          active={expectedFilter !== EXPECTED_ITEMS[0]}
         />
       </div>
 
