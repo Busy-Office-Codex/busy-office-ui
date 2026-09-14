@@ -23,14 +23,30 @@ const MODULES: ModuleRow[] = [
   { key: 'builder', label: 'Builder', defaultEnabled: false },
 ];
 
+type ChangeLogEntry = { who: string; what: string; when: string };
+
+// New secondary content (not in the reference screen) — a read-only audit trail of recent
+// settings edits, the same "who/what/when" shape as Notifications.tsx's activity rows. A
+// plausible real complement to a settings form (an audit log is standard for org-wide config
+// changes), and gives this page's freed-up width a genuine second column instead of stretching
+// the form itself.
+const RECENT_CHANGES: ChangeLogEntry[] = [
+  { who: 'Jordan Lee', what: 'Enabled the Builder module', when: 'Yesterday, 3:40 PM' },
+  { who: 'Alex Morgan', what: 'Changed base currency to USD', when: '3 days ago' },
+  { who: 'Jordan Lee', what: 'Updated the company address', when: '1 week ago' },
+  { who: 'System', what: 'Fiscal year start set to January', when: '2 weeks ago' },
+];
+
 /**
  * An organization settings form. Mirrors `templates/erp-skeleton`'s "25 · Settings" screen
  * (Claude Design project "Busy Office Design System"): a "General" header with Discard/Save
  * changes actions, then three labeled sections — Company (legal name, tax ID, address, logo
  * upload), Locale & currency (four real `Dropdown` value pickers), and Modules (five enable/hide
- * toggles). Meant to render as `AppShell`'s content for `module="Settings"`, whose own `NAV` entry
- * list starts with `'General'` — this screen's own reference header — so its route label lines up
- * with the module's first sibling screen (see AppShell.tsx's `NAV.Settings`).
+ * toggles) — plus, in a secondary column beside them, a "Recent changes" audit-log panel. Meant to
+ * render as `AppShell`'s content for `module="Settings"`, whose own `NAV` entry list starts with
+ * `'General'` — this screen's own reference header — so its route label lines up with the
+ * module's first sibling screen (see AppShell.tsx's `NAV.Settings`). Same main-pane/side-panel
+ * split as BuilderForms.tsx.
  */
 export function Settings() {
   const [legalName, setLegalName] = useState('Northwind Traders, LLC');
@@ -58,10 +74,11 @@ export function Settings() {
       }}
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligns instead of centering, matching every other
-          sample page's left edge (see RecordDetail.tsx). `maxWidth: 720` is this file's own call
-          (the reference gives no measured form width) — narrower than RecordDetail's 960, since a
-          settings form reads better as a single column than stretched to that width. */}
-      <div style={{ maxWidth: 720, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          sample page's left edge (see RecordDetail.tsx). `maxWidth: 1080` matches
+          UsersAndRoles.tsx's two-panel width — enough for the settings-form column plus a
+          fixed-width "Recent changes" side panel, without the form itself stretching past a
+          single-column read. */}
+      <div style={{ maxWidth: 1080, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <Density value="compact">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Text variant="heading">General</Text>
@@ -71,86 +88,117 @@ export function Settings() {
           </div>
         </Density>
 
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Text variant="title">Company</Text>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-              <Input label="Legal name" value={legalName} onChange={(event) => setLegalName(event.target.value)} />
-              <Input label="Tax ID" value={taxId} onChange={(event) => setTaxId(event.target.value)} />
-            </div>
-            <Input label="Address" value={address} onChange={(event) => setAddress(event.target.value)} />
-            <div>
-              {/* Static sample — no real file picker/upload wiring, per this batch's structural-
-                  first-pass scope. */}
-              <Button variant="secondary">Upload logo</Button>
-            </div>
-          </div>
-        </Card>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Text variant="title">Company</Text>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+                  <Input label="Legal name" value={legalName} onChange={(event) => setLegalName(event.target.value)} />
+                  <Input label="Tax ID" value={taxId} onChange={(event) => setTaxId(event.target.value)} />
+                </div>
+                <Input label="Address" value={address} onChange={(event) => setAddress(event.target.value)} />
+                <div>
+                  {/* Static sample — no real file picker/upload wiring, per this batch's structural-
+                      first-pass scope. */}
+                  <Button variant="secondary">Upload logo</Button>
+                </div>
+              </div>
+            </Card>
 
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Text variant="title">Locale &amp; currency</Text>
-            {/* `active={false}` on every field here, deliberately not following ListReport.tsx's
-                toolbar-filter Dropdown pattern verbatim: `active` (docs/design-conventions.md) is
-                the dark/filled treatment reserved for "a real narrowed filter," and every one of
-                these four fields always has exactly one item `selected` (a required setting has
-                no "All …"/unset state) — passing no `active` prop would fall back to
-                `items.some(selected)`, which is always true here, permanently filling all four
-                triggers and collapsing the very hierarchy ROADMAP item 11 introduced `active` to
-                preserve. These are value pickers, not filters, so they stay in the trigger's
-                normal (unfilled) rest style. */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-              <Dropdown
-                label={`Base currency · ${baseCurrency}`}
-                items={BASE_CURRENCY_ITEMS.map((label) => ({ label, selected: label === baseCurrency }))}
-                onSelect={setBaseCurrency}
-                active={false}
-              />
-              <Dropdown
-                label={`Fiscal year start · ${fiscalYearStart}`}
-                items={FISCAL_YEAR_START_ITEMS.map((label) => ({ label, selected: label === fiscalYearStart }))}
-                onSelect={setFiscalYearStart}
-                active={false}
-              />
-              <Dropdown
-                label={`Date format · ${dateFormat}`}
-                items={DATE_FORMAT_ITEMS.map((label) => ({ label, selected: label === dateFormat }))}
-                onSelect={setDateFormat}
-                active={false}
-              />
-              <Dropdown
-                label={`Time zone · ${timeZone}`}
-                items={TIME_ZONE_ITEMS.map((label) => ({ label, selected: label === timeZone }))}
-                onSelect={setTimeZone}
-                active={false}
-              />
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Text variant="title">Modules</Text>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {MODULES.map((module) => (
-                <label
-                  key={module.key}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
-                >
-                  <Text variant="body">{module.label}</Text>
-                  <input
-                    type="checkbox"
-                    checked={moduleEnabled[module.key]}
-                    onChange={() =>
-                      setModuleEnabled((prev) => ({ ...prev, [module.key]: !prev[module.key] }))
-                    }
-                    {...stylex.props(toggleStyles.checkbox)}
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Text variant="title">Locale &amp; currency</Text>
+                {/* `active={false}` on every field here, deliberately not following ListReport.tsx's
+                    toolbar-filter Dropdown pattern verbatim: `active` (docs/design-conventions.md) is
+                    the dark/filled treatment reserved for "a real narrowed filter," and every one of
+                    these four fields always has exactly one item `selected` (a required setting has
+                    no "All …"/unset state) — passing no `active` prop would fall back to
+                    `items.some(selected)`, which is always true here, permanently filling all four
+                    triggers and collapsing the very hierarchy ROADMAP item 11 introduced `active` to
+                    preserve. These are value pickers, not filters, so they stay in the trigger's
+                    normal (unfilled) rest style. */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                  <Dropdown
+                    label={`Base currency · ${baseCurrency}`}
+                    items={BASE_CURRENCY_ITEMS.map((label) => ({ label, selected: label === baseCurrency }))}
+                    onSelect={setBaseCurrency}
+                    active={false}
                   />
-                </label>
-              ))}
-            </div>
+                  <Dropdown
+                    label={`Fiscal year start · ${fiscalYearStart}`}
+                    items={FISCAL_YEAR_START_ITEMS.map((label) => ({ label, selected: label === fiscalYearStart }))}
+                    onSelect={setFiscalYearStart}
+                    active={false}
+                  />
+                  <Dropdown
+                    label={`Date format · ${dateFormat}`}
+                    items={DATE_FORMAT_ITEMS.map((label) => ({ label, selected: label === dateFormat }))}
+                    onSelect={setDateFormat}
+                    active={false}
+                  />
+                  <Dropdown
+                    label={`Time zone · ${timeZone}`}
+                    items={TIME_ZONE_ITEMS.map((label) => ({ label, selected: label === timeZone }))}
+                    onSelect={setTimeZone}
+                    active={false}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Text variant="title">Modules</Text>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {MODULES.map((module) => (
+                    <label
+                      key={module.key}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
+                    >
+                      <Text variant="body">{module.label}</Text>
+                      <input
+                        type="checkbox"
+                        checked={moduleEnabled[module.key]}
+                        onChange={() =>
+                          setModuleEnabled((prev) => ({ ...prev, [module.key]: !prev[module.key] }))
+                        }
+                        {...stylex.props(toggleStyles.checkbox)}
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </Card>
           </div>
-        </Card>
+
+          <div style={{ width: 300, flexShrink: 0 }}>
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Text variant="title">Recent changes</Text>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {RECENT_CHANGES.map((entry, index) => (
+                    <div
+                      key={`${entry.who}-${entry.what}`}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        paddingBottom: 12,
+                        borderBottom: index === RECENT_CHANGES.length - 1 ? 'none' : '1px solid #e2e8f0',
+                      }}
+                    >
+                      <Text variant="body">{entry.what}</Text>
+                      <Text variant="caption">
+                        {entry.who} · {entry.when}
+                      </Text>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

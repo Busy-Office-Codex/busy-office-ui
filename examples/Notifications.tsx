@@ -11,10 +11,16 @@ import { FilterTabs } from './filterTabs.js';
 /**
  * A notifications list page: header actions, a filter-Chip-as-tabs row (see Profile.tsx for why
  * this package uses filter `Chip` in place of a `Tab` component, which doesn't exist here), a
- * notification list grouped by day, and a channel-preferences panel below it. Mirrors
- * `templates/erp-skeleton`'s "05 · Notifications" screen. Meant to render as the content inside
- * `AppShell` (module="General", route "Notifications" — already present in AppShell.tsx's
- * `NAV.General`) — see AppShell.tsx.
+ * notification list grouped by day, and — in a secondary column beside it — a channel-preferences
+ * panel. Mirrors `templates/erp-skeleton`'s "05 · Notifications" screen. Meant to render as the
+ * content inside `AppShell` (module="General", route "Notifications" — already present in
+ * AppShell.tsx's `NAV.General`) — see AppShell.tsx.
+ *
+ * Two-column below the header/tabs (list + a fixed-width side panel), same pattern as
+ * BuilderForms.tsx/Approvals.tsx's main-pane/side-panel split — this page's own single content
+ * column (the notification list) doesn't need the full page width, but the "Notification
+ * channels" preferences card does have a natural place to live alongside it instead of stacked
+ * below, once the page isn't capped to a narrow single-column width.
  *
  * Only "Unread" is selected, and — matching Profile.tsx's structural-first-pass scope — the
  * other tabs ("Approvals" / "Orders" / "Finance" / "System") render as present-but-inactive
@@ -147,7 +153,7 @@ export function Notifications() {
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ maxWidth: 760, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ maxWidth: 1080, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <Density value="compact">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Text variant="heading">Notifications</Text>
@@ -163,46 +169,52 @@ export function Notifications() {
 
         <FilterTabs tabs={TABS} selected="Unread" />
 
-        <Density value="compact">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {GROUPS.map((group) => (
-              <div key={group.label} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Text variant="overline">{group.label}</Text>
-                <Card>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    {group.items.map((item, index) => (
-                      <NotificationRow key={item.id} item={item} isLast={index === group.items.length - 1} />
-                    ))}
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 480px', minWidth: 320 }}>
+            <Density value="compact">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {GROUPS.map((group) => (
+                  <div key={group.label} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <Text variant="overline">{group.label}</Text>
+                    <Card>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        {group.items.map((item, index) => (
+                          <NotificationRow key={item.id} item={item} isLast={index === group.items.length - 1} />
+                        ))}
+                      </div>
+                    </Card>
                   </div>
-                </Card>
+                ))}
               </div>
-            ))}
+            </Density>
           </div>
-        </Density>
 
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Text variant="title">Notification channels</Text>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {CHANNELS.map((channel) => (
-                <label
-                  key={channel.key}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
-                >
-                  <Text variant="body">{channel.label}</Text>
-                  <input
-                    type="checkbox"
-                    checked={channelEnabled[channel.key]}
-                    onChange={() =>
-                      setChannelEnabled((prev) => ({ ...prev, [channel.key]: !prev[channel.key] }))
-                    }
-                    {...stylex.props(checkboxStyles.checkbox)}
-                  />
-                </label>
-              ))}
-            </div>
+          <div style={{ width: 280, flexShrink: 0 }}>
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Text variant="title">Notification channels</Text>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {CHANNELS.map((channel) => (
+                    <label
+                      key={channel.key}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
+                    >
+                      <Text variant="body">{channel.label}</Text>
+                      <input
+                        type="checkbox"
+                        checked={channelEnabled[channel.key]}
+                        onChange={() =>
+                          setChannelEnabled((prev) => ({ ...prev, [channel.key]: !prev[channel.key] }))
+                        }
+                        {...stylex.props(checkboxStyles.checkbox)}
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </Card>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );
