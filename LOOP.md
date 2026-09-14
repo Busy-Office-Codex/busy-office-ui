@@ -64,10 +64,19 @@ without an agreed request.
      `pnpm security` when `package.json` and `pnpm-lock.yaml` are unchanged.
    - One fresh-context, read-only reviewer checks the whole batch diff against
      every item's Accept and against simplicity (dead code, props with one
-     caller, duplication). Each Accept property starts FAIL and flips only on
-     cited output (test name, command result, SHA).
-   - An item that fails and cannot be fixed in this tick has its merge reverted
-     on the batch branch; the rest ships and that item's `attempts` goes up.
+     caller, duplication), and reports findings as a schema: one row per
+     `item:acceptClause`, each starting FAIL and flipping to PASS only on
+     cited evidence (test name, command result, SHA). Only when this batch
+     closes the current milestone, fan the same diff out to three parallel
+     reviewer lenses instead of one — spec-match, contrast/accessibility,
+     simplicity-and-duplication — each reporting the same schema; a clause
+     fails if any lens fails it. This costs more tokens but no extra
+     wall-clock, since the lenses run concurrently.
+   - A clause still FAIL after a fix-and-reverify round is one round short of
+     the cap, not resolved by re-asking the same question. Cap fix-then-
+     reverify at 2 rounds per batch: a clause still FAIL after round 2 has
+     its item's merge reverted on the batch branch regardless of cause; the
+     rest ships and that item's `attempts` goes up.
 5. **Gate.** Classify each decision where it arises.
    - **Two-way** (internal implementation, tests, docs wording, examples,
      additive ARIA attributes): decide, note the reason in the merge commit
