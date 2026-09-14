@@ -1,8 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
-import { Button, Card, Chip, Density, Dropdown, Input, Text } from '../src/index.js';
+import { Button, Card, Density, Dropdown, Input, Text } from '../src/index.js';
 // This repo's shared native-checkbox treatment (see examples/ListReport.tsx/Settings.tsx for the
 // full history) — reused here for the Properties panel's Required/Read-only/Show on mobile rows.
 import { checkboxStyles } from './checkboxStyles.js';
+import { FilterTabs } from './filterTabs.js';
 
 /**
  * A static 3-pane form/page editor layout. Mirrors `templates/erp-skeleton`'s "23 Builder (forms)"
@@ -83,15 +84,7 @@ export function BuilderForms() {
           </Density>
         </div>
 
-        <Density value="compact">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {TABS.map((tab) => (
-              <Chip key={tab} variant="filter" selected={tab === 'Design'}>
-                {tab}
-              </Chip>
-            ))}
-          </div>
-        </Density>
+        <FilterTabs tabs={TABS} selected="Design" />
       </div>
 
       <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>

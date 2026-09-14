@@ -14,6 +14,7 @@ import {
   TableRow,
   Text,
 } from '../src/index.js';
+import { FilterTabs } from './filterTabs.js';
 
 type SalesOrder = {
   orderNumber: string;
@@ -209,15 +210,7 @@ export function SalesOrderList() {
         </div>
       </Density>
 
-      <Density value="compact">
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {STATUS_TABS.map((tab) => (
-            <Chip key={tab} variant="filter" selected={tab === 'All'}>
-              {tab}
-            </Chip>
-          ))}
-        </div>
-      </Density>
+      <FilterTabs tabs={STATUS_TABS} selected="All" />
 
       <Density value="compact">
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>

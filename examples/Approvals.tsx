@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button, Card, Chip, Density, Input, Text } from '../src/index.js';
+import { FilterTabs } from './filterTabs.js';
 
 /**
  * A cross-module approval queue: a mixed-type queue list on the left (purchase
@@ -225,15 +226,7 @@ export function Approvals() {
           </div>
         </Density>
 
-        <Density value="compact">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {TABS.map((tab) => (
-              <Chip key={tab} variant="filter" selected={tab === 'Mine'}>
-                {tab}
-              </Chip>
-            ))}
-          </div>
-        </Density>
+        <FilterTabs tabs={TABS} selected="Mine" />
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div

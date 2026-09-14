@@ -1,11 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
-import { Button, Card, Chip, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
+import { Button, Card, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 // ROADMAP M6 (issue #17): examples/checkboxStyles.ts's shared native-checkbox styling — see that
 // file for the full history/rationale. Third consumer alongside ListReport.tsx's row-selection
 // checkboxes and Settings.tsx's Modules toggle rows; this page's permissions-matrix cells are the
 // same "real native checkbox, same visual treatment" case, not a reason to invent a fourth look.
 import { checkboxStyles } from './checkboxStyles.js';
+import { FilterTabs } from './filterTabs.js';
 
 /**
  * A two-pane role editor: a role list on the left, and — for the selected role — a header,
@@ -157,15 +158,7 @@ export function UsersAndRoles() {
               </div>
             </Density>
 
-            <Density value="compact">
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {TABS.map((tab) => (
-                  <Chip key={tab} variant="filter" selected={tab === 'Permissions'}>
-                    {tab}
-                  </Chip>
-                ))}
-              </div>
-            </Density>
+            <FilterTabs tabs={TABS} selected="Permissions" />
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <Text variant="title">Permissions</Text>

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import { Button, Card, Chip, Density, Dropdown, Text } from '../src/index.js';
 // Same shared native-checkbox treatment ListReport.tsx's row-selection column and Settings.tsx's
 // Modules toggles already use — see examples/checkboxStyles.ts for the full history.
@@ -69,27 +69,16 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
   },
 ];
 
-const styles = stylex.create({
-  // Same "thin div between cards" spine Delivery.tsx's TrackingTimeline draws between tracking
-  // steps, centered under each Card rather than aligned to a left-hand dot column — a step here
-  // is a full Card, not a compact list row, so a plain centered line reads as the connector
-  // without needing the dot glyph that timeline uses to mark done/current state (these steps have
-  // no such state to distinguish).
-  connector: {
-    width: '2px',
-    height: '24px',
-    marginInline: 'auto',
-    backgroundColor: '#cbd5e1',
-  },
-});
-
 /**
  * A vertical connector line between two adjacent step Cards — a locally-scoped `<div>`, not a new
  * package export, same precedent as Delivery.tsx's `TrackingTimeline` spine (see that file for the
- * full reasoning: a single consumer doesn't earn a shared component per AGENTS.md).
+ * full reasoning: a single consumer doesn't earn a shared component per AGENTS.md). A plain inline
+ * `style` object, not `stylex.create` — no `:hover`/`:focus-visible` pseudo-class need here (unlike
+ * `checkboxStyles.ts`), and every other inline style in this file already uses a plain object, same
+ * as Delivery.tsx's own `TrackingTimeline` spine.
  */
 function StepConnector() {
-  return <div aria-hidden="true" {...stylex.props(styles.connector)} />;
+  return <div aria-hidden="true" style={{ width: 2, height: 24, marginInline: 'auto', backgroundColor: '#cbd5e1' }} />;
 }
 
 /**
@@ -182,21 +171,18 @@ function WorkflowStepCard({ step }: { step: WorkflowStep }) {
  *
  * The side panel configures only the APPROVAL step, per the content spec — reusing RolePage.tsx's
  * own "Jordan Lee"/"Priya Shah" personas for "Approvers in sequence" rather than inventing new
- * ones. "Allow delegation"/"Comment required" reuse examples/checkboxStyles.ts's shared native
- * checkbox treatment, each wrapped in a `<label>` (same pattern as Settings.tsx's Modules toggle
- * rows) so the visible text is the checkbox's accessible name for free. "Role"/"Escalate after"/
- * "Notification template" are real `Dropdown` value pickers, not filters, so each passes
- * `active={false}` — same reasoning as Settings.tsx's Locale & currency section (a required field
- * always has exactly one item selected, so the `items.some(selected)` fallback would permanently
- * fill the trigger; see that file for the full explanation).
+ * ones. Static/non-interactive throughout, matching BuilderForms.tsx's Properties panel (its
+ * sibling screen in this same batch): "Role"/"Escalate after"/"Notification template" are real
+ * `Dropdown`s with a fixed `label`/`items` (no `onSelect`), `active={false}` since each is a
+ * value picker, not a filter — same reasoning as Settings.tsx's Locale & currency section (a
+ * required field always has exactly one item selected, so the `items.some(selected)` fallback
+ * would permanently fill the trigger; see that file for the full explanation). "Allow
+ * delegation"/"Comment required" reuse examples/checkboxStyles.ts's shared native checkbox
+ * treatment with a fixed `defaultChecked` (not controlled), each wrapped in a `<label>` (same
+ * pattern as Settings.tsx's Modules toggle rows) so the visible text is the checkbox's
+ * accessible name for free.
  */
 export function BuilderWorkflow() {
-  const [role, setRole] = useState(ROLE_ITEMS[0]);
-  const [escalateAfter, setEscalateAfter] = useState(ESCALATE_ITEMS[1]);
-  const [notificationTemplate, setNotificationTemplate] = useState(TEMPLATE_ITEMS[0]);
-  const [allowDelegation, setAllowDelegation] = useState(true);
-  const [commentRequired, setCommentRequired] = useState(false);
-
   return (
     <div
       style={{
@@ -266,43 +252,30 @@ export function BuilderWorkflow() {
               </div>
 
               <Dropdown
-                label={`Role · ${role}`}
-                items={ROLE_ITEMS.map((label) => ({ label, selected: label === role }))}
-                onSelect={setRole}
+                label={ROLE_ITEMS[0]}
+                items={ROLE_ITEMS.map((label) => ({ label, selected: label === ROLE_ITEMS[0] }))}
                 active={false}
               />
 
               <Dropdown
-                label={`Escalate after · ${escalateAfter}`}
-                items={ESCALATE_ITEMS.map((label) => ({ label, selected: label === escalateAfter }))}
-                onSelect={setEscalateAfter}
+                label={ESCALATE_ITEMS[1]}
+                items={ESCALATE_ITEMS.map((label) => ({ label, selected: label === ESCALATE_ITEMS[1] }))}
                 active={false}
               />
 
               <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                 <Text variant="body">Allow delegation</Text>
-                <input
-                  type="checkbox"
-                  checked={allowDelegation}
-                  onChange={() => setAllowDelegation((prev) => !prev)}
-                  {...stylex.props(checkboxStyles.checkbox)}
-                />
+                <input type="checkbox" defaultChecked {...stylex.props(checkboxStyles.checkbox)} />
               </label>
 
               <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                 <Text variant="body">Comment required</Text>
-                <input
-                  type="checkbox"
-                  checked={commentRequired}
-                  onChange={() => setCommentRequired((prev) => !prev)}
-                  {...stylex.props(checkboxStyles.checkbox)}
-                />
+                <input type="checkbox" {...stylex.props(checkboxStyles.checkbox)} />
               </label>
 
               <Dropdown
-                label={`Notification template · ${notificationTemplate}`}
-                items={TEMPLATE_ITEMS.map((label) => ({ label, selected: label === notificationTemplate }))}
-                onSelect={setNotificationTemplate}
+                label={TEMPLATE_ITEMS[0]}
+                items={TEMPLATE_ITEMS.map((label) => ({ label, selected: label === TEMPLATE_ITEMS[0] }))}
                 active={false}
               />
             </Card>

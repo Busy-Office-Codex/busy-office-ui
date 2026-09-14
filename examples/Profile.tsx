@@ -1,4 +1,5 @@
-import { Button, Card, Chip, Density, Input, Text } from '../src/index.js';
+import { Button, Card, Density, Input, Text } from '../src/index.js';
+import { FilterTabs } from './filterTabs.js';
 
 /**
  * A user account settings page: avatar + name/role header with a "Change
@@ -7,14 +8,12 @@ import { Button, Card, Chip, Density, Input, Text } from '../src/index.js';
  * content inside `AppShell` (module="General", route "Profile") — see
  * AppShell.tsx.
  *
- * This repo has no `Tab` component, so the tab row reuses filter `Chip`
- * (`variant="filter"`) the same way `Shell`'s own command-palette category
- * row does (`src/shell/Shell.tsx`) — one reusable selection affordance
- * instead of a new single-purpose component (AGENTS.md: "no prop or export
- * with a single caller"). Only "Details" is selected, and it's the only tab
- * with real content below it — "Roles & access" / "Preferences" /
- * "Security" / "Activity" render as present-but-inactive chips with no
- * switching logic, per this milestone's structural-first-pass scope.
+ * The tab row is `./filterTabs.js`'s shared `FilterTabs` (no `Tab`
+ * component in this package — see that file for the reuse rationale).
+ * Only "Details" is selected, and it's the only tab with real content
+ * below it — "Roles & access" / "Preferences" / "Security" / "Activity"
+ * render as present-but-inactive chips with no switching logic, per this
+ * milestone's structural-first-pass scope.
  */
 const TABS = ['Details', 'Roles & access', 'Preferences', 'Security', 'Activity'];
 
@@ -58,15 +57,7 @@ export function Profile() {
           </Density>
         </div>
 
-        <Density value="compact">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {TABS.map((tab) => (
-              <Chip key={tab} variant="filter" selected={tab === 'Details'}>
-                {tab}
-              </Chip>
-            ))}
-          </div>
-        </Density>
+        <FilterTabs tabs={TABS} selected="Details" />
 
         <Card>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
