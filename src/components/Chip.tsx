@@ -57,6 +57,15 @@ const styles = stylex.create({
     fontSize: font.sizeCaption,
     borderRadius: radius.pill,
     height: '24px',
+    // ROADMAP item 12 (2026-09-14 design review, confirmed MEDIUM finding): the browser default
+    // is `content-box`, under which a border ADDS to the declared height instead of being
+    // absorbed into it — `toneDanger` below is the only one of the four tones with a border
+    // (1px, for its outlined look), so it alone rendered 26px instead of the uniform 24px every
+    // other tone renders at, breaking row-height uniformity in any table with a danger-tone
+    // status Chip (e.g. "Overdue" in examples/ListReport.tsx's sample data). `border-box` makes
+    // that 1px absorbed into the declared 24px instead — a no-op for `toneNeutral`/`toneStrong`/
+    // `toneAccent` below, none of which set a border or padding that would interact with it.
+    boxSizing: 'border-box',
     paddingInline: space.space3,
     display: 'inline-flex',
     alignItems: 'center',
