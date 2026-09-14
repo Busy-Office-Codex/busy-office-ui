@@ -66,68 +66,76 @@ export function Help() {
         boxSizing: 'border-box',
       }}
     >
-      {/* `margin: 0`, left-aligned like every other sample page's content frame. `maxWidth: 880` is
-          this file's own call (no measured reference width available here) — wide enough for the
-          two-column link-section grid below, narrower than RecordDetail's 960 since this page has
-          no table to accommodate. */}
-      <div style={{ maxWidth: 880, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* `margin: 0`, left-aligned like every other sample page's content frame. `maxWidth: 1120`
+          matches UsersAndRoles.tsx's two-panel width — wide enough for the main setup column plus
+          a fixed side panel of link sections (see below), rather than either column having to
+          fight the other for room. */}
+      <div style={{ maxWidth: 1120, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Text variant="heading">Help</Text>
           <Text variant="caption">Search articles, finish setup, or contact support.</Text>
         </div>
 
-        <div style={{ maxWidth: 480 }}>
-          <Input aria-label="Search help articles" placeholder="Search help articles…" size="search" />
-        </div>
-
-        <Card>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
-            <Text variant="title">Finish setting up your workspace</Text>
-            <Text variant="caption">
-              {COMPLETED_STEPS} of {SETUP_STEPS.length} complete
-            </Text>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {SETUP_STEPS.map((step) => (
-              <div key={step.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                <Text variant="body">{step.label}</Text>
-                {step.done ? (
-                  <Chip variant="status" tone="strong">
-                    Done
-                  </Chip>
-                ) : (
-                  <Density value="compact">
-                    <Button variant="ghost">Start</Button>
-                  </Density>
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card>
-          <Text variant="title">Take a guided tour</Text>
-          <Text variant="caption">A five-minute walkthrough of records, approvals, and the command palette.</Text>
-          <Density value="compact">
-            <div>
-              <Button variant="primary">Start tour</Button>
+        {/* Two-column below the header: a main setup column (search, checklist, guided tour) and
+            a fixed-width side panel for the link-list sections — same main-pane/side-panel split
+            as BuilderForms.tsx/UsersAndRoles.tsx, so the link sections read as reference material
+            alongside the task at hand rather than a grid the reader has to scroll past first. */}
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div style={{ maxWidth: 480 }}>
+              <Input aria-label="Search help articles" placeholder="Search help articles…" size="search" />
             </div>
-          </Density>
-        </Card>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-          {LINK_SECTIONS.map((section) => (
-            <Card key={section.title}>
-              <Text variant="title">{section.title}</Text>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {section.items.map((item) => (
-                  <Text key={item} variant="body">
-                    {item}
-                  </Text>
+            <Card>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+                <Text variant="title">Finish setting up your workspace</Text>
+                <Text variant="caption">
+                  {COMPLETED_STEPS} of {SETUP_STEPS.length} complete
+                </Text>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {SETUP_STEPS.map((step) => (
+                  <div key={step.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                    <Text variant="body">{step.label}</Text>
+                    {step.done ? (
+                      <Chip variant="status" tone="strong">
+                        Done
+                      </Chip>
+                    ) : (
+                      <Density value="compact">
+                        <Button variant="ghost">Start</Button>
+                      </Density>
+                    )}
+                  </div>
                 ))}
               </div>
             </Card>
-          ))}
+
+            <Card>
+              <Text variant="title">Take a guided tour</Text>
+              <Text variant="caption">A five-minute walkthrough of records, approvals, and the command palette.</Text>
+              <Density value="compact">
+                <div>
+                  <Button variant="primary">Start tour</Button>
+                </div>
+              </Density>
+            </Card>
+          </div>
+
+          <div style={{ width: 300, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {LINK_SECTIONS.map((section) => (
+              <Card key={section.title}>
+                <Text variant="title">{section.title}</Text>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {section.items.map((item) => (
+                    <Text key={item} variant="body">
+                      {item}
+                    </Text>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </div>

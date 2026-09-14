@@ -1,9 +1,11 @@
-import { Button, Card, Density, Input, Text } from '../src/index.js';
+import type { ReactNode } from 'react';
+import { Button, Card, Chip, Density, Input, Text } from '../src/index.js';
 import { FilterTabs } from './filterTabs.js';
 
 /**
  * A user account settings page: avatar + name/role header with a "Change
- * photo" action, a tab-selector row, and a settings form. Mirrors
+ * photo" action, a tab-selector row, a settings form, and — beside the form,
+ * in a secondary column — an account summary panel. Mirrors
  * `templates/erp-skeleton`'s "07 Profile" screen. Meant to render as the
  * content inside `AppShell` (module="General", route "Profile") — see
  * AppShell.tsx.
@@ -14,6 +16,12 @@ import { FilterTabs } from './filterTabs.js';
  * below it — "Roles & access" / "Preferences" / "Security" / "Activity"
  * render as present-but-inactive chips with no switching logic, per this
  * milestone's structural-first-pass scope.
+ *
+ * The account summary panel is new (not in the "Details" form) — it's a
+ * plausible read-only complement to an editable profile form (employment
+ * facts, not user-editable fields), and gives this page's freed-up width a
+ * genuine second column instead of stretching the single-column form to
+ * fill it. Same main-pane/side-panel split as BuilderForms.tsx.
  */
 const TABS = ['Details', 'Roles & access', 'Preferences', 'Security', 'Activity'];
 
@@ -28,6 +36,23 @@ const PROFILE = {
   timeZone: '(UTC-05:00) Eastern Time',
 };
 
+const ACCOUNT_SUMMARY = {
+  employeeId: 'EMP-04821',
+  startDate: 'March 3, 2021',
+  status: 'Active',
+  lastLogin: 'Today, 8:12 AM',
+  twoFactor: 'Enabled',
+};
+
+function SummaryRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <Text variant="caption">{label}</Text>
+      {children}
+    </div>
+  );
+}
+
 export function Profile() {
   return (
     <div
@@ -38,7 +63,7 @@ export function Profile() {
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ maxWidth: 760, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ maxWidth: 1080, margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           {/* Decorative placeholder avatar — same pattern as AppShell.tsx's account-slot avatar
               div, sized up for a header rather than a command-bar slot. */}
@@ -57,32 +82,65 @@ export function Profile() {
           </Density>
         </div>
 
-        <FilterTabs tabs={TABS} selected="Details" />
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <FilterTabs tabs={TABS} selected="Details" />
 
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(200px, 1fr))', gap: 16 }}>
-              <Input label="Full name" defaultValue={PROFILE.fullName} />
-              <Input label="Job title" defaultValue={PROFILE.jobTitle} />
-              <Input label="Email" type="email" defaultValue={PROFILE.email} />
-              <Input label="Phone" type="tel" defaultValue={PROFILE.phone} />
-              <Input label="Department" defaultValue={PROFILE.department} />
-              <Input label="Manager" defaultValue={PROFILE.manager} />
-              <Input label="Language" defaultValue={PROFILE.language} />
-              <Input label="Time zone" defaultValue={PROFILE.timeZone} />
-            </div>
-            <Density value="compact">
-              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                <Button type="button" variant="ghost">
-                  Cancel
-                </Button>
-                <Button type="button" variant="primary">
-                  Save
-                </Button>
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(200px, 1fr))', gap: 16 }}>
+                  <Input label="Full name" defaultValue={PROFILE.fullName} />
+                  <Input label="Job title" defaultValue={PROFILE.jobTitle} />
+                  <Input label="Email" type="email" defaultValue={PROFILE.email} />
+                  <Input label="Phone" type="tel" defaultValue={PROFILE.phone} />
+                  <Input label="Department" defaultValue={PROFILE.department} />
+                  <Input label="Manager" defaultValue={PROFILE.manager} />
+                  <Input label="Language" defaultValue={PROFILE.language} />
+                  <Input label="Time zone" defaultValue={PROFILE.timeZone} />
+                </div>
+                <Density value="compact">
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                    <Button type="button" variant="ghost">
+                      Cancel
+                    </Button>
+                    <Button type="button" variant="primary">
+                      Save
+                    </Button>
+                  </div>
+                </Density>
               </div>
-            </Density>
+            </Card>
           </div>
-        </Card>
+
+          <div style={{ width: 280, flexShrink: 0 }}>
+            <Card>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Text variant="title">Account summary</Text>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <SummaryRow label="Employee ID">
+                    <Text variant="body">{ACCOUNT_SUMMARY.employeeId}</Text>
+                  </SummaryRow>
+                  <SummaryRow label="Start date">
+                    <Text variant="body">{ACCOUNT_SUMMARY.startDate}</Text>
+                  </SummaryRow>
+                  <SummaryRow label="Status">
+                    <Chip variant="status" tone="strong">
+                      {ACCOUNT_SUMMARY.status}
+                    </Chip>
+                  </SummaryRow>
+                  <SummaryRow label="Last login">
+                    <Text variant="body">{ACCOUNT_SUMMARY.lastLogin}</Text>
+                  </SummaryRow>
+                  <SummaryRow label="Two-factor auth">
+                    <Chip variant="status" tone="accent">
+                      {ACCOUNT_SUMMARY.twoFactor}
+                    </Chip>
+                  </SummaryRow>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
