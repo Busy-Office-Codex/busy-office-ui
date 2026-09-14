@@ -161,10 +161,13 @@ export function Inbox() {
                 </Text>
                 <Density value="compact">
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <Button type="button" variant="secondary">
+                    {/* Every row's Assign/Archive repeats the same visible text — disambiguating
+                        aria-label per row, same precedent as ListReport.tsx's row-selection
+                        checkboxes ("Select ${order.po}"). */}
+                    <Button type="button" variant="secondary" aria-label={`Assign ${thread.subject}`}>
                       Assign
                     </Button>
-                    <Button type="button" variant="ghost">
+                    <Button type="button" variant="ghost" aria-label={`Archive ${thread.subject}`}>
                       Archive
                     </Button>
                   </div>

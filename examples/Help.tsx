@@ -77,7 +77,7 @@ export function Help() {
         </div>
 
         <div style={{ maxWidth: 480 }}>
-          <Input placeholder="Search help articles…" size="search" />
+          <Input aria-label="Search help articles" placeholder="Search help articles…" size="search" />
         </div>
 
         <Card>
