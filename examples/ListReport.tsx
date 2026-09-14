@@ -5,6 +5,7 @@ import {
   Card,
   Chip,
   type ChipTone,
+  Density,
   Dropdown,
   Input,
   Table,
@@ -343,12 +344,14 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
         gap: 20,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <Text variant="heading">Purchase orders</Text>
-        <div style={{ flex: 1 }} />
-        <Button variant="secondary" size="compact">From requisition</Button>
-        <Button variant="primary" size="compact">+ New PO</Button>
-      </div>
+      <Density value="compact">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <Text variant="heading">Purchase orders</Text>
+          <div style={{ flex: 1 }} />
+          <Button variant="secondary">From requisition</Button>
+          <Button variant="primary">+ New PO</Button>
+        </div>
+      </Density>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
         <StatTile label="Awaiting approval" value={String(AWAITING_APPROVAL_COUNT)} shimmerWidth="40%" loading={state === 'loading'} />
@@ -444,9 +447,9 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
       {state === 'error' && (
         <Card role="alert">
           <Text variant="body">Purchase orders couldn't be loaded. Try again.</Text>
-          <div>
-            <Button variant="secondary" size="compact">Retry</Button>
-          </div>
+          <Density value="compact">
+            <Button variant="secondary">Retry</Button>
+          </Density>
         </Card>
       )}
 
@@ -459,7 +462,8 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
       {state === 'ready' && (
         <div role="region" aria-label="Purchase orders table" tabIndex={0} style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}>
           <div style={{ minWidth: 760 }}>
-          <Table density="compact">
+          <Density value="compact">
+          <Table>
             <TableHead>
               <TableRow>
                 <TableHeaderCell>
@@ -514,6 +518,7 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
               )}
             </TableBody>
           </Table>
+          </Density>
           </div>
         </div>
       )}
