@@ -41,6 +41,18 @@ test('a checked checkbox fills solid, since appearance:none (required for the 4p
   await expect(checkbox).toHaveCSS('border-color', 'rgb(15, 23, 42)');
 });
 
+test('the checkbox is still keyboard-toggleable — appearance:none only repaints it, native activation is untouched', async ({ page }) => {
+  await page.goto('/#examples');
+
+  const checkbox = page.getByRole('checkbox', { name: 'Select PO-1042', exact: true });
+  await checkbox.focus();
+  await expect(checkbox).not.toBeChecked();
+  await page.keyboard.press('Space');
+  await expect(checkbox).toBeChecked();
+  await page.keyboard.press('Space');
+  await expect(checkbox).not.toBeChecked();
+});
+
 test('a row-selection checkbox shows the shared focus-visible ring', async ({ page }) => {
   await page.goto('/#examples');
 
