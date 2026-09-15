@@ -64,7 +64,7 @@ test('all three sample pages share the same content padding, so their headings l
   expect(dashboardX).toBe(24);
 });
 
-test('no sample page scrolls into empty canvas below its content: scrollHeight equals the 800px viewport for all three pages', async ({ page }) => {
+test('no sample page scrolls into empty canvas below its content: scrollHeight equals the 800px viewport for the two unchanged pages', async ({ page }) => {
   await page.setViewportSize(VIEWPORT);
   await page.goto('/#examples');
 
@@ -76,11 +76,25 @@ test('no sample page scrolls into empty canvas below its content: scrollHeight e
   await page.getByRole('button', { name: 'Sales', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'SO-1042 · Northwind Traders' })).toBeVisible();
   expect(await scrollHeight()).toBe(800);
+});
+
+test('Dashboard genuinely scrolls past 800px now that it has a real revenue-trend chart, not phantom empty space', async ({ page }) => {
+  // Dashboard grew taller once Chart.tsx's first real consumer (the "Revenue trend" card, ROADMAP
+  // issue #16) landed — a real content addition, not the min-height/margin/banner class of bug
+  // the test above still guards against on the two pages that haven't changed. A generous upper
+  // bound (instead of asserting one exact pixel height tied to today's specific chart size) still
+  // catches a genuine phantom-scroll regression without being brittle to reasonable future edits.
+  await page.setViewportSize(VIEWPORT);
+  await page.goto('/#examples');
+  const scrollHeight = () => page.evaluate(() => document.scrollingElement?.scrollHeight);
 
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
   await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Dashboards\b/ }).click();
   await expect(page.getByRole('heading', { name: 'Good morning, Priya' })).toBeVisible();
-  expect(await scrollHeight()).toBe(800);
+
+  const height = await scrollHeight();
+  expect(height).toBeGreaterThan(800);
+  expect(height).toBeLessThan(1200);
 });
 
 test('the preview host resets the UA body margin', async ({ page }) => {

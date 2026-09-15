@@ -109,6 +109,31 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('>Dark</button>');
   });
 
+  it('renders a Chart as an aria-hidden canvas plus a real, visually-hidden accessible data table', () => {
+    const markup = renderToStaticMarkup(
+      createElement(designSystem.Chart, {
+        type: 'bar',
+        title: 'Stock by warehouse',
+        valueLabel: 'units',
+        data: [
+          { label: 'East', value: 420 },
+          { label: 'West', value: 310 },
+        ],
+      }),
+    );
+
+    // Chart.js itself only draws once mounted in a real browser (useEffect never runs during
+    // server rendering) — this checks the markup SSR can produce: the canvas shell and the real
+    // accessible-table fallback, not the drawn chart.
+    expect(markup).toContain('<canvas');
+    expect(markup).toContain('aria-hidden="true"');
+    expect(markup).toContain('<table');
+    expect(markup).toContain('<caption>Stock by warehouse</caption>');
+    expect(markup).toContain('>East</td>');
+    expect(markup).toContain('>420 units</td>');
+    expect(markup).toContain('Value (units)');
+  });
+
   it('renders a controlled modal on a native <dialog>, closed by default', () => {
     // Modal is always mounted so `showModal()`/`close()` can be called
     // imperatively as `open` changes; a dialog with no `open` attribute is
