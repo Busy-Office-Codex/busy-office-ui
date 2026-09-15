@@ -30,6 +30,10 @@ const PAGE_LABELS = [
   'Users and roles',
   'Forms',
   'Workflows',
+  // M7 Slice 1 (Sales-to-billing) additions — same flexible-layout conventions, checked the same
+  // way rather than assumed to inherit it.
+  'Quotations',
+  'Billing',
 ];
 
 for (const label of PAGE_LABELS) {

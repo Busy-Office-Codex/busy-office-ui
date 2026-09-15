@@ -70,7 +70,9 @@ const NAV: Record<AppShellModule, string[]> = {
   // sample-pages-navigation.spec.ts and others target it by exact label). The list-view screen
   // (item 24) needed its own distinct label rather than overloading the same one; 'Sales orders'
   // (plural) added as a new sibling entry, not a rename.
-  Sales: ['Customers', 'Sales orders', 'Sales order', 'Delivery', 'Invoice', 'Returns'],
+  // 'Quotations'/'Billing' added M7, Slice 1 (Sales-to-billing) — purely additive, same as every
+  // earlier NAV.Sales expansion this file's own comments already document.
+  Sales: ['Customers', 'Quotations', 'Sales orders', 'Sales order', 'Delivery', 'Billing', 'Invoice', 'Returns'],
   Purchase: ['Purchase orders', 'Suppliers', 'Inventory', 'Approvals', 'Receiving'],
   Finance: ['Overview', 'Ledger', 'Receivables', 'Payables', 'Reports'],
   BI: ['Dashboards', 'Explore', 'Datasets', 'Schedules'],
