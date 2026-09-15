@@ -85,6 +85,30 @@ describe('design-system rendered contracts', () => {
     expect(statusMarkup).not.toContain('<button');
   });
 
+  it('renders a ButtonGroup as a labelled radiogroup with one checked radio and disabled segments preserved', () => {
+    const markup = renderToStaticMarkup(
+      createElement(designSystem.ButtonGroup, {
+        'aria-label': 'Appearance',
+        value: 'light',
+        onChange: () => {},
+        options: [
+          { value: 'light', label: 'Light' },
+          { value: 'dark', label: 'Dark', disabled: true, ariaLabel: 'Dark — not available yet' },
+        ],
+      }),
+    );
+
+    expect(markup).toContain('role="radiogroup"');
+    expect(markup).toContain('aria-label="Appearance"');
+    expect(markup).toContain('role="radio"');
+    expect(markup).toContain('aria-checked="true"');
+    expect(markup).toContain('aria-checked="false"');
+    expect(markup).toContain('aria-label="Dark — not available yet"');
+    expect(markup).toContain('disabled');
+    expect(markup).toContain('>Light</button>');
+    expect(markup).toContain('>Dark</button>');
+  });
+
   it('renders a controlled modal on a native <dialog>, closed by default', () => {
     // Modal is always mounted so `showModal()`/`close()` can be called
     // imperatively as `open` changes; a dialog with no `open` attribute is
