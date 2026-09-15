@@ -28,6 +28,8 @@ import { Planning } from '../examples/Planning.js';
 import { ProductionOrders } from '../examples/ProductionOrders.js';
 import { Users } from '../examples/Users.js';
 import { Roles } from '../examples/Roles.js';
+import { Companies } from '../examples/Companies.js';
+import { Integrations } from '../examples/Integrations.js';
 import { AuditLog } from '../examples/AuditLog.js';
 import { Analytics } from '../examples/Analytics.js';
 import { BuilderScreens } from '../examples/BuilderScreens.js';
@@ -92,6 +94,10 @@ const routes = [
   // M7, Slice 9 (Administration, role management) — fills the pre-existing NAV.Administration
   // 'Roles' placeholder (M6).
   { id: 'roles', module: 'Administration', label: 'Roles' },
+  // M7, Slice 12 (Administration — companies & entities, integrations & API) — fills the last two
+  // pre-existing NAV.Administration placeholders (M6): 'Companies' and 'Integrations'.
+  { id: 'companies', module: 'Administration', label: 'Companies' },
+  { id: 'integrations', module: 'Administration', label: 'Integrations' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -124,6 +130,8 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   analytics: <Analytics />,
   'builder-screens': <BuilderScreens />,
   roles: <Roles />,
+  companies: <Companies />,
+  integrations: <Integrations />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */

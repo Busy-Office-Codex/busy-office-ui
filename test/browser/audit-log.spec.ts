@@ -17,13 +17,14 @@ test('lists seeded activity across multiple domains, newest first', async ({ pag
   await expect(page.getByRole('row', { name: /Requisition.*REQ-4001.*submitted for approval/ })).toBeVisible();
   await expect(page.getByRole('row', { name: /Quotation.*QUO-3001.*sent to Northwind Traders/ })).toBeVisible();
 
-  // Newest seeded entry (2026-09-15, a User event) renders above the oldest (2026-08-20, a
-  // Quotation event) — reverse-chronological, not insertion order. Scoped to this screen's own
-  // table region: previously-visited routes stay in the DOM as `hidden` panes (SamplePreview's
-  // own persistence model in preview/client.tsx), so an unscoped `tbody tr` can silently match a
-  // different page's table.
+  // Newest seeded entry (2026-09-15, an Integration event — Slice 12) renders above the oldest
+  // (2026-08-20, a Quotation event) — reverse-chronological, not insertion order (both are dated
+  // 2026-09-15; this asserts array order, not a real date sort — see AuditLog.tsx). Scoped to this
+  // screen's own table region: previously-visited routes stay in the DOM as `hidden` panes
+  // (SamplePreview's own persistence model in preview/client.tsx), so an unscoped `tbody tr` can
+  // silently match a different page's table.
   const bodyRows = page.getByRole('region', { name: 'Audit log table' }).locator('tbody tr');
-  await expect(bodyRows.first()).toContainText('Renee Castillo assigned role Warehouse');
+  await expect(bodyRows.first()).toContainText('Integration connected — Slack notifications');
   await expect(bodyRows.last()).toContainText('Quotation QUO-3001 sent to Northwind Traders');
 });
 

@@ -223,6 +223,33 @@ export type User = {
   roleId?: string;
 };
 
+// --- Administration — companies & entities, integrations & API (Slice 12) ----------------------
+
+export type CompanyStatus = 'active' | 'inactive';
+
+/** A legal entity/business unit under the account — distinct from Settings.tsx's own single
+ * "Company" form (that screen edits the ONE entity a host itself is; this models the multi-entity
+ * structure AdminOverview.tsx's "Companies & entities" card names). */
+export type Company = {
+  id: string;
+  legalName: string;
+  businessUnit: string;
+  taxId: string;
+  address: Address;
+  status: CompanyStatus;
+};
+
+export type IntegrationStatus = 'connected' | 'disconnected';
+
+export type Integration = {
+  id: string;
+  name: string;
+  category: string;
+  status: IntegrationStatus;
+  /** Set only while `status` is `'connected'`. */
+  connectedAt?: string;
+};
+
 export type ActivityEntry = {
   id: string;
   at: string;
@@ -238,7 +265,9 @@ export type ActivityEntry = {
     | 'plannedOrder'
     | 'productionOrder'
     | 'user'
-    | 'role';
+    | 'role'
+    | 'company'
+    | 'integration';
   recordId: string;
   message: string;
 };
@@ -263,6 +292,8 @@ export type AppState = {
   productionOrders: Record<string, ProductionOrder>;
   roles: Record<string, Role>;
   users: Record<string, User>;
+  companies: Record<string, Company>;
+  integrations: Record<string, Integration>;
   activity: ActivityEntry[];
   /**
    * A record id another screen wants pre-selected the next time its owning list+detail screen
