@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { createStore, useStoreState } from './store.js';
 import { seed } from './seed.js';
-import type { AppState, GoodsReceiptLine, Invoice, Payment, User } from './types.js';
+import type { AppState, GoodsReceiptLine, Invoice, Payment, Role, User } from './types.js';
 import { documentTotal } from './types.js';
 
 /** The one shared store instance every reference-app screen reads from. */
@@ -349,6 +349,42 @@ export const appActions = {
         'user',
         userId,
         `${user.name} assigned role ${role.name}`,
+      );
+    });
+  },
+
+  // --- Administration + role-based config, role management (Slice 9) --------------------
+
+  /** Toggles one module in/out of a role's grants — the "effective access preview" on Users.tsx
+   * (Slice 4) reads this live, so editing a role here changes what every user holding it can
+   * see, not just a standalone settings screen nobody else reads. */
+  toggleRoleModuleAccess(roleId: string, module: string) {
+    appStore.setState((state) => {
+      const role = state.roles[roleId];
+      if (!role) return state;
+      const granted = role.moduleAccess.includes(module);
+      const nextModuleAccess = granted ? role.moduleAccess.filter((m) => m !== module) : [...role.moduleAccess, module];
+      return logActivity(
+        { ...state, roles: { ...state.roles, [roleId]: { ...role, moduleAccess: nextModuleAccess } } },
+        'role',
+        roleId,
+        `${role.name} ${granted ? 'lost' : 'gained'} ${module} access`,
+      );
+    });
+  },
+
+  /** A real "clone role" — the brief's own named Administration journey (create/edit/clone a
+   * role) — copies the source role's current grants under a new name, not a blank template. */
+  cloneRole(roleId: string, newRoleId: string) {
+    appStore.setState((state) => {
+      const role = state.roles[roleId];
+      if (!role || state.roles[newRoleId]) return state;
+      const clone: Role = { id: newRoleId, name: `${role.name} (copy)`, moduleAccess: [...role.moduleAccess] };
+      return logActivity(
+        { ...state, roles: { ...state.roles, [newRoleId]: clone } },
+        'role',
+        newRoleId,
+        `${clone.name} cloned from ${role.name}`,
       );
     });
   },

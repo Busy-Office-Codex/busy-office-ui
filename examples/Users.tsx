@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Card, Chip, type ChipTone, Density, Dropdown, Input, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { appActions, appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { ALL_MODULES } from './data/types.js';
 
 /**
  * Users + role assignment + access preview + audit history (ROADMAP M7's ERP reference-app
@@ -24,8 +25,6 @@ import { useStoreState } from './data/store.js';
 
 const STATUS_TONE: Record<string, ChipTone> = { invited: 'accent', active: 'strong', deactivated: 'neutral' };
 const STATUS_LABEL: Record<string, string> = { invited: 'Invited', active: 'Active', deactivated: 'Deactivated' };
-
-const ALL_MODULES = ['General', 'Sales', 'Purchase', 'Production', 'Finance', 'BI', 'Administration', 'Builder', 'Settings'];
 
 let nextUserSeq = 1;
 
