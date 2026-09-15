@@ -99,17 +99,19 @@ test('the resize divider gets its own :focus-visible ring on real keyboard focus
   expect(outline).toBe('2px');
 });
 
-test('a System-category thread offers only Archive, not Assign — there is no person to hand it off to', async ({ page }) => {
+// A third "grill the design" pass (2026-09-15, "screen looks messy now" against a live
+// screenshot) moved Assign/Archive off every thread-list row into the detail pane
+// (recordContext), acting on "whichever thread is open" — the same place Approvals.tsx already
+// keeps its own row-level actions, not a new pattern. Repeating two full-weight Button labels
+// down 5-6 rows read as noise; the list is back to two lines per row.
+test('Assign/Archive live once in the detail pane, not repeated on every thread-list row', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await openInbox(page);
 
-  // Each row's Archive/Assign button has an exact, per-thread aria-label ("Archive <subject>") —
-  // a more precise target than trying to scope a locator to "the row containing this text", which
-  // would match every ancestor div up the tree, not just the row itself.
-  await expect(page.getByRole('button', { name: 'Archive Weekly digest is ready', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Assign Weekly digest is ready', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Assign', exact: true })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Archive', exact: true })).toHaveCount(1);
 
-  // A Mentions/Assigned thread still gets both.
-  await expect(page.getByRole('button', { name: 'Assign Assigned: expedite PO-1035', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Archive Assigned: expedite PO-1035', exact: true })).toBeVisible();
+  // Confirm they sit in the detail pane (next to the open thread's record context), not the list.
+  const recordHeading = page.getByRole('heading', { name: 'SO-1042 · Northwind Traders' });
+  await expect(recordHeading).toBeVisible();
 });

@@ -67,14 +67,28 @@ import { color } from '../src/tokens.stylex.js';
  * screenshot the owner sent — traced a visually broken-looking full-height
  * rectangle around the handle's tall, narrow hit box.
  *
- * Two more findings from that same "grill the design" pass (2026-09-15):
+ * A second "grill the design" pass (2026-09-15, against a live screenshot):
  * `Filter`/`Mark all read` only ever act on the thread list, but used to
  * sit in the page-wide header, right-aligned over the DETAIL pane rather
  * than the list they control — moved into `listToolbar`, which now sits
- * directly above the thread list in both layouts. And "Assign" no longer
- * renders on System-category rows (a digest or a backorder alert has no
- * person's judgment call to hand off) — showing an action that doesn't
- * semantically apply is inbox noise, not restraint.
+ * directly above the thread list in both layouts.
+ *
+ * A third pass (2026-09-15, again from a live screenshot — "screen looks
+ * messy now") moved Assign/Archive off every thread-list row entirely, into
+ * `recordContext` (the detail pane), acting on "whichever thread is open"
+ * instead of each row individually. Repeating the same two `Button` labels
+ * down 5-6 rows read as noise, not restraint — `ghost`/`secondary` `Button`
+ * text renders at `font.weightMedium`/near-full ink color by design (meant
+ * to stand alone in a toolbar), which looks disproportionately heavy
+ * repeated that many times inside a dense list. This also isn't a new
+ * pattern invented for Inbox: Approvals.tsx already keeps its own row-level
+ * actions (Approve/Reject/Request changes) in ITS detail pane, not on the
+ * queue list — Inbox is catching up to a precedent already established
+ * elsewhere in this same package. The list itself is back to two lines per
+ * row (subject + timestamp, sender + preview), matching the reference
+ * screenshot; the per-category "Assign only for Mentions/Assigned, not
+ * System" judgment from the second pass no longer applies now that there's
+ * one fixed pair of actions rather than one instance per thread.
  */
 
 type ThreadCategory = 'Mentions' | 'Assigned' | 'System';
@@ -220,32 +234,6 @@ function ThreadRow({ thread, selected, isLast }: { thread: Thread; selected: boo
             {thread.sender} · {thread.preview}
           </Text>
         </div>
-
-        {/* Assign/Archive get their own line, not the title's — sharing the title's row with
-            two buttons squeezed a long subject down to 1-2 characters before ellipsis on a
-            narrow/mobile row (caught visually, not just by the no-horizontal-overflow check:
-            that check passed while the title was already unreadable). This keeps the row
-            compact — no per-thread Card — while staying legible at every width, without a
-            `@media` query. */}
-        <Density value="compact">
-          <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
-            {/* "Assign" only for Mentions/Assigned threads (owner-directed, "grilled" from a
-                live screenshot): a System thread ("Weekly digest is ready", sender "System") has
-                no person's judgment call to hand off — offering "Assign" there anyway is the kind
-                of inbox noise that trains people to stop reading row actions. Every row's
-                Assign/Archive repeats the same visible text — disambiguating aria-label per row,
-                same precedent as ListReport.tsx's row-selection checkboxes ("Select
-                ${order.po}"). */}
-            {thread.category !== 'System' && (
-              <Button type="button" variant="ghost" aria-label={`Assign ${thread.subject}`}>
-                Assign
-              </Button>
-            )}
-            <Button type="button" variant="ghost" aria-label={`Archive ${thread.subject}`}>
-              Archive
-            </Button>
-          </div>
-        </Density>
       </div>
     </div>
   );
@@ -417,6 +405,15 @@ export function Inbox() {
       </Card>
     );
 
+  // Assign/Archive moved here from every thread-list row (owner-directed, "grilled" from a live
+  // screenshot: repeating the same two Button labels down 5-6 rows — each rendering at
+  // Button's full font.weightMedium/color.textPrimary, meant to stand alone in a toolbar — read
+  // as visual noise competing with the actual content, not restraint). They now act on
+  // "whichever thread is open", the same place Approvals.tsx already puts its own row-level
+  // actions (Approve/Reject/Request changes live in ITS detail pane too, not on the queue
+  // list) — this wasn't a new pattern invented for Inbox, just Inbox catching up to a precedent
+  // already established elsewhere in this file's own package. The thread list itself is back to
+  // two lines per row (subject + timestamp, sender + preview), matching the reference screenshot.
   const recordContext = (
     <Card>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -424,6 +421,17 @@ export function Inbox() {
         <Chip variant="status" tone="accent">
           Awaiting approval
         </Chip>
+        <div style={{ flex: 1 }} />
+        <Density value="compact">
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button type="button" variant="secondary">
+              Assign
+            </Button>
+            <Button type="button" variant="ghost">
+              Archive
+            </Button>
+          </div>
+        </Density>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
