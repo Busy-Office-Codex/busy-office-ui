@@ -119,7 +119,13 @@ const styles = stylex.create({
     // block (see the component body) rather than being static, since the panel is portaled to
     // `document.body` and needs real viewport coordinates, not a CSS value relative to a parent
     // it's no longer a DOM descendant of.
-    width: '280px',
+    // 320px, not the original 280px (owner-flagged, 2026-09-15: "needs bigger space for control
+    // center?"): with `ButtonGroup`'s segments now equal-width (see ButtonGroup.tsx), the widest
+    // label in this panel — "Comfortable" — needs roughly 113px on its own at this padding/font
+    // size (measured live), so a 3-segment row needs ~339px before border/padding; 280px was
+    // already tight for the OLD unequal-width layout and would force real crowding once every
+    // segment has to match the widest one's share.
+    width: '320px',
     borderRadius: radius.md,
     padding: space.space4,
     backgroundColor: glass.bg,
@@ -199,7 +205,24 @@ export function ControlCenterButton({
 
     const positionPanel = () => {
       const rect = triggerRef.current?.getBoundingClientRect();
-      if (rect) setPanelPosition({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+      if (!rect) return;
+      // Found live (owner-flagged, 2026-09-15, widening the panel from 280px to 320px to fit
+      // ButtonGroup's now-equal-width segments): a pure right-edge-aligned `right` value pushed
+      // the panel's LEFT edge to x:-56 at a 390px viewport — the top bar's own narrow-viewport
+      // retraction (Shell.tsx's `chromeIsNarrow`) sits the trigger close enough to the left edge
+      // that a 320px-plus-padding panel no longer fits between the trigger and the screen's left
+      // side. `panelRef.current` already exists in the DOM at this point (React commits `open`'s
+      // new DOM before this layout effect runs), so its real rendered width — fixed by the
+      // `panel` style's own `width`, independent of position — can be measured directly instead
+      // of duplicating that value as a second hardcoded constant here.
+      const panelWidth = panelRef.current?.getBoundingClientRect().width;
+      let right = window.innerWidth - rect.right;
+      if (panelWidth) {
+        const viewportMargin = 12; // matches Shell's own narrow-viewport horizontal padding
+        const maxRight = window.innerWidth - panelWidth - viewportMargin;
+        right = Math.min(right, Math.max(maxRight, viewportMargin));
+      }
+      setPanelPosition({ top: rect.bottom + 8, right });
     };
     positionPanel();
     // The trigger lives inside Shell's `position: fixed` top bar, so its viewport position never
