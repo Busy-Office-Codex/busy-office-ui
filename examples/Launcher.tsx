@@ -1,4 +1,6 @@
 import { Button, Card, Chip, Text } from '../src/index.js';
+import { appStore } from './data/appStore.js';
+import { useStoreState } from './data/store.js';
 
 /**
  * The "Home" screen — the app launcher. Mirrors templates/erp-skeleton's
@@ -6,6 +8,14 @@ import { Button, Card, Chip, Text } from '../src/index.js';
  * grid grouped loosely by department (Finance/BI/Administration render as
  * folder-style icons in the real wireframe). Meant to render as the content
  * inside `AppShell` (module="General" active="Home") — see AppShell.tsx.
+ *
+ * "Recent activity" (ROADMAP M7's ERP reference-app initiative, Slice 11, Entry/nav) is this
+ * file's first connection to the shared `examples/data` store — genuine, not a same-named
+ * coincidence: it reads the exact `state.activity` log every slice since Slice 1 already writes
+ * to (the same one AuditLog.tsx reads), rather than a separate "recently viewed" log this app
+ * would need to newly instrument on every single screen's row-click just to populate. "For you"/
+ * "All apps" above stay the static M6 sample they already were — a role-scoped landing view isn't
+ * something a single seeded "Sales manager" persona can honestly demonstrate live.
  */
 
 const FOR_YOU = [
@@ -45,6 +55,9 @@ function AppTile({ label, folder, muted, destination, onNavigate }: { label: str
 }
 
 export function Launcher({ destinations, onNavigate }: { destinations?: readonly LauncherDestination[]; onNavigate?: (routeId: string) => void }) {
+  const activity = useStoreState(appStore, (state) => state.activity);
+  const recentActivity = activity.slice(-5).reverse();
+
   return (
     <div
       style={{
@@ -79,6 +92,22 @@ export function Launcher({ destinations, onNavigate }: { destinations?: readonly
           ))}
         </div>
       </div>
+
+      {recentActivity.length > 0 && (
+        <div role="region" aria-label="Recent activity" style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Text variant="overline">Recent activity</Text>
+          <Card>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {recentActivity.map((entry) => (
+                <div key={entry.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                  <Text variant="body">{entry.message}</Text>
+                  <Text variant="caption">{entry.at}</Text>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
 
       <div style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <Text variant="overline">All apps</Text>
