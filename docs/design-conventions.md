@@ -51,6 +51,13 @@ A page with more than one content column (a main pane plus a side panel, or seve
 
 This reflows automatically, with no `@media` query: once a row's columns can't fit their flex-basis widths side by side, the browser wraps them onto their own full-width rows — which is exactly what a narrow/mobile viewport needs (each panel becomes a full-width stacked block). Verify a new or changed page at both a wide desktop width and a narrow (~375-400px) mobile width: no column should force horizontal scrolling, and every column should read sensibly at its full-row width once wrapped.
 
+### Full-height workspace pages (the exception)
+
+Every page above scrolls with the rest of the document — the normal case. A page whose job is holding an unbounded list alongside a conversation/composer the user wants anchored (a mail-client-style inbox, not a form) can instead become a full-height "workspace" view that stops scrolling itself: it fills `AppShell`'s content slot exactly and gives its own list/detail regions `overflow-y: auto` instead. `examples/Inbox.tsx` is the one example of this today (scoped there deliberately, gated behind a `matchMedia('(min-width: 900px)')` check — below that width it falls back to the normal stacked/page-scrolling layout unchanged, since a fixed-height dual-pane layout doesn't fit a mobile viewport). Two things a page opting into this needs, both already true in `Shell.tsx`:
+
+- Size against `height: 'calc(100vh - 192px)'` (96px top + 96px bottom, matching `Shell`'s fixed header/dock reservations), not `height: '100%'` — `Shell`'s own root uses `min-height: 100vh` (deliberately, so every normal page can grow taller than the viewport), which never gives the ancestor chain a *definite* height for a percentage to resolve against; anchoring to the viewport directly sidesteps that ambiguity. Confirmed live while building Inbox's version: `height: '100%'` silently rendered at whatever height the content demanded, `overflow: hidden` and all, never actually capping at the viewport.
+- `overflow: hidden` on the page's own root, then `overflow-y: auto` + `min-height: 0` on each internally-scrolling region (the classic nested-flexbox requirement — a flex item's default `min-height: auto` refuses to shrink below its content's size unless overridden).
+
 ## Where the truth lives
 
 - `src/components/`: authoritative React prop types and implementation.
