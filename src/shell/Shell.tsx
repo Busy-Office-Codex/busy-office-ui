@@ -49,6 +49,10 @@ export const SHELL_MAX_ROUTES = 32;
 export const SHELL_MAX_ROUTE_ID_LENGTH = 64;
 export const SHELL_MAX_ROUTE_LABEL_LENGTH = 80;
 
+// Below this, the top bar's brand slot retracts regardless of scroll position — see the
+// `chromeIsNarrow` comment in `Shell()` for the full measured-overflow rationale.
+const NARROW_CHROME_QUERY = '(max-width: 640px)';
+
 const FONT_STACK = '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 /** Pure validation for hosts that build route registries dynamically. */
@@ -365,6 +369,31 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Owner-directed (2026-09-15): the top bar's brand slot is host-supplied, unbounded content
+  // (examples/AppShell.tsx's own default is already ~180px: a logo square, "Busy Office", and an
+  // "Acme Co ▾" org switcher) sharing one 52px row with the palette trigger and the `account`
+  // slot — neither of which Shell can shrink, since both are host content it only renders as
+  // given. Confirmed live at a 390px viewport (a real phone width): with brand always shown, the
+  // bar's own content measured 611px wide against a 390px viewport — 221px of overflow, silently
+  // "handled" by the bar's pre-existing `overflowX: auto` (a fixed-looking header that actually
+  // requires a horizontal swipe most users won't discover), pushing `account` (the notification
+  // bell, avatar, and any primary action) entirely out of the initial viewport. Brand is the one
+  // piece of that row Shell fully owns end to end (it already wraps host content or its own
+  // default in a `chromeExpanded`-driven collapse), so it's the one piece Shell can retract on
+  // its own authority to guarantee the row fits — not a stylistic call, a fix for content that
+  // was already unreachable without knowing to scroll the header sideways. `matchMedia`, not a
+  // CSS `@media` query: brand's own maxWidth is computed in JS from BOTH this and
+  // `chromeExpanded` together (see below), which inline styles can't express as one rule.
+  const [chromeIsNarrow, setChromeIsNarrow] = useState(() => window.matchMedia(NARROW_CHROME_QUERY).matches);
+  useEffect(() => {
+    const mql = window.matchMedia(NARROW_CHROME_QUERY);
+    const onChange = () => setChromeIsNarrow(mql.matches);
+    onChange();
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+  const brandVisible = chromeExpanded && !chromeIsNarrow;
+
   const openPalette = (opener?: HTMLElement) => {
     if (paletteOpenRef.current) return;
     const activeElement = opener ?? document.activeElement;
@@ -434,24 +463,31 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
           boxShadow: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',
           display: 'flex',
           alignItems: 'center',
-          gap: 12,
-          padding: '0 20px',
+          // Tighter below 640px (same breakpoint `brandVisible` uses): retracting `brand` alone
+          // still left a real, measured overflow at a 390px phone width — CSS `gap` applies
+          // between every adjacent pair of flex children regardless of any one child's own
+          // content width, so even a fully-collapsed (0px) brand wrapper still "spends" a full
+          // gap on either side of it. Six such gaps plus the bar's own side padding were enough
+          // on their own to push `account` (a host-supplied, non-shrinkable slot) a further ~20px
+          // past the viewport — this closes that with margin, not just to the exact edge.
+          gap: chromeIsNarrow ? 8 : 12,
+          padding: chromeIsNarrow ? '0 12px' : '0 20px',
           overflowX: 'auto',
           overflowY: 'hidden',
         }}
       >
         <div
-          aria-hidden={!chromeExpanded}
-          inert={!chromeExpanded}
+          aria-hidden={!brandVisible}
+          inert={!brandVisible}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 12,
             flexShrink: 0,
             overflow: 'hidden',
-            maxWidth: chromeExpanded ? 240 : 0,
-            marginRight: chromeExpanded ? 0 : -12,
-            opacity: chromeExpanded ? 1 : 0,
+            maxWidth: brandVisible ? 240 : 0,
+            marginRight: brandVisible ? 0 : -12,
+            opacity: brandVisible ? 1 : 0,
             transitionProperty: 'max-width, margin-right, opacity',
             transitionDuration: motion.durationBase,
             transitionTimingFunction: motion.easeStandard,

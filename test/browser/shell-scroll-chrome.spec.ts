@@ -86,3 +86,37 @@ test('a collapsed dock is genuinely inert, not just visually hidden — a direct
   });
   expect(focusedAfterAttempt).toBe(false);
 });
+
+// Owner-directed (2026-09-15): "why do you need Busy Office on mobile — screen area is limited,
+// show only what's important?" Confirmed live before fixing anything: with `brand` always shown,
+// the top bar's own content measured 611px wide against a 390px phone viewport (221px past the
+// bar's `overflowX: auto` fallback) — pushing `account` (notifications, avatar, "+New") entirely
+// out of the initial view, reachable only by discovering you can swipe the header sideways. Brand
+// now retracts unconditionally below 640px (independent of scroll position — app-strip and dock
+// are untouched by width, only by scroll), the one piece of that row Shell fully owns end to end.
+test('below 640px, the brand slot retracts even at the top of the page — the top bar fits without horizontal overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/#examples');
+
+  await expect.poll(() => chromeState(page).then((s) => s.brandAriaHidden)).toBe('true');
+  // App strip and dock are driven by scroll, not width — at the top of the page, both stay
+  // expanded regardless of viewport width.
+  const state = await chromeState(page);
+  expect(state.dockAriaHidden).toBe('false');
+  expect(state.stripAriaHidden).toBe('false');
+
+  const overflow = await page.evaluate(() => {
+    const topBar = document.elementFromPoint(5, 20)?.closest('div[style*="position: fixed"]') as HTMLElement | null;
+    if (!topBar) return null;
+    return { scrollWidth: topBar.scrollWidth, clientWidth: topBar.clientWidth };
+  });
+  expect(overflow).not.toBeNull();
+  expect(overflow!.scrollWidth).toBeLessThanOrEqual(overflow!.clientWidth);
+});
+
+test('above 640px, the brand slot stays expanded at the top of the page, same as before', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/#examples');
+
+  await expect.poll(() => chromeState(page).then((s) => s.brandAriaHidden)).toBe('false');
+});
