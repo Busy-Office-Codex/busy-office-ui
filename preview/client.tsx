@@ -20,6 +20,8 @@ import { Approvals } from '../examples/Approvals.js';
 import { UsersAndRoles } from '../examples/UsersAndRoles.js';
 import { BuilderForms } from '../examples/BuilderForms.js';
 import { BuilderWorkflow } from '../examples/BuilderWorkflow.js';
+import { Quotations } from '../examples/Quotations.js';
+import { Billing } from '../examples/Billing.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -55,6 +57,10 @@ const routes = [
   { id: 'users-and-roles', module: 'Administration', label: 'Users and roles' },
   { id: 'builder-forms', module: 'Builder', label: 'Forms' },
   { id: 'builder-workflow', module: 'Builder', label: 'Workflows' },
+  // M7, Slice 1 (Sales-to-billing, ERP reference-app initiative): Sales' first two screens
+  // reading from the shared examples/data store instead of a page-local hardcoded array.
+  { id: 'quotations', module: 'Sales', label: 'Quotations' },
+  { id: 'billing', module: 'Sales', label: 'Billing' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -76,6 +82,8 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   'users-and-roles': <UsersAndRoles />,
   'builder-forms': <BuilderForms />,
   'builder-workflow': <BuilderWorkflow />,
+  quotations: <Quotations />,
+  billing: <Billing />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */
