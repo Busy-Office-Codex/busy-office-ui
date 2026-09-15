@@ -3,17 +3,25 @@ import { useRef, type KeyboardEvent } from 'react';
 import { color, density, font, motion, radius, space } from '../tokens.stylex.js';
 
 const styles = stylex.create({
-  // The track is the "one capsule" (docs/design-conventions.md's capsule rule) — segments are
-  // small pills floating inside it, not their own independent capsules with gaps between them
-  // (that shape already exists: `Chip variant="filter"` rows, see `examples/filterTabs.tsx`).
-  // Density-driven (`controlHeight`) like `Button`/`Dropdown`'s trigger/filter `Chip`, so a
-  // `ButtonGroup` sits at the same height as its capsule-family neighbors at every tier.
+  // The track is the "one capsule" (docs/design-conventions.md's capsule rule), and only the
+  // TRACK owns that shape — segments are plain rectangles, not independently pill-shaped tiles.
+  // Found live: an earlier version gave every segment its own `radius.pill`, so a middle segment
+  // rendered with rounded left AND right corners that didn't correspond to any real edge of the
+  // group (owner-flagged: "button doesn't make sense with round left/right for middle"). Fixed
+  // the standard way a joined/seamless segmented control gets its shape — `overflow: 'hidden'`
+  // on the track clips flat-edged segments into the track's own `radius.pill` ends automatically,
+  // so only the FIRST segment's left corners and the LAST segment's right corners ever read as
+  // rounded, with no per-segment position logic needed. No padding/gap either: segments sit flush
+  // against each other (a thin divider border, applied per-segment below, marks the seam) instead
+  // of floating as separately-spaced pills — that spaced-pill shape already exists as filter
+  // `Chip` rows (`examples/filterTabs.tsx`). Density-driven (`controlHeight`) like `Button`/
+  // `Dropdown`'s trigger/filter `Chip`, so a `ButtonGroup` sits at the same height as its capsule-
+  // family neighbors at every tier.
   track: {
     display: 'inline-flex',
-    alignItems: 'center',
-    gap: '2px',
-    padding: '2px',
+    alignItems: 'stretch',
     borderRadius: radius.pill,
+    overflow: 'hidden',
     borderStyle: 'solid',
     borderWidth: '1px',
     borderColor: color.borderStrong,
@@ -24,11 +32,9 @@ const styles = stylex.create({
   segment: {
     fontFamily: font.family,
     fontSize: density.fontSize,
-    // `controlHeight` minus the track's 2px top/bottom padding, so the segment fills the track
-    // exactly rather than leaving unequal inner whitespace at every density tier.
-    minHeight: `calc(${density.controlHeight} - 4px)`,
-    boxSizing: 'border-box',
-    borderRadius: radius.pill,
+    // No explicit height — `align-items: 'stretch'` (the track's default) fills each segment to
+    // the track's own content-box height, which the track's `minHeight` + `boxSizing: 'border-
+    // box'` above already pins to the ambient density tier.
     borderStyle: 'none',
     paddingInline: space.space4,
     display: 'inline-flex',
@@ -53,9 +59,9 @@ const styles = stylex.create({
     transitionDuration: motion.durationFast,
     transitionTimingFunction: motion.easeStandard,
     // Inset, not the capsule family's usual +2px offset (Button/Chip/Dropdown trigger): those
-    // are standalone controls, but a segment sits flush against its neighbors inside a 2px-
-    // padded track, where an outward ring would visually collide with the track's own border —
-    // same reasoning as Dropdown's `itemHighlighted` inset ring for menu options.
+    // are standalone controls, but a segment sits flush against its neighbors inside a track
+    // that clips overflow — an outward ring would get cut off at the track's own edge, same
+    // reasoning as Dropdown's `itemHighlighted` inset ring for menu options.
     outlineStyle: 'solid',
     outlineOffset: '-2px',
     outlineColor: {
@@ -66,6 +72,14 @@ const styles = stylex.create({
       default: 0,
       ':focus-visible': '2px',
     },
+  },
+  // Marks the seam between two flush segments — applied to every segment except the last (see
+  // the component body), so adjacent options stay visually scannable without the spaced-pill gap
+  // this redesign removed.
+  divider: {
+    borderInlineEndStyle: 'solid',
+    borderInlineEndWidth: '1px',
+    borderInlineEndColor: color.border,
   },
   // Same dark-ink fill as `Button`'s primary variant and filter `Chip`'s `selected` state — the
   // one "this is the active thing" treatment this design system already uses everywhere else,
@@ -160,7 +174,7 @@ export function ButtonGroup({ options, value, onChange, ...rest }: ButtonGroupPr
             tabIndex={selected ? 0 : -1}
             onClick={() => selectIndex(index)}
             onKeyDown={(event) => handleKeyDown(event, index)}
-            {...stylex.props(styles.segment, selected && styles.segmentSelected)}
+            {...stylex.props(styles.segment, index < options.length - 1 && styles.divider, selected && styles.segmentSelected)}
           >
             {option.label}
           </button>
