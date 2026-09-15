@@ -205,6 +205,121 @@ export const appActions = {
     });
   },
 
+  // --- Production planning (Slice 3) -----------------------------------------------------
+
+  /** An open recommendation → a new planned order for the suggested qty, linked both ways. */
+  actionRecommendation(recommendationId: string, newPlannedOrderId: string, dueDate: string) {
+    appStore.setState((state) => {
+      const recommendation = state.planningRecommendations[recommendationId];
+      if (!recommendation || recommendation.status !== 'open' || state.plannedOrders[newPlannedOrderId]) return state;
+      let nextState: AppState = {
+        ...state,
+        planningRecommendations: {
+          ...state.planningRecommendations,
+          [recommendationId]: { ...recommendation, status: 'actioned', plannedOrderId: newPlannedOrderId },
+        },
+        plannedOrders: {
+          ...state.plannedOrders,
+          [newPlannedOrderId]: {
+            id: newPlannedOrderId,
+            productId: recommendation.productId,
+            warehouseId: recommendation.warehouseId,
+            qty: recommendation.suggestedQty,
+            dueDate,
+            status: 'planned',
+            recommendationId,
+          },
+        },
+      };
+      nextState = logActivity(nextState, 'planningRecommendation', recommendationId, `Recommendation ${recommendationId} actioned`);
+      return logActivity(nextState, 'plannedOrder', newPlannedOrderId, `Planned order ${newPlannedOrderId} created`);
+    });
+  },
+
+  dismissRecommendation(recommendationId: string) {
+    appStore.setState((state) => {
+      const recommendation = state.planningRecommendations[recommendationId];
+      if (!recommendation || recommendation.status !== 'open') return state;
+      return logActivity(
+        { ...state, planningRecommendations: { ...state.planningRecommendations, [recommendationId]: { ...recommendation, status: 'dismissed' } } },
+        'planningRecommendation',
+        recommendationId,
+        `Recommendation ${recommendationId} dismissed`,
+      );
+    });
+  },
+
+  /** A planned order → a released production order on the shop floor, linked both ways. */
+  releasePlannedOrder(plannedOrderId: string, newProductionOrderId: string, startDate: string) {
+    appStore.setState((state) => {
+      const planned = state.plannedOrders[plannedOrderId];
+      if (!planned || planned.status !== 'planned' || state.productionOrders[newProductionOrderId]) return state;
+      let nextState: AppState = {
+        ...state,
+        plannedOrders: { ...state.plannedOrders, [plannedOrderId]: { ...planned, status: 'released', productionOrderId: newProductionOrderId } },
+        productionOrders: {
+          ...state.productionOrders,
+          [newProductionOrderId]: {
+            id: newProductionOrderId,
+            plannedOrderId,
+            productId: planned.productId,
+            warehouseId: planned.warehouseId,
+            qty: planned.qty,
+            status: 'released',
+            startDate,
+            dueDate: planned.dueDate,
+          },
+        },
+      };
+      nextState = logActivity(nextState, 'plannedOrder', plannedOrderId, `Planned order ${plannedOrderId} released`);
+      return logActivity(nextState, 'productionOrder', newProductionOrderId, `Production order ${newProductionOrderId} released to the shop floor`);
+    });
+  },
+
+  /** Completing a production order is the second (and last) action in this reference app that
+   * mutates stock — the finished qty is added to the target warehouse, same ledger
+   * `stockMovements` the goods-receipt flow already writes to, typed `'adjustment'` here since
+   * it's stock created by assembly, not purchased or physically counted. */
+  completeProductionOrder(productionOrderId: string) {
+    appStore.setState((state) => {
+      const order = state.productionOrders[productionOrderId];
+      if (!order || order.status !== 'in_progress') return state;
+
+      const stockLevels = [...state.stockLevels];
+      const existingIndex = stockLevels.findIndex((level) => level.productId === order.productId && level.warehouseId === order.warehouseId);
+      if (existingIndex >= 0) {
+        stockLevels[existingIndex] = { ...stockLevels[existingIndex], qtyOnHand: stockLevels[existingIndex].qtyOnHand + order.qty };
+      } else {
+        stockLevels.push({ productId: order.productId, warehouseId: order.warehouseId, qtyOnHand: order.qty, qtyReserved: 0 });
+      }
+      const today = new Date().toISOString().slice(0, 10);
+
+      const nextState: AppState = {
+        ...state,
+        productionOrders: { ...state.productionOrders, [productionOrderId]: { ...order, status: 'completed' } },
+        stockLevels,
+        stockMovements: [
+          ...state.stockMovements,
+          { id: `mv-runtime-${productionOrderId}`, productId: order.productId, warehouseId: order.warehouseId, type: 'adjustment', qty: order.qty, date: today, reference: productionOrderId },
+        ],
+      };
+      return logActivity(nextState, 'productionOrder', productionOrderId, `Production order ${productionOrderId} completed — stock updated`);
+    });
+  },
+
+  startProductionOrder(productionOrderId: string) {
+    appStore.setState((state) => {
+      const order = state.productionOrders[productionOrderId];
+      if (!order || order.status !== 'released') return state;
+      return logActivity(
+        { ...state, productionOrders: { ...state.productionOrders, [productionOrderId]: { ...order, status: 'in_progress' } } },
+        'productionOrder',
+        productionOrderId,
+        `Production order ${productionOrderId} started`,
+      );
+    });
+  },
+
   reset() {
     activitySeq = 0;
     appStore.reset();
