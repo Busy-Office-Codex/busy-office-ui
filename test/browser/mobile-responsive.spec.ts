@@ -43,6 +43,8 @@ const PAGE_LABELS = [
   // M7 Slice 4 (Administration + role-based config).
   'Users',
   'Audit log',
+  // M7 Slice 5 (Analytics).
+  'Analytics',
 ];
 
 for (const label of PAGE_LABELS) {

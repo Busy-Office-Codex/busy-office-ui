@@ -28,6 +28,7 @@ import { Planning } from '../examples/Planning.js';
 import { ProductionOrders } from '../examples/ProductionOrders.js';
 import { Users } from '../examples/Users.js';
 import { AuditLog } from '../examples/AuditLog.js';
+import { Analytics } from '../examples/Analytics.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -77,6 +78,8 @@ const routes = [
   // already unbuilt NAV.Administration placeholders (M6); no AppShell.tsx NAV change needed.
   { id: 'users', module: 'Administration', label: 'Users' },
   { id: 'audit-log', module: 'Administration', label: 'Audit log' },
+  // M7, Slice 5 (Analytics) — BI's second route, alongside the existing Dashboard.
+  { id: 'analytics', module: 'BI', label: 'Analytics' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -106,6 +109,7 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   'production-orders': <ProductionOrders />,
   users: <Users />,
   'audit-log': <AuditLog />,
+  analytics: <Analytics />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */

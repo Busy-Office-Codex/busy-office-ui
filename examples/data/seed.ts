@@ -276,4 +276,6 @@ export const seed: AppState = {
     { id: 'act-8', at: '2026-09-14', recordType: 'user', recordId: 'usr-5', message: 'Elena Cho invited (Finance)' },
     { id: 'act-9', at: '2026-09-15', recordType: 'user', recordId: 'usr-4', message: 'Renee Castillo assigned role Warehouse' },
   ],
+
+  focusRecordId: null,
 };

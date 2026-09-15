@@ -1,4 +1,5 @@
-import { createStore } from './store.js';
+import { useEffect } from 'react';
+import { createStore, useStoreState } from './store.js';
 import { seed } from './seed.js';
 import type { AppState, GoodsReceiptLine, Invoice, Payment, User } from './types.js';
 import { documentTotal } from './types.js';
@@ -352,8 +353,39 @@ export const appActions = {
     });
   },
 
+  // --- Analytics (Slice 5) -----------------------------------------------------------------
+
+  /** Sets the record a target list+detail screen should pre-select on its next render. */
+  focusRecord(recordId: string) {
+    appStore.setState((state) => ({ ...state, focusRecordId: recordId }));
+  },
+
+  /** Consumed by the target screen right after it acts on `focusRecordId`, so a later plain
+   * visit to that screen doesn't re-select a stale record. */
+  clearFocus() {
+    appStore.setState((state) => (state.focusRecordId === null ? state : { ...state, focusRecordId: null }));
+  },
+
   reset() {
     activitySeq = 0;
     appStore.reset();
   },
 };
+
+/**
+ * A list+detail screen calls this with a predicate for "is this id one of MY records" and a
+ * setter for its own selection state — when a dashboard exception (Analytics.tsx) sets
+ * `focusRecordId` to a matching id, the screen jumps its selection there and the focus is
+ * consumed (so a later plain visit doesn't re-trigger it). Three real consumers today
+ * (Billing.tsx, Requisitions.tsx, Planning.tsx) — a proven-reuse case for living here rather
+ * than being copied into each screen.
+ */
+export function useFocusRecord(matches: (recordId: string) => boolean, onMatch: (recordId: string) => void) {
+  const focusRecordId = useStoreState(appStore, (state) => state.focusRecordId);
+  useEffect(() => {
+    if (focusRecordId && matches(focusRecordId)) {
+      onMatch(focusRecordId);
+      appActions.clearFocus();
+    }
+  }, [focusRecordId]);
+}

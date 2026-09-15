@@ -86,7 +86,9 @@ const NAV: Record<AppShellModule, string[]> = {
   // Production planning).
   Production: ['Planning', 'Production orders'],
   Finance: ['Overview', 'Ledger', 'Receivables', 'Payables', 'Reports'],
-  BI: ['Dashboards', 'Explore', 'Datasets', 'Schedules'],
+  // 'Analytics' added M7, Slice 5 — purely additive alongside the existing 'Dashboards' (M6,
+  // the company-wide Dashboard.tsx). 'Explore'/'Datasets'/'Schedules' stay unbuilt placeholders.
+  BI: ['Dashboards', 'Analytics', 'Explore', 'Datasets', 'Schedules'],
   // ROADMAP M6 (issue #17, batch 4): the reference's "22 · Users and roles" screen is one
   // unified two-pane role editor covering both concepts together, not two separate screens —
   // rather than force it onto just 'Users' or just 'Roles' (leaving the other stranded, or

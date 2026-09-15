@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, Card, Chart, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
-import { appActions, appStore } from './data/appStore.js';
+import { appActions, appStore, useFocusRecord } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
 
 /**
@@ -29,6 +29,10 @@ export function Planning() {
   const state = useStoreState(appStore, (s) => s);
   const recommendationList = Object.values(state.planningRecommendations).sort((a, b) => (a.id < b.id ? 1 : -1));
   const [selectedId, setSelectedId] = useState(recommendationList[0]?.id ?? '');
+  useFocusRecord(
+    (id) => Boolean(state.planningRecommendations[id]),
+    (id) => setSelectedId(id),
+  );
   const selected = state.planningRecommendations[selectedId];
   const product = selected ? state.products[selected.productId] : undefined;
   const warehouse = selected ? state.warehouses[selected.warehouseId] : undefined;

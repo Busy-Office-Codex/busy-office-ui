@@ -259,6 +259,13 @@ export type AppState = {
   roles: Record<string, Role>;
   users: Record<string, User>;
   activity: ActivityEntry[];
+  /**
+   * A record id another screen wants pre-selected the next time its owning list+detail screen
+   * mounts or updates (Slice 5's dashboard-exception drill-down: "row Analytics.tsx surfaced" IS
+   * the row Billing/Requisitions/Planning select, not just a same-labeled coincidence). Screens
+   * that consume it clear it right after, so a plain later visit doesn't re-trigger a stale jump.
+   */
+  focusRecordId: string | null;
 };
 
 export function lineTotal(line: LineItem): number {
