@@ -1,6 +1,6 @@
 import { createStore } from './store.js';
 import { seed } from './seed.js';
-import type { AppState, Invoice, Payment } from './types.js';
+import type { AppState, GoodsReceiptLine, Invoice, Payment } from './types.js';
 import { documentTotal } from './types.js';
 
 /** The one shared store instance every reference-app screen reads from. */
@@ -106,6 +106,102 @@ export const appActions = {
         invoiceId,
         `Payment of $${newPayment.amount.toLocaleString('en-US')} recorded on ${invoiceId}${nextStatus === 'paid' ? ' — invoice paid in full' : ''}`,
       );
+    });
+  },
+
+  // --- Procurement + inventory (Slice 2) -------------------------------------------------
+
+  /** Approved requisition → a new draft purchase order to a chosen supplier, linked both ways. */
+  approveRequisitionAndCreatePO(requisitionId: string, newPurchaseOrderId: string, supplierId: string, warehouseId: string) {
+    appStore.setState((state) => {
+      const requisition = state.requisitions[requisitionId];
+      if (!requisition || requisition.status !== 'pending_approval' || state.purchaseOrders[newPurchaseOrderId]) return state;
+      let nextState: AppState = {
+        ...state,
+        requisitions: {
+          ...state.requisitions,
+          [requisitionId]: { ...requisition, status: 'converted', purchaseOrderId: newPurchaseOrderId },
+        },
+        purchaseOrders: {
+          ...state.purchaseOrders,
+          [newPurchaseOrderId]: {
+            id: newPurchaseOrderId,
+            supplierId,
+            warehouseId,
+            status: 'sent',
+            orderDate: new Date().toISOString().slice(0, 10),
+            requisitionId,
+            lines: requisition.lines,
+            goodsReceiptIds: [],
+          },
+        },
+      };
+      nextState = logActivity(nextState, 'requisition', requisitionId, `Requisition ${requisitionId} approved`);
+      return logActivity(nextState, 'purchaseOrder', newPurchaseOrderId, `Purchase order ${newPurchaseOrderId} created from ${requisitionId}`);
+    });
+  },
+
+  rejectRequisition(requisitionId: string) {
+    appStore.setState((state) => {
+      const requisition = state.requisitions[requisitionId];
+      if (!requisition || requisition.status !== 'pending_approval') return state;
+      return logActivity(
+        { ...state, requisitions: { ...state.requisitions, [requisitionId]: { ...requisition, status: 'rejected' } } },
+        'requisition',
+        requisitionId,
+        `Requisition ${requisitionId} rejected`,
+      );
+    });
+  },
+
+  /** Posts a full goods receipt against a sent PO: creates the receipt record, marks the PO
+   * received, and — the actual inventory effect — adds the received qty to stock (creating the
+   * `StockLevel` row if this is the first time this product/warehouse pairing has ever been
+   * stocked) plus a matching `receipt` movement, the same ledger `stockMovements` already models
+   * for the seeded historical entries. */
+  receiveGoods(purchaseOrderId: string, newGoodsReceiptId: string) {
+    appStore.setState((state) => {
+      const order = state.purchaseOrders[purchaseOrderId];
+      if (!order || order.status !== 'sent' || state.goodsReceipts[newGoodsReceiptId]) return state;
+
+      const receiptLines: GoodsReceiptLine[] = order.lines.map((line) => ({ ...line, qtyReceived: line.qty }));
+
+      const stockLevels = [...state.stockLevels];
+      const stockMovements = [...state.stockMovements];
+      const today = new Date().toISOString().slice(0, 10);
+      for (const line of receiptLines) {
+        const existingIndex = stockLevels.findIndex((level) => level.productId === line.productId && level.warehouseId === order.warehouseId);
+        if (existingIndex >= 0) {
+          stockLevels[existingIndex] = { ...stockLevels[existingIndex], qtyOnHand: stockLevels[existingIndex].qtyOnHand + line.qtyReceived };
+        } else {
+          stockLevels.push({ productId: line.productId, warehouseId: order.warehouseId, qtyOnHand: line.qtyReceived, qtyReserved: 0 });
+        }
+        stockMovements.push({
+          id: `mv-runtime-${newGoodsReceiptId}-${line.productId}`,
+          productId: line.productId,
+          warehouseId: order.warehouseId,
+          type: 'receipt',
+          qty: line.qtyReceived,
+          date: today,
+          reference: purchaseOrderId,
+        });
+      }
+
+      let nextState: AppState = {
+        ...state,
+        purchaseOrders: {
+          ...state.purchaseOrders,
+          [purchaseOrderId]: { ...order, status: 'received', goodsReceiptIds: [...order.goodsReceiptIds, newGoodsReceiptId] },
+        },
+        goodsReceipts: {
+          ...state.goodsReceipts,
+          [newGoodsReceiptId]: { id: newGoodsReceiptId, purchaseOrderId, receivedDate: today, lines: receiptLines },
+        },
+        stockLevels,
+        stockMovements,
+      };
+      nextState = logActivity(nextState, 'purchaseOrder', purchaseOrderId, `Purchase order ${purchaseOrderId} received in full`);
+      return logActivity(nextState, 'goodsReceipt', newGoodsReceiptId, `Goods receipt ${newGoodsReceiptId} posted — stock updated`);
     });
   },
 

@@ -73,7 +73,9 @@ const NAV: Record<AppShellModule, string[]> = {
   // 'Quotations'/'Billing' added M7, Slice 1 (Sales-to-billing) — purely additive, same as every
   // earlier NAV.Sales expansion this file's own comments already document.
   Sales: ['Customers', 'Quotations', 'Sales orders', 'Sales order', 'Delivery', 'Billing', 'Invoice', 'Returns'],
-  Purchase: ['Purchase orders', 'Suppliers', 'Inventory', 'Approvals', 'Receiving'],
+  // 'Requisitions' added M7, Slice 2 (Procurement-to-stock) — purely additive. 'Inventory' was
+  // already an unbuilt placeholder entry here (M6); its route now exists.
+  Purchase: ['Requisitions', 'Purchase orders', 'Suppliers', 'Inventory', 'Approvals', 'Receiving'],
   Finance: ['Overview', 'Ledger', 'Receivables', 'Payables', 'Reports'],
   BI: ['Dashboards', 'Explore', 'Datasets', 'Schedules'],
   // ROADMAP M6 (issue #17, batch 4): the reference's "22 · Users and roles" screen is one

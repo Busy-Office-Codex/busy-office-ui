@@ -22,6 +22,8 @@ import { BuilderForms } from '../examples/BuilderForms.js';
 import { BuilderWorkflow } from '../examples/BuilderWorkflow.js';
 import { Quotations } from '../examples/Quotations.js';
 import { Billing } from '../examples/Billing.js';
+import { Requisitions } from '../examples/Requisitions.js';
+import { Inventory } from '../examples/Inventory.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -61,6 +63,9 @@ const routes = [
   // reading from the shared examples/data store instead of a page-local hardcoded array.
   { id: 'quotations', module: 'Sales', label: 'Quotations' },
   { id: 'billing', module: 'Sales', label: 'Billing' },
+  // M7, Slice 2 (Procurement-to-stock).
+  { id: 'requisitions', module: 'Purchase', label: 'Requisitions' },
+  { id: 'inventory', module: 'Purchase', label: 'Inventory' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -84,6 +89,8 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   'builder-workflow': <BuilderWorkflow />,
   quotations: <Quotations />,
   billing: <Billing />,
+  requisitions: <Requisitions />,
+  inventory: <Inventory />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */

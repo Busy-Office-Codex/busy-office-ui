@@ -133,7 +133,13 @@ export function Chart({ type, data, title, valueLabel, height = 220 }: ChartProp
         options: {
           animation: reduceMotion ? false : undefined,
           plugins: {
-            legend: { position: 'right', labels: { color: AXIS_COLOR, font: TICK_FONT } },
+            // `bottom`, not `right` — found live: Chart.js's `right` legend allocates a fixed-
+            // width side column that doesn't grow to fit longer labels (it clips instead), even
+            // in a genuinely wide container. A `bottom` legend wraps its items across the full
+            // chart width, which scales with however wide the caller's own layout makes this
+            // component — far more robust for real business labels, not just this file's own
+            // short "Paper"/"Cable"/"Switches" example.
+            legend: { position: 'bottom', labels: { color: AXIS_COLOR, font: TICK_FONT, boxWidth: 12, padding: 12 } },
             tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${formatValue(Number(ctx.raw), valueLabel)}` } },
           },
         },

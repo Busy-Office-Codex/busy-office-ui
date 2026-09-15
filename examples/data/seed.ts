@@ -63,6 +63,17 @@ export const seed: AppState = {
     'prod-support': { id: 'prod-support', description: 'Annual support & maintenance renewal', unitPrice: 4200, unit: 'yr' },
     'prod-seats': { id: 'prod-seats', description: 'Additional user licenses', unitPrice: 45, unit: 'seat' },
     'prod-training': { id: 'prod-training', description: 'On-site admin training (2-day)', unitPrice: 2600, unit: 'session' },
+    // Stocked materials (Slice 2, procurement + inventory) — bought from suppliers, held in a
+    // warehouse, distinct from the services products above (sold to customers, never stocked).
+    'mat-paper': { id: 'mat-paper', description: '500-sheet letterhead paper, ream', unitPrice: 6.2, unit: 'ream' },
+    'mat-cable': { id: 'mat-cable', description: 'Cat6 network cable, 1000ft spool', unitPrice: 145, unit: 'spool' },
+    'mat-switch': { id: 'mat-switch', description: '24-port managed network switch', unitPrice: 410, unit: 'unit' },
+  },
+
+  warehouses: {
+    'wh-main': { id: 'wh-main', name: 'Main DC' },
+    'wh-east': { id: 'wh-east', name: 'East Coast Hub' },
+    'wh-west': { id: 'wh-west', name: 'West Coast Hub' },
   },
 
   quotations: {
@@ -146,6 +157,54 @@ export const seed: AppState = {
     },
   },
 
+  // Slice 2 (Procurement → stock). Anchored on FRESH record numbers (REQ-4xxx/PO-4xxx/GR-4xxx),
+  // deliberately not reusing PO-1042 and its siblings (already fully consistent across
+  // ListReport.tsx/Approvals.tsx/Notifications.tsx/Inbox.tsx, same "don't add a conflicting
+  // definition of an already-established number" reasoning as SO-1042 above) — those existing
+  // pages stay untouched and independently correct; this is a second, separate live chain.
+  requisitions: {
+    'REQ-4001': {
+      id: 'REQ-4001',
+      requestedBy: 'Marcus Webb',
+      department: 'Facilities',
+      status: 'pending_approval',
+      requestDate: '2026-09-12',
+      lines: [{ productId: 'mat-paper', description: '500-sheet letterhead paper, ream', qty: 120, unitPrice: 6.2 }],
+    },
+    'REQ-4002': {
+      id: 'REQ-4002',
+      requestedBy: 'Priya Shah',
+      department: 'IT',
+      status: 'draft',
+      requestDate: '2026-09-15',
+      lines: [
+        { productId: 'mat-cable', description: 'Cat6 network cable, 1000ft spool', qty: 4, unitPrice: 145 },
+        { productId: 'mat-switch', description: '24-port managed network switch', qty: 2, unitPrice: 410 },
+      ],
+    },
+  },
+
+  purchaseOrders: {},
+  goodsReceipts: {},
+
+  stockLevels: [
+    { productId: 'mat-paper', warehouseId: 'wh-main', qtyOnHand: 340, qtyReserved: 40 },
+    { productId: 'mat-paper', warehouseId: 'wh-east', qtyOnHand: 95, qtyReserved: 10 },
+    { productId: 'mat-paper', warehouseId: 'wh-west', qtyOnHand: 60, qtyReserved: 0 },
+    { productId: 'mat-cable', warehouseId: 'wh-main', qtyOnHand: 18, qtyReserved: 6 },
+    { productId: 'mat-cable', warehouseId: 'wh-east', qtyOnHand: 5, qtyReserved: 4 },
+    { productId: 'mat-switch', warehouseId: 'wh-main', qtyOnHand: 12, qtyReserved: 2 },
+    { productId: 'mat-switch', warehouseId: 'wh-west', qtyOnHand: 3, qtyReserved: 3 },
+  ],
+
+  stockMovements: [
+    { id: 'mv-1', productId: 'mat-paper', warehouseId: 'wh-main', type: 'receipt', qty: 200, date: '2026-08-18', reference: 'PO-1042' },
+    { id: 'mv-2', productId: 'mat-switch', warehouseId: 'wh-main', type: 'receipt', qty: 15, date: '2026-08-22', reference: 'PO-1029' },
+    { id: 'mv-3', productId: 'mat-paper', warehouseId: 'wh-main', type: 'shipment', qty: -60, date: '2026-09-02', reference: 'SO-1035' },
+    { id: 'mv-4', productId: 'mat-cable', warehouseId: 'wh-east', type: 'transfer', qty: -3, date: '2026-09-08', reference: 'wh-main → wh-east' },
+    { id: 'mv-5', productId: 'mat-switch', warehouseId: 'wh-west', type: 'adjustment', qty: -1, date: '2026-09-10', reference: 'Cycle count variance' },
+  ],
+
   activity: [
     { id: 'act-1', at: '2026-08-20', recordType: 'quotation', recordId: 'QUO-3001', message: 'Quotation QUO-3001 sent to Northwind Traders' },
     { id: 'act-2', at: '2026-08-22', recordType: 'quotation', recordId: 'QUO-3001', message: 'Quotation QUO-3001 accepted — Sales order SO-1042 created' },
@@ -153,5 +212,6 @@ export const seed: AppState = {
     { id: 'act-4', at: '2026-09-03', recordType: 'delivery', recordId: 'DL-3101', message: 'Delivery DL-3101 shipped via FreightLine Express' },
     { id: 'act-5', at: '2026-09-05', recordType: 'delivery', recordId: 'DL-3101', message: 'Delivery DL-3101 confirmed delivered' },
     { id: 'act-6', at: '2026-09-05', recordType: 'invoice', recordId: 'INV-3201', message: 'Invoice INV-3201 issued and sent to Northwind Traders' },
+    { id: 'act-7', at: '2026-09-12', recordType: 'requisition', recordId: 'REQ-4001', message: 'Requisition REQ-4001 submitted for approval' },
   ],
 };
