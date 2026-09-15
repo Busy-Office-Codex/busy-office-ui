@@ -86,7 +86,11 @@ export function Login() {
                 />
               </div>
 
-              <Text variant="caption">Forgot your password?</Text>
+              {/* A real link (`#password-reset`, wired in preview/client.tsx's `App`), not inert
+                  caption text — Slice 8 (Entry/nav) gave this a real destination. */}
+              <a href="#password-reset" style={{ fontSize: 12.5, color: '#475569' }}>
+                Forgot your password?
+              </a>
 
               {/* MFA / remember-this-device row — a real, controlled native checkbox (same
                   bare-native-input pattern ListReport.tsx's row-selection checkboxes use, not a
