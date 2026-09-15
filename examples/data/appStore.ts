@@ -1,6 +1,6 @@
 import { createStore } from './store.js';
 import { seed } from './seed.js';
-import type { AppState, GoodsReceiptLine, Invoice, Payment } from './types.js';
+import type { AppState, GoodsReceiptLine, Invoice, Payment, User } from './types.js';
 import { documentTotal } from './types.js';
 
 /** The one shared store instance every reference-app screen reads from. */
@@ -316,6 +316,38 @@ export const appActions = {
         'productionOrder',
         productionOrderId,
         `Production order ${productionOrderId} started`,
+      );
+    });
+  },
+
+  // --- Administration + role-based config (Slice 4) --------------------------------------
+
+  /** A fresh invited user, no role assigned yet — the live starting point for "assign role". */
+  createUser(newUserId: string, name: string, email: string, department: string) {
+    appStore.setState((state) => {
+      if (state.users[newUserId]) return state;
+      const newUser: User = { id: newUserId, name, email, department, status: 'invited' };
+      return logActivity(
+        { ...state, users: { ...state.users, [newUserId]: newUser } },
+        'user',
+        newUserId,
+        `${name} invited (${department})`,
+      );
+    });
+  },
+
+  /** Assigning a role also activates an invited user — a real ERP onboarding step, not two. */
+  assignRole(userId: string, roleId: string) {
+    appStore.setState((state) => {
+      const user = state.users[userId];
+      const role = state.roles[roleId];
+      if (!user || !role) return state;
+      const nextUser: User = { ...user, roleId, status: user.status === 'invited' ? 'active' : user.status };
+      return logActivity(
+        { ...state, users: { ...state.users, [userId]: nextUser } },
+        'user',
+        userId,
+        `${user.name} assigned role ${role.name}`,
       );
     });
   },

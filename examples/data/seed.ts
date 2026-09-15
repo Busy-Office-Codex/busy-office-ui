@@ -237,6 +237,34 @@ export const seed: AppState = {
   plannedOrders: {},
   productionOrders: {},
 
+  // Slice 4 (Administration + role-based config). Role names match UsersAndRoles.tsx's own
+  // SYSTEM_ROLES list exactly (documented reuse, not a second conflicting role taxonomy) — this
+  // slice's `moduleAccess` is a coarser, complementary grant (which app MODULES a role can open)
+  // rather than that screen's per-action permissions matrix. `Users` below also reuses this
+  // codebase's own recurring internal-staff cast (Jordan Lee/Priya Shah/Marcus Webb — already
+  // established across Approvals.tsx, Customers.tsx owners, ListReport.tsx buyers, Profile.tsx's
+  // manager, RolePage.tsx, Settings.tsx's audit trail, BuilderWorkflow.tsx's approvers) instead of
+  // inventing a fourth, disconnected identity for the same three people. Elena Cho is
+  // AdminOverview.tsx's own static "New user invited — Elena Cho (Finance)" line, seeded here as a
+  // genuine invited/no-role-yet user — the live target for this slice's "assign role" action.
+  roles: {
+    'role-admin': { id: 'role-admin', name: 'Administrator', moduleAccess: ['General', 'Sales', 'Purchase', 'Production', 'Finance', 'BI', 'Administration', 'Builder', 'Settings'] },
+    'role-finance': { id: 'role-finance', name: 'Finance manager', moduleAccess: ['General', 'Finance', 'BI', 'Settings'] },
+    'role-sales': { id: 'role-sales', name: 'Sales manager', moduleAccess: ['General', 'Sales', 'BI'] },
+    'role-salesrep': { id: 'role-salesrep', name: 'Sales rep', moduleAccess: ['General', 'Sales'] },
+    'role-warehouse': { id: 'role-warehouse', name: 'Warehouse', moduleAccess: ['General', 'Purchase', 'Production'] },
+    'role-purchasing': { id: 'role-purchasing', name: 'Purchasing', moduleAccess: ['General', 'Purchase'] },
+    'role-viewer': { id: 'role-viewer', name: 'Viewer', moduleAccess: ['General', 'BI'] },
+  },
+
+  users: {
+    'usr-1': { id: 'usr-1', name: 'Jordan Lee', email: 'jordan.lee@busyoffice.example', department: 'Sales', status: 'active', roleId: 'role-admin' },
+    'usr-2': { id: 'usr-2', name: 'Priya Shah', email: 'priya.shah@busyoffice.example', department: 'Sales', status: 'active', roleId: 'role-sales' },
+    'usr-3': { id: 'usr-3', name: 'Marcus Webb', email: 'marcus.webb@busyoffice.example', department: 'Purchasing', status: 'active', roleId: 'role-purchasing' },
+    'usr-4': { id: 'usr-4', name: 'Renee Castillo', email: 'renee.castillo@busyoffice.example', department: 'Warehouse', status: 'active', roleId: 'role-warehouse' },
+    'usr-5': { id: 'usr-5', name: 'Elena Cho', email: 'elena.cho@busyoffice.example', department: 'Finance', status: 'invited' },
+  },
+
   activity: [
     { id: 'act-1', at: '2026-08-20', recordType: 'quotation', recordId: 'QUO-3001', message: 'Quotation QUO-3001 sent to Northwind Traders' },
     { id: 'act-2', at: '2026-08-22', recordType: 'quotation', recordId: 'QUO-3001', message: 'Quotation QUO-3001 accepted — Sales order SO-1042 created' },
@@ -245,5 +273,7 @@ export const seed: AppState = {
     { id: 'act-5', at: '2026-09-05', recordType: 'delivery', recordId: 'DL-3101', message: 'Delivery DL-3101 confirmed delivered' },
     { id: 'act-6', at: '2026-09-05', recordType: 'invoice', recordId: 'INV-3201', message: 'Invoice INV-3201 issued and sent to Northwind Traders' },
     { id: 'act-7', at: '2026-09-12', recordType: 'requisition', recordId: 'REQ-4001', message: 'Requisition REQ-4001 submitted for approval' },
+    { id: 'act-8', at: '2026-09-14', recordType: 'user', recordId: 'usr-5', message: 'Elena Cho invited (Finance)' },
+    { id: 'act-9', at: '2026-09-15', recordType: 'user', recordId: 'usr-4', message: 'Renee Castillo assigned role Warehouse' },
   ],
 };

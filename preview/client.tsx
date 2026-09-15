@@ -26,6 +26,8 @@ import { Requisitions } from '../examples/Requisitions.js';
 import { Inventory } from '../examples/Inventory.js';
 import { Planning } from '../examples/Planning.js';
 import { ProductionOrders } from '../examples/ProductionOrders.js';
+import { Users } from '../examples/Users.js';
+import { AuditLog } from '../examples/AuditLog.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -71,6 +73,10 @@ const routes = [
   // M7, Slice 3 (Production planning) — Production's first two routes.
   { id: 'planning', module: 'Production', label: 'Planning' },
   { id: 'production-orders', module: 'Production', label: 'Production orders' },
+  // M7, Slice 4 (Administration + role-based config) — labels 'Users' and 'Audit log' were
+  // already unbuilt NAV.Administration placeholders (M6); no AppShell.tsx NAV change needed.
+  { id: 'users', module: 'Administration', label: 'Users' },
+  { id: 'audit-log', module: 'Administration', label: 'Audit log' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -98,6 +104,8 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   inventory: <Inventory />,
   planning: <Planning />,
   'production-orders': <ProductionOrders />,
+  users: <Users />,
+  'audit-log': <AuditLog />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */
