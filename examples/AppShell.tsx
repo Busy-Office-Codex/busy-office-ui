@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState, type ReactNode } from 'react';
-import { Button, Density, Text } from '../src/index.js';
+import { Text } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
 import { color, radius } from '../src/tokens.stylex.js';
 import { Launcher } from './Launcher.js';
@@ -224,15 +224,17 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
             <span style={{ fontSize: 12, color: color.textTertiary, whiteSpace: 'nowrap' }}>Acme Co ▾</span>
           </>
         }
+        // Owner-directed removal (2026-09-15): a global "+ New" sitting next to Notifications
+        // read as confusing, not convenient, once weighed against how many modules this ERP
+        // actually has — "new WHAT?" has no good context-free answer here, and this design
+        // system already has two better-scoped ways to create a record: the command palette's
+        // own "Actions" category (`commands`, e.g. "Create sales order" — see docs/Shell.md's
+        // own example) for cross-module quick-create, and every list page's own contextual
+        // "+ New PO"/"+ New SO" button (ListReport.tsx etc.) for the common case of creating
+        // the thing you're already looking at. A third, global, unscoped "+ New" duplicated both
+        // without being as good as either — removed rather than kept as a decorative redundancy.
         account={
           <>
-            <div style={{ flexShrink: 0 }}>
-              <Density value="compact">
-                <Button type="button" variant="primary">
-                  + New ▾
-                </Button>
-              </Density>
-            </div>
             <button
               type="button"
               aria-label="Notifications, 3 unread"
