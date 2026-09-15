@@ -9,8 +9,9 @@ import { useStoreState } from './data/store.js';
  * user → assign role → preview access → inspect audit history"). Reads the exact same shared
  * `activity` array every other screen since Slice 1 already appends to (quotations, sales
  * orders, deliveries, invoices, requisitions, purchase orders, goods receipts, planning
- * recommendations, planned/production orders, users) — this is genuinely the whole app's history
- * in one place, not a users-only log invented fresh for this screen.
+ * recommendations, planned/production orders, users, roles, companies, integrations) — this is
+ * genuinely the whole app's history in one place, not a users-only log invented fresh for this
+ * screen.
  */
 
 const RECORD_TYPE_TONE: Record<string, ChipTone> = {
@@ -26,6 +27,8 @@ const RECORD_TYPE_TONE: Record<string, ChipTone> = {
   productionOrder: 'neutral',
   user: 'danger',
   role: 'danger',
+  company: 'danger',
+  integration: 'danger',
 };
 
 const RECORD_TYPE_LABEL: Record<string, string> = {
@@ -41,6 +44,8 @@ const RECORD_TYPE_LABEL: Record<string, string> = {
   productionOrder: 'Production order',
   user: 'User',
   role: 'Role',
+  company: 'Company',
+  integration: 'Integration',
 };
 
 const FILTER_ITEMS = ['All types', ...Object.keys(RECORD_TYPE_LABEL).map((key) => RECORD_TYPE_LABEL[key]!)];

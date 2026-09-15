@@ -285,6 +285,50 @@ export const seed: AppState = {
     'usr-5': { id: 'usr-5', name: 'Elena Cho', email: 'elena.cho@busyoffice.example', department: 'Finance', status: 'invited' },
   },
 
+  // Slice 12 (Administration — companies & entities, integrations & API). AdminOverview.tsx's own
+  // static "Plan: Enterprise · 148 seats · 3 companies" line has its company count wired to
+  // `Object.keys(state.companies).length` this same slice, so "3" here is load-bearing, not a
+  // coincidence; Northwind Traders, LLC's legal name/tax ID/address reuse Settings.tsx's exact
+  // values (the same entity, viewed from a different admin screen) instead of inventing a second,
+  // contradicting legal identity for it. One entity seeded `inactive` so the activate/deactivate
+  // toggle has a real target to demonstrate in both directions.
+  companies: {
+    'co-northwind-hq': {
+      id: 'co-northwind-hq',
+      legalName: 'Northwind Traders, LLC',
+      businessUnit: 'Corporate HQ',
+      taxId: '84-2947103',
+      address: { line1: '4500 Meridian Ave, Suite 200', cityStateZip: 'Austin, TX 78745' },
+      status: 'active',
+    },
+    'co-northwind-west': {
+      id: 'co-northwind-west',
+      legalName: 'Northwind Distribution West, LLC',
+      businessUnit: 'West Coast distribution',
+      taxId: '94-1183256',
+      address: { line1: '900 Harbor Way', cityStateZip: 'Oakland, CA 94607' },
+      status: 'active',
+    },
+    'co-northwind-legacy': {
+      id: 'co-northwind-legacy',
+      legalName: 'Northwind Legacy Services, LLC',
+      businessUnit: 'Discontinued professional-services unit',
+      taxId: '46-7720981',
+      address: { line1: '220 Industrial Pkwy', cityStateZip: 'Pittsburgh, PA 15222' },
+      status: 'inactive',
+    },
+  },
+
+  // AdminOverview.tsx's own static "Integration connected — Slack notifications · Yesterday"
+  // activity line is this exact Slack row's own real `connectIntegration` result, not independent
+  // copy for the same fact — connectedAt lands the day before this seed's most recent activity
+  // entries (2026-09-16). QuickBooks/DocuSign start disconnected so "Connect" has a real target.
+  integrations: {
+    'int-slack': { id: 'int-slack', name: 'Slack notifications', category: 'Messaging', status: 'connected', connectedAt: '2026-09-15' },
+    'int-quickbooks': { id: 'int-quickbooks', name: 'QuickBooks Online', category: 'Accounting', status: 'disconnected' },
+    'int-docusign': { id: 'int-docusign', name: 'DocuSign', category: 'Documents', status: 'disconnected' },
+  },
+
   activity: [
     { id: 'act-1', at: '2026-08-20', recordType: 'quotation', recordId: 'QUO-3001', message: 'Quotation QUO-3001 sent to Northwind Traders' },
     { id: 'act-2', at: '2026-08-22', recordType: 'quotation', recordId: 'QUO-3001', message: 'Quotation QUO-3001 accepted — Sales order SO-1042 created' },
@@ -295,6 +339,7 @@ export const seed: AppState = {
     { id: 'act-7', at: '2026-09-12', recordType: 'requisition', recordId: 'REQ-4001', message: 'Requisition REQ-4001 submitted for approval' },
     { id: 'act-8', at: '2026-09-14', recordType: 'user', recordId: 'usr-5', message: 'Elena Cho invited (Finance)' },
     { id: 'act-9', at: '2026-09-15', recordType: 'user', recordId: 'usr-4', message: 'Renee Castillo assigned role Warehouse' },
+    { id: 'act-10', at: '2026-09-15', recordType: 'integration', recordId: 'int-slack', message: 'Integration connected — Slack notifications' },
   ],
 
   focusRecordId: null,

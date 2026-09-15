@@ -1,4 +1,6 @@
 import { Card, Chip, Text } from '../src/index.js';
+import { appStore } from './data/appStore.js';
+import { useStoreState } from './data/store.js';
 
 /**
  * The Administration "Overview" screen — a card-grid settings hub. Mirrors
@@ -7,6 +9,13 @@ import { Card, Chip, Text } from '../src/index.js';
  * system-health / recent-activity panel below it. Meant to render as
  * `AppShell`'s content when module="Administration" route="Overview" is
  * active (see AppShell.tsx's `NAV.Administration`).
+ *
+ * M7 Slice 12 makes the "3 companies" count real — `Object.keys(state.companies).length`, the
+ * same entities Companies.tsx now lists — rather than leave a number Companies.tsx's own arrival
+ * could silently make wrong. "Plan: Enterprise · 148 seats" and the recent-activity panel below
+ * stay static and disclosed as such: this structural-first-pass overview card grid was never this
+ * slice's target (Companies.tsx/Integrations.tsx are), and a seats/plan concept has no data model
+ * anywhere in this store to connect to honestly.
  */
 
 type AdminArea = { label: string; description: string };
@@ -34,6 +43,8 @@ const RECENT_ACTIVITY = [
 ];
 
 export function AdminOverview() {
+  const companyCount = useStoreState(appStore, (s) => Object.keys(s.companies).length);
+
   return (
     <div
       style={{
@@ -50,7 +61,9 @@ export function AdminOverview() {
       <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Text variant="heading">Administration</Text>
-          <Text variant="body">Plan: Enterprise · 148 seats · 3 companies</Text>
+          <Text variant="body">
+            Plan: Enterprise · 148 seats · {companyCount} compan{companyCount === 1 ? 'y' : 'ies'}
+          </Text>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>

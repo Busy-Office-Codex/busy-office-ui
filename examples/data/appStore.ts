@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { createStore, useStoreState } from './store.js';
 import { seed } from './seed.js';
-import type { AppState, GoodsReceiptLine, Invoice, Payment, Role, User } from './types.js';
+import type { AppState, Company, GoodsReceiptLine, Invoice, Payment, Role, User } from './types.js';
 import { documentTotal } from './types.js';
 
 /** The one shared store instance every reference-app screen reads from. */
@@ -434,6 +434,59 @@ export const appActions = {
         'role',
         newRoleId,
         `${clone.name} cloned from ${role.name}`,
+      );
+    });
+  },
+
+  // --- Administration — companies & entities, integrations & API (Slice 12) -------------
+
+  /** The one meaningful mutation this reference app's "Companies & entities" admin area
+   * supports — activate/deactivate a legal entity. Renaming or editing tax ID/address stays out
+   * of scope: Settings.tsx already owns the single org-settings form for the one entity a host
+   * itself is, so this screen is about entity lifecycle across many entities, not a second copy
+   * of that same edit form for each one. */
+  toggleCompanyStatus(companyId: string) {
+    appStore.setState((state) => {
+      const company = state.companies[companyId];
+      if (!company) return state;
+      const nextStatus: Company['status'] = company.status === 'active' ? 'inactive' : 'active';
+      return logActivity(
+        { ...state, companies: { ...state.companies, [companyId]: { ...company, status: nextStatus } } },
+        'company',
+        companyId,
+        `${company.legalName} ${nextStatus === 'active' ? 'reactivated' : 'deactivated'}`,
+      );
+    });
+  },
+
+  /** A real connect/disconnect, not a static badge: AdminOverview.tsx's own "Integration
+   * connected — Slack notifications" activity line is this exact action's own logged message on
+   * the seeded Slack row, not independent copy for the same fact. No API-key/webhook form here —
+   * this reference app never calls a network, so a real secret field would be theater; the
+   * connect/disconnect lifecycle itself is the real, testable part. */
+  connectIntegration(integrationId: string) {
+    appStore.setState((state) => {
+      const integration = state.integrations[integrationId];
+      if (!integration || integration.status === 'connected') return state;
+      const connectedAt = new Date().toISOString().slice(0, 10);
+      return logActivity(
+        { ...state, integrations: { ...state.integrations, [integrationId]: { ...integration, status: 'connected', connectedAt } } },
+        'integration',
+        integrationId,
+        `Integration connected — ${integration.name}`,
+      );
+    });
+  },
+
+  disconnectIntegration(integrationId: string) {
+    appStore.setState((state) => {
+      const integration = state.integrations[integrationId];
+      if (!integration || integration.status === 'disconnected') return state;
+      return logActivity(
+        { ...state, integrations: { ...state.integrations, [integrationId]: { ...integration, status: 'disconnected', connectedAt: undefined } } },
+        'integration',
+        integrationId,
+        `Integration disconnected — ${integration.name}`,
       );
     });
   },

@@ -94,8 +94,8 @@ const NAV: Record<AppShellModule, string[]> = {
   // rather than force it onto just 'Users' or just 'Roles' (leaving the other stranded, or
   // pretending they're independent when the reference treats them as one), added as its own
   // distinct entry. 'Users' and 'Audit log' gained their own real routes in M7 Slice 4
-  // (Administration + role-based config) — 'Roles'/'Companies'/'Integrations' stay unbuilt
-  // placeholders in this same module.
+  // (Administration + role-based config); 'Roles' gained its own in Slice 9; 'Companies' and
+  // 'Integrations' gained theirs in Slice 12 — the last of this module's M6-era placeholders.
   Administration: ['Overview', 'Users and roles', 'Users', 'Roles', 'Companies', 'Integrations', 'Audit log'],
   Builder: ['Pages', 'Forms', 'Workflows', 'Fields', 'Publish'],
   Settings: ['General', 'Organization', 'Numbering', 'Tax', 'Email', 'Security'],

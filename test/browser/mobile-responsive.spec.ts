@@ -49,6 +49,9 @@ const PAGE_LABELS = [
   'Pages',
   // M7 Slice 9 (Administration, role management).
   'Roles',
+  // M7 Slice 12 (Administration — companies & entities, integrations & API).
+  'Companies',
+  'Integrations',
 ];
 
 for (const label of PAGE_LABELS) {
