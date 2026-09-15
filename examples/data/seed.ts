@@ -126,6 +126,18 @@ export const seed: AppState = {
       deliveryIds: ['DL-3101'],
       invoiceIds: ['INV-3201'],
     },
+    // Slice 7 (Distribution) — confirmed but not yet delivered or invoiced, so DL-3102 below has
+    // genuine pending → picking → packed → shipped → delivered work left to demonstrate live
+    // (DL-3101 above starts already `delivered`, so it alone couldn't show the chain in progress).
+    'SO-1043': {
+      id: 'SO-1043',
+      customerId: BLUEPEAK,
+      status: 'confirmed',
+      orderDate: '2026-09-10',
+      lines: [{ productId: 'prod-training', description: 'On-site admin training (2-day)', qty: 1, unitPrice: 2600 }],
+      deliveryIds: ['DL-3102'],
+      invoiceIds: [],
+    },
   },
 
   deliveries: {
@@ -136,6 +148,14 @@ export const seed: AppState = {
       status: 'delivered',
       carrier: 'FreightLine Express',
       trackingNumber: 'FLX-88213409',
+      lines: [{ productId: 'prod-training', description: 'On-site admin training (2-day)', qty: 1, unitPrice: 2600 }],
+    },
+    'DL-3102': {
+      id: 'DL-3102',
+      salesOrderId: 'SO-1043',
+      customerId: BLUEPEAK,
+      status: 'pending',
+      carrier: 'Regional Courier Co.',
       lines: [{ productId: 'prod-training', description: 'On-site admin training (2-day)', qty: 1, unitPrice: 2600 }],
     },
   },
