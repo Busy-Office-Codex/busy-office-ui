@@ -99,8 +99,50 @@ accessibility, simplicity); the simplicity lens found and fixed one real
 cross-milestone duplication (`examples/filterTabs.tsx`, extracted from 9
 call sites across 8 files) before merge.
 
+**M7 — Chart primitive (issue #16) — in progress.** Item 34, issue #16
+(`agreed`, project owner, 2026-09-16 — was `proposed` since M6). Owner-
+directed: build the primitive M6 deferred, using a real charting library
+(Chart.js) rather than issue #16's own original hand-rolled-SVG default,
+once the owner reviewed a 5-library comparison (ECharts, ApexCharts,
+Chart.js, Plotly.js, D3.js) and decided a dependency was worth it. Chart.js
+won on fit, not raw capability: this package only ever needs bar/line/donut
+at ERP-sample-data scale, which ruled out ECharts/Plotly's large-dataset/
+scientific/geographic strength as unneeded weight, and D3's "build a
+charting library on top of D3 before building a chart" cost against a
+package that had exactly one runtime dependency before this. Registered
+tree-shaken (`BarController`/`LineController`/`DoughnutController` +
+elements/scales/`Legend`/`Tooltip` only, never `chart.js/auto`), and — a
+finding surfaced while wiring it up, not assumed in advance — the whole
+package had no `package.json` `sideEffects` declaration, so no consumer
+ever got real tree-shaking even before this; added `"sideEffects": false`
+and moved `Chart`'s own `ChartJS.register(...)` off the module top level
+(a real side effect that would have defeated that declaration for this one
+file) into a first-render guard. Measured, not assumed: a host importing
+only `{ Button }` now ships 5.5KB minified/1.9KB gzipped with zero chart.js
+code (verified directly — grepped the bundle), while a host using `Chart`
+pays chart.js's real cost, ~201KB minified/~69KB gzipped for the whole
+package (was ~20KB/~6.4KB before Chart existed). Accessibility: canvas
+carries no accessibility tree, so `Chart` renders `aria-hidden` and pairs
+it with a real, visually-hidden `Table` of the same data as what a screen
+reader actually gets — not an `aria-label`/`aria-describedby` summary.
+`prefers-reduced-motion` disables Chart.js's own draw-in animation
+(matching `motion.stylex.ts` elsewhere); found live while verifying this,
+not assumed: an early screenshot caught the chart mid-animation with a
+fully-drawn grid/axes but an invisible data line — not a rendering bug,
+but proof the default ~1s animation needs accounting for in both real
+usage and tests, not just documentation. First real consumer landed:
+Dashboard.tsx's "Revenue trend" line chart (issue #16's own "19 BI
+dashboard" scenario), sharing its $486K/+6.4% figures with the existing
+REVENUE THIS MONTH stat card rather than inventing a second number for
+the same fact. The other 4 named consumers (stock-by-warehouse bar,
+cash-flow line, a Reports summary chart, BI explore's Table/Bar/Line/Pie
+toggle) remain open — landing across separate, reviewed slices, not one
+batch, per this repo's own "manageable slices" discipline.
+
 After M6, or once its scope is exhausted, stop expanding the framework: new
-work starts only from a request that passes the Objective tests.
+work starts only from a request that passes the Objective tests. M7 is the
+one exception already in flight; after it closes, this line applies again
+until the next request clears the same bar.
 
 ## Items
 
@@ -341,6 +383,16 @@ issues.
     17–32's page confirmed reachable via app strip and/or command
     palette (verified route-by-route by a required milestone-closing
     review); `pnpm test:browser` 77/77 green. Issue #17.
+34. [ ] Chart primitive — `src/components/Chart.tsx`, exported from
+    `src/index.ts`. Bar/line/donut via Chart.js, tree-shaken registration,
+    `aria-hidden` canvas paired with a real visually-hidden accessible
+    `Table`, `prefers-reduced-motion` disables draw-in animation. First
+    real consumer landed: Dashboard.tsx's "Revenue trend" line chart.
+    Package gained `"sideEffects": false` (package.json) as part of this
+    work — genuinely accurate now that `Chart`'s own registration moved
+    off the module top level — unlocking real per-export tree-shaking for
+    every component, not just this one. 4 of 5 named consumers (issue #16)
+    still open. Issue #16.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).

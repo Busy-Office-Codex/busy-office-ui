@@ -18,3 +18,5 @@ export type { DropdownProps, DropdownItem } from './components/Dropdown.js';
 export { Table, TableHead, TableBody, TableRow, TableHeaderCell, TableCell } from './components/Table.js';
 export type { TableProps, TableHeaderCellProps, TableCellProps } from './components/Table.js';
 export { Density } from './components/Density.js';
+export { Chart } from './components/Chart.js';
+export type { ChartProps, ChartSeries } from './components/Chart.js';

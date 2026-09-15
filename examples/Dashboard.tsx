@@ -1,8 +1,21 @@
 import { useState } from 'react';
-import { Button, Card, Chip, Text } from '../src/index.js';
+import { Button, Card, Chart, Chip, Text } from '../src/index.js';
+
+// Revenue trend — the first real consumer of `Chart` (ROADMAP issue #16's own "19 BI dashboard"
+// scenario: "revenue trend vs target"). Six months ending at the same $486K/+6.4% the REVENUE
+// THIS MONTH stat card above already states, so the chart and the card agree with each other
+// rather than each inventing its own number for the same fact.
+const REVENUE_TREND = [
+  { label: 'Apr', value: 410000 },
+  { label: 'May', value: 428000 },
+  { label: 'Jun', value: 441000 },
+  { label: 'Jul', value: 452000 },
+  { label: 'Aug', value: 457000 },
+  { label: 'Sep', value: 486000 },
+];
 
 /**
- * A KPI dashboard home page: greeting, and a grid of stat cards. Mirrors
+ * A KPI dashboard home page: greeting, a grid of stat cards, and a revenue trend chart. Mirrors
  * the "dashboard" Claude Design template.
  */
 export function Dashboard() {
@@ -73,6 +86,13 @@ export function Dashboard() {
             </div>
           </Card>
         </div>
+
+        <Card>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Text variant="title">Revenue trend</Text>
+            <Chart type="line" title="Revenue trend, last 6 months" valueLabel="$" data={REVENUE_TREND} />
+          </div>
+        </Card>
 
         <div>
           <Button variant="secondary">View full report</Button>
