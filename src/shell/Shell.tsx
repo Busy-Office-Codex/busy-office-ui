@@ -4,7 +4,7 @@ import { Chip } from '../components/Chip.js';
 import { Density } from '../components/Density.js';
 import { Input } from '../components/Input.js';
 import { Text } from '../components/Text.js';
-import { color, density, font, radius } from '../tokens.stylex.js';
+import { color, density, font, motion, radius } from '../tokens.stylex.js';
 
 export type ShellRoute = {
   id: string;
@@ -338,6 +338,32 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
   const paletteOpenRef = useRef(false);
   const paletteOpenerRef = useRef<HTMLElement | null>(null);
   const mountedRef = useRef(true);
+  // Owner-directed (2026-09-15): the brand block, the app-strip row and the dock collapse/hide
+  // together while scrolling down into a page's content (freeing vertical space), and return the
+  // moment the user scrolls back up or reaches the top — leaving only the search trigger and the
+  // `account` slot always visible in the top bar. One shared boolean drives all three surfaces
+  // since they always move in lockstep; a scroll-position ref (not state) tracks direction
+  // without re-rendering on every scroll event.
+  const [chromeExpanded, setChromeExpanded] = useState(true);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    // A small dead zone (8px) absorbs trackpad/rubber-band jitter that would otherwise flip
+    // direction on every frame; "at the top" always wins regardless of direction, so the chrome
+    // is never stuck collapsed when there's nothing left to scroll past.
+    const SCROLL_DEAD_ZONE = 8;
+    const AT_TOP_THRESHOLD = 4;
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollYRef.current;
+      if (currentY <= AT_TOP_THRESHOLD) setChromeExpanded(true);
+      else if (delta > SCROLL_DEAD_ZONE) setChromeExpanded(false);
+      else if (delta < -SCROLL_DEAD_ZONE) setChromeExpanded(true);
+      lastScrollYRef.current = currentY;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const openPalette = (opener?: HTMLElement) => {
     if (paletteOpenRef.current) return;
@@ -385,8 +411,21 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
 
   return (
     <div style={{ fontFamily: FONT_STACK, minHeight: '100vh', background: color.bgCanvas, color: color.textPrimary, display: 'flex', flexDirection: 'column' }}>
+      {/* `position: fixed`, not an in-flow sibling (owner-directed scroll-collapse, 2026-09-15):
+          an in-flow header whose own height/width animates on scroll changes the document's total
+          scroll height, which the browser then clamps the scroll position against — firing more
+          'scroll' events that re-trigger this same collapse logic, an infinite feedback loop. A
+          fixed header never affects document height regardless of its own size, so it can't create
+          that loop (same reason the dock below is already `position: fixed`). The content area
+          reserves the FULL expanded height (52 + 44) as a constant `paddingTop` so nothing shifts
+          at the default (top-of-page) state — see below. */}
       <div
         style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
           height: 52,
           flex: 'none',
           background: 'rgba(255, 255, 255, 0.72)',
@@ -401,12 +440,30 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
           overflowY: 'hidden',
         }}
       >
-        {brand ?? (
-          <>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: color.textPrimary, flexShrink: 0 }} />
-            <span style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>Busy Office</span>
-          </>
-        )}
+        <div
+          aria-hidden={!chromeExpanded}
+          inert={!chromeExpanded}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            flexShrink: 0,
+            overflow: 'hidden',
+            maxWidth: chromeExpanded ? 240 : 0,
+            marginRight: chromeExpanded ? 0 : -12,
+            opacity: chromeExpanded ? 1 : 0,
+            transitionProperty: 'max-width, margin-right, opacity',
+            transitionDuration: motion.durationBase,
+            transitionTimingFunction: motion.easeStandard,
+          }}
+        >
+          {brand ?? (
+            <>
+              <div style={{ width: 26, height: 26, borderRadius: 7, background: color.textPrimary, flexShrink: 0 }} />
+              <span style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>Busy Office</span>
+            </>
+          )}
+        </div>
         <div style={{ flex: 1 }} />
         <div style={{ position: 'relative', width: 520, maxWidth: '40vw' }}>
           <button
@@ -449,17 +506,29 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
 
       <Density value="compact">
         <div
+          aria-hidden={!chromeExpanded}
+          inert={!chromeExpanded}
           style={{
-            height: 44,
+            position: 'fixed',
+            top: 52,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+            height: chromeExpanded ? 44 : 0,
             flex: 'none',
             background: 'rgba(255, 255, 255, 0.6)',
             backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(15, 23, 42, 0.06)',
+            borderBottom: `1px solid rgba(15, 23, 42, ${chromeExpanded ? 0.06 : 0})`,
             display: 'flex',
             alignItems: 'center',
             gap: 4,
             padding: '0 16px',
             overflowX: 'auto',
+            overflowY: 'hidden',
+            opacity: chromeExpanded ? 1 : 0,
+            transitionProperty: 'height, opacity, border-color',
+            transitionDuration: motion.durationBase,
+            transitionTimingFunction: motion.easeStandard,
           }}
         >
           <div style={{ width: 22, height: 22, borderRadius: 6, background: color.textPrimary, flexShrink: 0, marginRight: 6 }} />
@@ -498,7 +567,15 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
         </div>
       </Density>
 
-      <div style={{ flex: 1, paddingBottom: 96, position: 'relative' }}>
+      {/* `paddingTop: 96` is a CONSTANT, not tied to `chromeExpanded` — it reserves exactly the
+          fixed header's full expanded height (52 + 44) so nothing shifts when the page first
+          loads (matching the pre-scroll-collapse layout exactly). It deliberately does NOT shrink
+          when the header collapses: an animated padding here would reintroduce the same
+          document-height feedback loop the header's own `position: fixed` above was just made to
+          avoid. The visible effect when collapsed is a fixed, floating header over already-
+          scrolled content — the standard collapsing-header pattern (Gmail/X mobile web), not
+          content sliding up to reclaim the space. */}
+      <div style={{ flex: 1, paddingTop: 96, paddingBottom: 96, position: 'relative' }}>
         {!valid ? (
           <div role="status" style={{ padding: 32 }}>
             <Text variant="heading">Navigation is unavailable</Text>
@@ -516,6 +593,8 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
         <div
           role="region"
           aria-label="App dock"
+          aria-hidden={!chromeExpanded}
+          inert={!chromeExpanded}
           tabIndex={0}
           style={{
             height: 60,
@@ -528,11 +607,16 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            pointerEvents: 'auto',
+            pointerEvents: chromeExpanded ? 'auto' : 'none',
             flex: '0 1 auto',
             minWidth: 0,
             maxWidth: '100%',
             overflowX: 'auto',
+            transform: chromeExpanded ? 'translateY(0)' : 'translateY(140%)',
+            opacity: chromeExpanded ? 1 : 0,
+            transitionProperty: 'transform, opacity',
+            transitionDuration: motion.durationBase,
+            transitionTimingFunction: motion.easeStandard,
           }}
         >
           <div style={{ flexShrink: 0 }}>
