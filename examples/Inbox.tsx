@@ -300,7 +300,7 @@ function ResizeHandle({ width, onResize }: { width: number; onResize: (width: nu
       onKeyDown={handleKeyDown}
       style={{
         flexShrink: 0,
-        width: 12,
+        width: 8,
         cursor: 'col-resize',
         display: 'flex',
         alignItems: 'center',
@@ -308,7 +308,9 @@ function ResizeHandle({ width, onResize }: { width: number; onResize: (width: nu
         touchAction: 'none',
       }}
     >
-      <div aria-hidden="true" style={{ width: 2, height: '100%', background: color.border, borderRadius: 1 }} />
+      {/* `borderStrong`, not the lighter `border` — this needs to read as a control sitting in
+          the gap, not as more empty space next to it. */}
+      <div aria-hidden="true" style={{ width: 2, height: '100%', background: color.borderStrong, borderRadius: 1 }} />
     </div>
   );
 }
@@ -457,7 +459,13 @@ export function Inbox() {
         }}
       >
         {headerRow}
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 24 }}>
+        {/* `gap: 12`, not the 24 every other multi-column page uses — there, the gap is the ONLY
+            separation between columns. Here, the resize handle already sits in that space and
+            provides its own visual/functional separation, so the same 24 on both sides of it
+            (48px total, plus the handle's own width) read as a wide stripe of empty space rather
+            than "there's a divider here" — caught from a live screenshot the owner flagged: the
+            gap between panels looked far larger than the thin divider inside it justified. */}
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 12 }}>
           <div style={{ width: sidebarWidth, flexShrink: 0, minHeight: 0, overflowY: 'auto' }}>{threadList}</div>
           <ResizeHandle width={sidebarWidth} onResize={setSidebarWidth} />
           <div style={{ flex: 1, minWidth: 280, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
