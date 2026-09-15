@@ -1,0 +1,314 @@
+import * as stylex from '@stylexjs/stylex';
+import { useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
+import { Button, Chip, Text } from '../src/index.js';
+import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.js';
+
+/**
+ * A quick-settings popover for `AppShell`'s top bar (owner-directed, 2026-09-15, following the
+ * "+ New" removal: a real, well-scoped need for a settings entry point, once the confusing
+ * global-create button was gone). Structural first pass, same standard as M6's sample pages:
+ * real components, real interaction where the underlying capability genuinely exists, disclosed
+ * placeholders where it doesn't — not a decorative mockup pretending to be finished.
+ *
+ * **Density** is real and functional: this package already ships a working `Density` tier system
+ * (`compact`/`comfortable`/`spacious`), so selecting a tier here actually re-themes every
+ * density-aware control across the whole app (`AppShell.tsx` wraps its `Shell` children in
+ * `<Density value={density}>`, driven by this component's own selection) — a genuine feature,
+ * not a mockup.
+ *
+ * **Appearance** (Light/Dark/System) is NOT real, and says so: this design system has no
+ * dark-mode infrastructure today — every `color.*` token in `tokens.stylex.ts` is a single
+ * light-mode value, a deliberate decision from the M4 docs-site build, not an oversight. "Light"
+ * is real (it's the only theme that exists) and stays selected; Dark/System render `disabled`
+ * (Chip's filter variant already dims disabled options — no new styling needed) with a caption
+ * explaining why, rather than a toggle that silently does nothing when pressed. A control that
+ * looks interactive but has no effect is worse than one that's honestly unavailable.
+ *
+ * The panel is rendered through a `createPortal` into `document.body`, positioned with
+ * `position: 'fixed'` at coordinates computed from the trigger's own `getBoundingClientRect()` —
+ * not a plain child of the trigger's wrapper the way `Dropdown.tsx`'s menu is. Found live, not
+ * assumed necessary up front: the trigger lives inside `Shell`'s top bar, which sets
+ * `overflowX: 'auto', overflowY: 'hidden'` (see Shell.tsx) so its own content can scroll
+ * horizontally on narrow screens without a vertical scrollbar — but `overflow: hidden` clips
+ * ANY descendant that visually extends past its box, including a `position: absolute` popover,
+ * regardless of z-index (verified directly: bumping the panel's z-index to 99999, then the top
+ * bar's own z-index to 99999, changed nothing — `getBoundingClientRect()` reported a perfectly
+ * correct on-screen box the whole time, because that call doesn't know about ancestor clipping;
+ * only `elementFromPoint` and an actual screenshot revealed the panel was invisible). A portal is
+ * the standard fix for a popover trigger that lives inside a clipping/scrolling ancestor. Visual
+ * styling (the `glass`/`shadow.md`/`radius.md` treatment) still mirrors `Dropdown.tsx`'s own menu
+ * popover — the closest existing precedent for "a lightweight, non-modal popover anchored to a
+ * trigger", not `Modal`'s heavier full-viewport glass overlay (this never blocks the rest of the
+ * page, and doesn't need `Modal`'s full Tab-trap: Escape closes it and returns focus to the
+ * trigger, a click outside closes it, and on open focus moves to the panel's first control — the
+ * same "focus moves in on open" contract `Modal`/the command palette both already establish — but
+ * Tab is allowed to move focus back out to the rest of the page rather than wrapping, since
+ * nothing behind this popover is blocked or inert).
+ *
+ * No Icon component exists in this package yet (`docs/Shell.md` already discloses this gap for
+ * the palette trigger and dock tiles) — `SlidersGlyph` below is the same class of plain-shape
+ * stand-in `examples/AppShell.tsx`'s notification bell already uses, not a new pattern.
+ */
+
+export type ControlCenterDensity = 'compact' | 'comfortable' | 'spacious';
+
+const DENSITY_OPTIONS: { value: ControlCenterDensity; label: string }[] = [
+  { value: 'compact', label: 'Compact' },
+  { value: 'comfortable', label: 'Comfortable' },
+  { value: 'spacious', label: 'Spacious' },
+];
+
+type Appearance = 'light' | 'dark' | 'system';
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const styles = stylex.create({
+  trigger: {
+    position: 'relative',
+    width: 32,
+    height: 32,
+    flexShrink: 0,
+    borderRadius: 8,
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    borderColor: {
+      default: color.border,
+      ':active': color.borderStrong,
+    },
+    backgroundColor: {
+      default: color.bgSurface,
+      ':hover': color.bgSubtle,
+    },
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    // Same shared focus-ring treatment as every other focusable control in this repo.
+    outlineStyle: 'solid',
+    outlineOffset: '2px',
+    outlineColor: {
+      default: 'transparent',
+      ':focus-visible': color.focusRing,
+    },
+    outlineWidth: {
+      default: 0,
+      ':focus-visible': '2px',
+    },
+  },
+  panel: {
+    // `position`/`top`/`right` are NOT here — they're computed per-open from the trigger's own
+    // `getBoundingClientRect()` and applied as a plain inline `style` alongside this stylex
+    // block (see the component body) rather than being static, since the panel is portaled to
+    // `document.body` and needs real viewport coordinates, not a CSS value relative to a parent
+    // it's no longer a DOM descendant of.
+    width: '280px',
+    borderRadius: radius.md,
+    padding: space.space4,
+    backgroundColor: glass.bg,
+    backdropFilter: `blur(${glass.blur})`,
+    border: glass.border,
+    boxShadow: `${shadow.md}, ${glass.highlight}`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: space.space4,
+    fontFamily: font.family,
+    zIndex: 100,
+    outlineStyle: 'solid',
+    outlineOffset: '2px',
+    outlineColor: {
+      default: 'transparent',
+      ':focus-visible': color.focusRing,
+    },
+    outlineWidth: {
+      default: 0,
+      ':focus-visible': '2px',
+    },
+  },
+});
+
+function SlidersGlyph() {
+  const track = { position: 'relative' as const, height: 2, borderRadius: 1, background: color.borderStrong };
+  const handle = (leftPercent: number) => ({
+    position: 'absolute' as const,
+    top: '50%',
+    left: `${leftPercent}%`,
+    transform: 'translate(-50%, -50%)',
+    width: 6,
+    height: 6,
+    borderRadius: '50%',
+    background: color.textPrimary,
+    border: `1.5px solid ${color.bgSurface}`,
+  });
+  return (
+    <div aria-hidden="true" style={{ display: 'flex', flexDirection: 'column', gap: 5, width: 16 }}>
+      <div style={track}>
+        <span style={handle(30)} />
+      </div>
+      <div style={track}>
+        <span style={handle(65)} />
+      </div>
+      <div style={track}>
+        <span style={handle(45)} />
+      </div>
+    </div>
+  );
+}
+
+function focusableWithin(panel: HTMLElement): HTMLElement[] {
+  return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+}
+
+export function ControlCenterButton({
+  density,
+  onDensityChange,
+  onOpenSettings,
+}: {
+  density: ControlCenterDensity;
+  onDensityChange: (value: ControlCenterDensity) => void;
+  onOpenSettings?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [appearance, setAppearance] = useState<Appearance>('light');
+  // Viewport coordinates for the portaled panel — `null` until computed on open, matching the
+  // trigger's own `getBoundingClientRect()` (bottom edge + 8px gap, right edge aligned).
+  const [panelPosition, setPanelPosition] = useState<{ top: number; right: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    const positionPanel = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (rect) setPanelPosition({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+    };
+    positionPanel();
+    // The trigger lives inside Shell's `position: fixed` top bar, so its viewport position never
+    // changes on page scroll — only a viewport resize can move it.
+    window.addEventListener('resize', positionPanel);
+
+    // Matches Modal's own "on open, focus the first focusable child (or the panel)" contract —
+    // `{ preventScroll: true }` is load-bearing, not defensive: found live, not assumed. Before
+    // this became a portal, the trigger's un-portaled panel sat inside Shell's top bar, which
+    // sets `overflowY: 'hidden'` (see Shell.tsx) — a plain `.focus()` on a newly-focused element
+    // outside that ancestor's visible 52px area triggered the browser's default scroll-into-view,
+    // which set a real `scrollTop` on the top bar EVEN THOUGH `overflow: hidden` blocks
+    // scrollbars/user-drag scrolling (it does not block a programmatic scrollTop change) —
+    // visibly throwing every one of the bar's children ~115px upward. The portal below removes
+    // the CLIPPING problem this caused; `preventScroll` is kept regardless, since focusing
+    // anything can still trigger an ancestor scroll in principle and there's no reason to allow it.
+    const first = panelRef.current ? focusableWithin(panelRef.current)[0] : undefined;
+    (first ?? panelRef.current)?.focus({ preventScroll: true });
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      const insideTrigger = containerRef.current?.contains(target);
+      const insidePanel = panelRef.current?.contains(target);
+      if (!insideTrigger && !insidePanel) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => {
+      window.removeEventListener('resize', positionPanel);
+      document.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [open]);
+
+  const handlePanelKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      setOpen(false);
+      triggerRef.current?.focus({ preventScroll: true });
+    }
+  };
+
+  const panelStylexProps = stylex.props(styles.panel);
+
+  const panel = open && (
+    <div
+      ref={panelRef}
+      role="dialog"
+      aria-label="Control center"
+      tabIndex={-1}
+      onKeyDown={handlePanelKeyDown}
+      {...panelStylexProps}
+      style={{
+        ...panelStylexProps.style,
+        position: 'fixed',
+        top: panelPosition?.top ?? 0,
+        right: panelPosition?.right ?? 0,
+      }}
+    >
+      <Text variant="title" as="h2">
+        Control center
+      </Text>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
+        <Text variant="caption" as="h3">
+          Appearance
+        </Text>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Chip variant="filter" selected={appearance === 'light'} onClick={() => setAppearance('light')}>
+            Light
+          </Chip>
+          {/* Disabled, not a silent no-op toggle: this design system has no dark palette or
+              theming mechanism today (see the file header comment) — a Chip that looked
+              selectable but did nothing on click would be worse than one that's honestly
+              unavailable. Chip's own `filterBase` already dims `:disabled` (0.4 opacity). */}
+          <Chip variant="filter" selected={false} disabled aria-label="Dark — not available yet">
+            Dark
+          </Chip>
+          <Chip variant="filter" selected={false} disabled aria-label="System — not available yet">
+            System
+          </Chip>
+        </div>
+        <Text variant="caption">Dark and system themes aren&apos;t available in this design system yet.</Text>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
+        <Text variant="caption" as="h3">
+          Density
+        </Text>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {DENSITY_OPTIONS.map((option) => (
+            <Chip key={option.value} variant="filter" selected={density === option.value} onClick={() => onDensityChange(option.value)}>
+              {option.label}
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      {onOpenSettings && (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => {
+            setOpen(false);
+            onOpenSettings();
+          }}
+        >
+          Open Settings ↗
+        </Button>
+      )}
+    </div>
+  );
+
+  return (
+    <div ref={containerRef} style={{ flexShrink: 0 }}>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-label="Control center"
+        aria-haspopup="true"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        {...stylex.props(styles.trigger)}
+      >
+        <SlidersGlyph />
+      </button>
+      {panel && createPortal(panel, document.body)}
+    </div>
+  );
+}
