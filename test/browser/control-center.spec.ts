@@ -148,3 +148,21 @@ test('at a narrow viewport, opening the panel does not push the top bar into hor
   });
   expect(after.scrollWidth).toBeLessThanOrEqual(after.clientWidth);
 });
+
+test('at a narrow viewport, the panel itself stays within the viewport — not just the top bar', async ({ page }) => {
+  // Regression test for a real bug found live (owner-flagged, 2026-09-15): widening the panel
+  // from 280px to 320px (to fit ButtonGroup's equal-width segments) pushed its LEFT edge to
+  // x:-56 at 390px — the top-bar-overflow test above only ever checked the TOP BAR's own
+  // scrollWidth/clientWidth, which the portaled, `position:fixed` panel never affects, so it
+  // couldn't have caught this. Fixed in ControlCenter.tsx's `positionPanel()` by clamping the
+  // computed `right` value against the panel's own measured width.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/#examples');
+
+  await page.getByRole('button', { name: 'Control center' }).click();
+  const panel = page.getByRole('dialog', { name: 'Control center' });
+  const box = await panel.boundingBox();
+  if (!box) throw new Error('panel not found');
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(390);
+});

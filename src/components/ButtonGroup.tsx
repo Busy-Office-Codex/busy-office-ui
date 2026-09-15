@@ -18,7 +18,16 @@ const styles = stylex.create({
   // `Dropdown`'s trigger/filter `Chip`, so a `ButtonGroup` sits at the same height as its capsule-
   // family neighbors at every tier.
   track: {
-    display: 'inline-flex',
+    display: 'flex',
+    // `width: '100%'` (owner-flagged, 2026-09-15: "proportion of group buttons doesn't make
+    // sense") — found live: without an explicit width, the track was an `inline-flex` box sized
+    // to its own children's combined content width, but it was ALSO a flex item of its own
+    // parent's `align-items: 'stretch'` column, which stretched the track to the parent's full
+    // width regardless — the segments, still only as wide as their own label text, ended up
+    // left-packed with a large empty gap at the track's right end. `width: '100%'` makes the
+    // track's own full-width sizing explicit and intentional (matching a settings control that
+    // should fill its container, not float at an arbitrary content width) instead of an
+    // accidental side effect of the parent's stretch behavior.
     alignItems: 'stretch',
     borderRadius: radius.pill,
     overflow: 'hidden',
@@ -28,6 +37,7 @@ const styles = stylex.create({
     backgroundColor: color.bgSubtle,
     minHeight: density.controlHeight,
     boxSizing: 'border-box',
+    width: '100%',
   },
   segment: {
     fontFamily: font.family,
@@ -36,6 +46,20 @@ const styles = stylex.create({
     // the track's own content-box height, which the track's `minHeight` + `boxSizing: 'border-
     // box'` above already pins to the ambient density tier.
     borderStyle: 'none',
+    // Equal-width segments (owner-flagged, 2026-09-15), not each sized to its own label's natural
+    // content width — a "Compact"/"Comfortable"/"Spacious" row previously rendered at 89/113/89px,
+    // an arbitrary-looking split driven purely by word length. `flex: '1 1 0%'` divides the
+    // track's now-explicit full width evenly regardless of label length; `minWidth: 0` overrides
+    // the flex-item default of `min-width: auto` (which would otherwise refuse to shrink a
+    // segment below its own text's content width, defeating the equal split the moment one label
+    // is longer than an equal share) — safe here because callers are expected to keep labels
+    // short enough to fit (this is a segmented control for 2-5 short options, not `Dropdown`'s
+    // free-text menu), and the caller's container width is the thing to widen if a label ever
+    // doesn't fit, not this component's own sizing logic.
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: '0%',
+    minWidth: 0,
     paddingInline: space.space4,
     display: 'inline-flex',
     alignItems: 'center',
