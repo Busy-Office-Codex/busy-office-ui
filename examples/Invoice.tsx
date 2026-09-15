@@ -1,4 +1,5 @@
 import { Button, Card, Chip, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
+import { color } from '../src/tokens.stylex.js';
 
 /**
  * A two-column invoice: a printed-document-style card (bill-to, dates, line
@@ -70,6 +71,7 @@ const tax = subtotal * TAX_RATE;
 const total = subtotal + tax;
 const totalPaid = PAYMENTS_RECEIVED.reduce((sum, payment) => sum + payment.amount, 0);
 const balanceDue = total - totalPaid;
+const paidPercent = Math.round((totalPaid / total) * 100);
 
 export function Invoice() {
   return (
@@ -123,6 +125,21 @@ export function Invoice() {
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div style={{ flex: '2 1 560px', minWidth: 320 }}>
             <Card>
+              {/* The document's own letterhead — found live: this card jumped straight to
+                  Bill-to/dates with no in-document header of its own, relying entirely on the
+                  page-level heading above the card (INVOICE.number is real page content either
+                  way; the reference shows it a second time INSIDE the printed document, the same
+                  way a real invoice PDF repeats its own number on the page itself). */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: color.textPrimary, flexShrink: 0 }} />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                  <Text variant="caption">INVOICE</Text>
+                  <Text variant="title" as="span">
+                    {INVOICE.number}
+                  </Text>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 16 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <Text variant="caption" as="span">
@@ -208,13 +225,34 @@ export function Invoice() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 12, borderTop: '1px solid #e2e8f0' }}>
-                <Text variant="title">Payment instructions</Text>
-                <Text variant="caption">
-                  Remit payment via ACH or wire transfer to Northwind Traders, LLC — routing 021000021, account
-                  4471182005. Reference invoice {INVOICE.number} on the transfer. Payments received after the due
-                  date may accrue a 1.5% monthly late fee.
-                </Text>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, paddingTop: 12, borderTop: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 240px' }}>
+                  <Text variant="title">Payment instructions</Text>
+                  <Text variant="caption">
+                    Remit payment via ACH or wire transfer to Northwind Traders, LLC — routing 021000021, account
+                    4471182005. Reference invoice {INVOICE.number} on the transfer. Payments received after the due
+                    date may accrue a 1.5% monthly late fee.
+                  </Text>
+                </div>
+                {/* A scannable pay-by-QR affordance — no QR-generation dependency in this
+                    package, so (matching the "no Icon component" precedent elsewhere in
+                    examples/) this is a plain hand-built stand-in, not a real generated code. */}
+                <div
+                  aria-hidden="true"
+                  style={{
+                    width: 72,
+                    height: 72,
+                    flexShrink: 0,
+                    border: '1px dashed #cbd5e1',
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#f8fafc',
+                  }}
+                >
+                  <Text variant="caption">QR</Text>
+                </div>
               </div>
             </Card>
           </div>
@@ -227,6 +265,27 @@ export function Invoice() {
                   Overdue · {INVOICE.overdueDays} days
                 </Chip>
               </div>
+
+              {/* A real Paid-vs-Outstanding progress bar — found live: this card only ever
+                  listed the same figures as plain text rows below, with nothing visual
+                  conveying how much of the invoice is actually paid off at a glance. */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div
+                  role="progressbar"
+                  aria-label="Payment progress"
+                  aria-valuenow={paidPercent}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  style={{ height: 8, borderRadius: 999, background: '#e2e8f0', overflow: 'hidden' }}
+                >
+                  <div style={{ height: '100%', width: `${paidPercent}%`, background: color.action, borderRadius: 999 }} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                  <Text variant="caption">Paid · {formatCurrency(totalPaid)}</Text>
+                  <Text variant="caption">Outstanding · {formatCurrency(balanceDue)}</Text>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
                   <Text variant="caption" as="span">
