@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { Button, Card, Chip, Density, Dropdown, Input, Text } from '../src/index.js';
 import { color } from '../src/tokens.stylex.js';
 
@@ -35,6 +35,35 @@ import { color } from '../src/tokens.stylex.js';
  * for System — not a new arbitrary palette) so category reads as more than
  * text alone, and the row is markedly shorter (one line of context instead
  * of a full card), closer to a scannable list than a stack of cards.
+ *
+ * Layout (owner-directed, 2026-09-15, "grilled" against the rest of this
+ * milestone's full-width/mobile-responsive pass before building): scoped to
+ * THIS page only, not rolled out to every sample page. Inbox is a workspace
+ * view — an unbounded thread list plus a conversation and reply composer the
+ * user wants anchored — unlike a short form (Settings/Profile/Help) that
+ * reads top-to-bottom once and is fine with normal page scroll. At a wide
+ * viewport (`min-width: 900px`, checked via `matchMedia`, not a CSS
+ * `@media` query — the two layouts differ in more than styling, they use a
+ * genuinely different scroll model, which inline styles alone can't
+ * express), the page becomes full height inside `AppShell`'s content slot
+ * and stops scrolling itself: the thread list and the conversation each get
+ * their own internal `overflow-y: auto` region, and the reply composer stays
+ * pinned at the bottom of the conversation pane instead of scrolling away —
+ * the standard workspace-app pattern (Gmail, Slack, Linear itself). Because
+ * the page never produces `window` scroll in this mode, `Shell`'s scroll-
+ * driven chrome collapse (`src/shell/Shell.tsx`) simply never triggers here
+ * — consistent with how those same real apps keep their own chrome docked
+ * while you're working inside a workspace view, not a bug to route around.
+ * Below the breakpoint, this falls back to the EXACT stacked, page-scrolling
+ * layout already built and verified against `test/browser/mobile-
+ * responsive.spec.ts` — unchanged, not a new mobile treatment. A resizable
+ * divider (pointer-drag with `setPointerCapture`, plus a real `role=
+ * "separator"` keyboard contract — arrow keys, Home/End) lets the thread
+ * list take more or less of the fixed width, clamped between 280 and
+ * 480px; it gets only the browser's default focus outline, not a custom
+ * `:focus-visible` ring, the same disclosed gap `docs/Shell.md` already
+ * names for the palette trigger and dock tiles — a CSS pseudo-class no
+ * plain inline `style` can express.
  */
 
 type ThreadCategory = 'Mentions' | 'Assigned' | 'System';
@@ -205,126 +234,264 @@ function ThreadRow({ thread, selected, isLast }: { thread: Thread; selected: boo
   );
 }
 
-export function Inbox() {
-  const [filter, setFilter] = useState<'All' | ThreadCategory>('All');
+const WIDE_LAYOUT_QUERY = '(min-width: 900px)';
+const DEFAULT_SIDEBAR_WIDTH = 360;
+const MIN_SIDEBAR_WIDTH = 280;
+const MAX_SIDEBAR_WIDTH = 480;
+const RESIZE_STEP = 16;
 
-  const visibleThreads = THREADS.filter((thread) => filter === 'All' || thread.category === filter);
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+/** `matchMedia`, not a CSS `@media` query: the two Inbox layouts differ in scroll MODEL (page
+ * scroll vs. two independent internal scroll regions), not just styling — something a plain
+ * inline `style` object can't express a breakpoint for on its own. */
+function useIsWideScreen(query: string): boolean {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const onChange = () => setMatches(mql.matches);
+    onChange();
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [query]);
+  return matches;
+}
+
+/** A real `role="separator"` drag handle (WAI-ARIA window-splitter pattern): pointer-drag via
+ * `setPointerCapture` (so dragging keeps tracking even once the cursor leaves this thin strip),
+ * plus a full keyboard contract (arrow keys nudge by `RESIZE_STEP`, Home/End jump to the clamped
+ * extremes) — not pointer-only. */
+function ResizeHandle({ width, onResize }: { width: number; onResize: (width: number) => void }) {
+  const dragRef = useRef<{ pointerId: number; startX: number; startWidth: number } | null>(null);
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startWidth: width };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    onResize(clamp(drag.startWidth + (event.clientX - drag.startX), MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH));
+  };
+  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    dragRef.current = null;
+    event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'ArrowLeft') onResize(clamp(width - RESIZE_STEP, MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH));
+    else if (event.key === 'ArrowRight') onResize(clamp(width + RESIZE_STEP, MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH));
+    else if (event.key === 'Home') onResize(MIN_SIDEBAR_WIDTH);
+    else if (event.key === 'End') onResize(MAX_SIDEBAR_WIDTH);
+  };
 
   return (
     <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize thread list"
+      aria-valuenow={Math.round(width)}
+      aria-valuemin={MIN_SIDEBAR_WIDTH}
+      aria-valuemax={MAX_SIDEBAR_WIDTH}
+      tabIndex={0}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onKeyDown={handleKeyDown}
       style={{
-        background: '#f8fafc',
-        fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
-        boxSizing: 'border-box',
+        flexShrink: 0,
+        width: 12,
+        cursor: 'col-resize',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        touchAction: 'none',
       }}
     >
+      <div aria-hidden="true" style={{ width: 2, height: '100%', background: color.border, borderRadius: 1 }} />
+    </div>
+  );
+}
+
+export function Inbox() {
+  const [filter, setFilter] = useState<'All' | ThreadCategory>('All');
+  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
+  const isWide = useIsWideScreen(WIDE_LAYOUT_QUERY);
+
+  const visibleThreads = THREADS.filter((thread) => filter === 'All' || thread.category === filter);
+
+  const headerRow = (
+    <Density value="compact">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <Text variant="heading">Inbox</Text>
+        <div style={{ flex: 1 }} />
+        <Dropdown
+          label={`Filter · ${filter}`}
+          items={FILTER_ITEMS.map((label) => ({ label, selected: label === filter }))}
+          onSelect={(label) => setFilter(label as 'All' | ThreadCategory)}
+          active={filter !== 'All'}
+        />
+        <Button type="button" variant="secondary">
+          Mark all read
+        </Button>
+      </div>
+    </Density>
+  );
+
+  const threadList =
+    visibleThreads.length > 0 ? (
+      <Card>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {visibleThreads.map((thread, index) => (
+            <ThreadRow
+              key={thread.id}
+              thread={thread}
+              selected={thread.id === SELECTED_THREAD_ID}
+              isLast={index === visibleThreads.length - 1}
+            />
+          ))}
+        </div>
+      </Card>
+    ) : (
+      <Card role="status">
+        <Text variant="body">No threads match this filter.</Text>
+      </Card>
+    );
+
+  const recordContext = (
+    <Card>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <Text variant="title">SO-1042 · Northwind Traders</Text>
+        <Chip variant="status" tone="accent">
+          Awaiting approval
+        </Chip>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <Text variant="caption" as="span">
+            Order total
+          </Text>
+          <Text variant="body">$24,300</Text>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <Text variant="caption" as="span">
+            Requested by
+          </Text>
+          <Text variant="body">Sales — East region</Text>
+        </div>
+      </div>
+    </Card>
+  );
+
+  const messageThread = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {MESSAGES.map((message) => (
+        <div key={message.id} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Text variant="caption">
+            {message.sender} · {message.timestamp}
+          </Text>
+          <Text variant="body">{message.text}</Text>
+        </div>
+      ))}
+    </div>
+  );
+
+  const composer = (
+    <Card>
+      <Density value="compact">
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Button type="button" variant="ghost">
+            @ Mention
+          </Button>
+          <Button type="button" variant="ghost">
+            Attach
+          </Button>
+          <Button type="button" variant="ghost">
+            / Command
+          </Button>
+        </div>
+      </Density>
+      <Density value="compact">
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            {/* This package's Input has no multiline/textarea variant — a disclosed
+                simplification: a single-line placeholder reply field stands in for what
+                a real composer would render as an expanding multi-line box. */}
+            <Input aria-label="Reply" placeholder="Reply…" />
+          </div>
+          <Button type="button" variant="primary">
+            Send
+          </Button>
+        </div>
+      </Density>
+    </Card>
+  );
+
+  const fontFamily = '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
+  if (isWide) {
+    // Full height inside AppShell's content slot, no page scroll of its own — the thread list
+    // and the conversation each scroll independently, and the composer stays pinned at the
+    // bottom of the conversation pane. See the file header comment for the full rationale.
+    //
+    // `height: 'calc(100vh - 192px)'`, not `'100%'`: Shell's own root uses `min-height: 100vh`
+    // (deliberately — it's what lets every OTHER page grow taller than the viewport and let the
+    // page itself scroll), which never gives this chain of ancestors a definite `height` for a
+    // percentage to resolve against — confirmed live: with `height: '100%'` here, this div's
+    // rendered box stayed exactly as tall as its own content demanded, `overflow: hidden` and
+    // all, instead of ever actually capping at the viewport. Anchoring directly to `100vh` and
+    // subtracting the two fixed reservations Shell's content slot already applies (96px top +
+    // 96px bottom, see `src/shell/Shell.tsx`) sidesteps that ambiguity entirely.
+    return (
+      <div
+        style={{
+          background: '#f8fafc',
+          fontFamily,
+          height: 'calc(100vh - 192px)',
+          boxSizing: 'border-box',
+          padding: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 20,
+          overflow: 'hidden',
+        }}
+      >
+        {headerRow}
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 24 }}>
+          <div style={{ width: sidebarWidth, flexShrink: 0, minHeight: 0, overflowY: 'auto' }}>{threadList}</div>
+          <ResizeHandle width={sidebarWidth} onResize={setSidebarWidth} />
+          <div style={{ flex: 1, minWidth: 280, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {recordContext}
+              {messageThread}
+            </div>
+            {composer}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Narrow viewport: the original stacked, page-scrolling layout, unchanged — already verified
+  // against test/browser/mobile-responsive.spec.ts.
+  return (
+    <div style={{ background: '#f8fafc', fontFamily, padding: 24, boxSizing: 'border-box' }}>
       {/* No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
           docs/design-conventions.md's "Page width and responsive layout"); the thread-list and
           detail-pane columns below use flexible bases so the row wraps to a stacked mobile
           layout on its own. */}
       <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <Density value="compact">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <Text variant="heading">Inbox</Text>
-            <div style={{ flex: 1 }} />
-            <Dropdown
-              label={`Filter · ${filter}`}
-              items={FILTER_ITEMS.map((label) => ({ label, selected: label === filter }))}
-              onSelect={(label) => setFilter(label as 'All' | ThreadCategory)}
-              active={filter !== 'All'}
-            />
-            <Button type="button" variant="secondary">
-              Mark all read
-            </Button>
-          </div>
-        </Density>
+        {headerRow}
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div style={{ flex: '1 1 400px', minWidth: 320, maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {visibleThreads.length > 0 ? (
-              <Card>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {visibleThreads.map((thread, index) => (
-                    <ThreadRow
-                      key={thread.id}
-                      thread={thread}
-                      selected={thread.id === SELECTED_THREAD_ID}
-                      isLast={index === visibleThreads.length - 1}
-                    />
-                  ))}
-                </div>
-              </Card>
-            ) : (
-              <Card role="status">
-                <Text variant="body">No threads match this filter.</Text>
-              </Card>
-            )}
+            {threadList}
           </div>
 
           <div style={{ flex: '2 1 380px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Card>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                <Text variant="title">SO-1042 · Northwind Traders</Text>
-                <Chip variant="status" tone="accent">
-                  Awaiting approval
-                </Chip>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <Text variant="caption" as="span">
-                    Order total
-                  </Text>
-                  <Text variant="body">$24,300</Text>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <Text variant="caption" as="span">
-                    Requested by
-                  </Text>
-                  <Text variant="body">Sales — East region</Text>
-                </div>
-              </div>
-            </Card>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {MESSAGES.map((message) => (
-                <div key={message.id} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Text variant="caption">
-                    {message.sender} · {message.timestamp}
-                  </Text>
-                  <Text variant="body">{message.text}</Text>
-                </div>
-              ))}
-            </div>
-
-            <Card>
-              <Density value="compact">
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <Button type="button" variant="ghost">
-                    @ Mention
-                  </Button>
-                  <Button type="button" variant="ghost">
-                    Attach
-                  </Button>
-                  <Button type="button" variant="ghost">
-                    / Command
-                  </Button>
-                </div>
-              </Density>
-              <Density value="compact">
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <div style={{ flex: 1 }}>
-                    {/* This package's Input has no multiline/textarea variant — a disclosed
-                        simplification: a single-line placeholder reply field stands in for what
-                        a real composer would render as an expanding multi-line box. */}
-                    <Input aria-label="Reply" placeholder="Reply…" />
-                  </div>
-                  <Button type="button" variant="primary">
-                    Send
-                  </Button>
-                </div>
-              </Density>
-            </Card>
+            {recordContext}
+            {messageThread}
+            {composer}
           </div>
         </div>
       </div>

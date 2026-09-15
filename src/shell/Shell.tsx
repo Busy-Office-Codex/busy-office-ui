@@ -575,7 +575,21 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
           avoid. The visible effect when collapsed is a fixed, floating header over already-
           scrolled content — the standard collapsing-header pattern (Gmail/X mobile web), not
           content sliding up to reclaim the space. */}
-      <div style={{ flex: 1, paddingTop: 96, paddingBottom: 96, position: 'relative' }}>
+      {/* `minHeight: 0` overrides the flex default (`auto`, effectively "never shrink below my
+          content's size") — needed so a page that wants to cap itself to the available height and
+          scroll its OWN content internally (Inbox.tsx's wide-viewport layout) actually can; without
+          it, this container would grow to fit that page's full content regardless, defeating the
+          page's own `overflow: hidden`. Harmless for every other page: none of them set a height
+          on themselves, so they still just grow to their natural content height exactly as before —
+          removing an unused floor changes nothing for content that was never being floored.
+          `boxSizing: 'border-box'` is the fix a `height: '100%'` page (Inbox.tsx) actually depends
+          on: without it, this div's default `content-box` sizing means `flex: 1`'s computed
+          content height plus this element's OWN 192px of padding exceeds the space the flex column
+          actually has, pushing the whole page 192px taller than the viewport — the exact bug
+          `RecordDetail.tsx` was fixed for (ROADMAP item 14: "RecordDetail's root missing
+          `box-sizing: border-box`"), just not one this div needed until a page could size itself
+          against it. */}
+      <div style={{ flex: 1, minHeight: 0, boxSizing: 'border-box', paddingTop: 96, paddingBottom: 96, position: 'relative' }}>
         {!valid ? (
           <div role="status" style={{ padding: 32 }}>
             <Text variant="heading">Navigation is unavailable</Text>
