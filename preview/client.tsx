@@ -29,6 +29,7 @@ import { ProductionOrders } from '../examples/ProductionOrders.js';
 import { Users } from '../examples/Users.js';
 import { AuditLog } from '../examples/AuditLog.js';
 import { Analytics } from '../examples/Analytics.js';
+import { BuilderScreens } from '../examples/BuilderScreens.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -80,6 +81,8 @@ const routes = [
   { id: 'audit-log', module: 'Administration', label: 'Audit log' },
   // M7, Slice 5 (Analytics) — BI's second route, alongside the existing Dashboard.
   { id: 'analytics', module: 'BI', label: 'Analytics' },
+  // M7, Slice 6 (Builder) — fills the pre-existing NAV.Builder 'Pages' placeholder (M6).
+  { id: 'builder-screens', module: 'Builder', label: 'Pages' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -110,6 +113,7 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   users: <Users />,
   'audit-log': <AuditLog />,
   analytics: <Analytics />,
+  'builder-screens': <BuilderScreens />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */
