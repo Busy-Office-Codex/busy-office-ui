@@ -15,6 +15,14 @@ import { useStoreState } from './data/store.js';
  * .recordPayment`, a real transition (the payment appears in the list below, the balance due
  * shrinks, and the status Chip flips to "Paid" once it reaches zero) rather than a static
  * rendered outcome.
+ *
+ * Slice 10 (Billing completions) added "+ New invoice" (bills a confirmed sales order that has
+ * no invoice yet — real worklist-driven creation, not a hand-typed blank form) and "Cancel
+ * invoice" (a real reversal for an unpaid invoice; this simple model doesn't try to model a
+ * credit note against an already-paid one — see `appActions.cancelInvoice`'s own comment).
+ * Print preview isn't wired here: Invoice.tsx's own richly-styled printed-document page
+ * (letterhead, QR code, payment progress bar) stays the static M6 reference it already is,
+ * a deliberate scope line rather than a half-connected rewrite of that page's own visual work.
  */
 
 const STATUS_TONE: Record<string, ChipTone> = {
@@ -35,6 +43,8 @@ const STATUS_LABEL: Record<string, string> = {
 
 const formatCurrency = (amount: number) => `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+let nextInvoiceSeq = 1;
+
 export function Billing() {
   const state = useStoreState(appStore, (s) => s);
   const invoiceList = Object.values(state.invoices).sort((a, b) => (a.id < b.id ? 1 : -1));
@@ -49,6 +59,8 @@ export function Billing() {
   const paid = selected ? selected.payments.reduce((sum, payment) => sum + payment.amount, 0) : 0;
   const balanceDue = total - paid;
 
+  const uninvoicedOrders = Object.values(state.salesOrders).filter((order) => order.status === 'confirmed' && order.invoiceIds.length === 0);
+
   return (
     <div
       style={{
@@ -60,6 +72,38 @@ export function Billing() {
     >
       <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Text variant="heading">Billing</Text>
+
+        {uninvoicedOrders.length > 0 && (
+          <Card>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Text variant="title">Ready to invoice</Text>
+              {uninvoicedOrders.map((order) => (
+                <div key={order.id} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1 }}>
+                    <Text variant="body">
+                      {order.id} · {state.customers[order.customerId]?.name}
+                    </Text>
+                    <Text variant="caption">{formatCurrency(documentTotal(order.lines))}</Text>
+                  </div>
+                  <Density value="compact">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        const newId = `INV-${3300 + nextInvoiceSeq}`;
+                        nextInvoiceSeq += 1;
+                        appActions.createInvoice(order.id, newId);
+                        setSelectedId(newId);
+                      }}
+                    >
+                      Create invoice
+                    </Button>
+                  </Density>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         <div
           role="region"
@@ -166,22 +210,27 @@ export function Billing() {
                 </div>
               )}
 
-              {balanceDue > 0 && selected.status !== 'cancelled' && (
+              {selected.status !== 'paid' && selected.status !== 'cancelled' && (
                 <Density value="compact">
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                    <Button
-                      type="button"
-                      variant="primary"
-                      onClick={() =>
-                        appActions.recordPayment(selected.id, {
-                          date: new Date().toISOString().slice(0, 10),
-                          amount: balanceDue,
-                          method: 'ACH transfer',
-                        })
-                      }
-                    >
-                      Record payment — {formatCurrency(balanceDue)}
+                    <Button type="button" variant="secondary" onClick={() => appActions.cancelInvoice(selected.id)}>
+                      Cancel invoice
                     </Button>
+                    {balanceDue > 0 && (
+                      <Button
+                        type="button"
+                        variant="primary"
+                        onClick={() =>
+                          appActions.recordPayment(selected.id, {
+                            date: new Date().toISOString().slice(0, 10),
+                            amount: balanceDue,
+                            method: 'ACH transfer',
+                          })
+                        }
+                      >
+                        Record payment — {formatCurrency(balanceDue)}
+                      </Button>
+                    )}
                   </div>
                 </Density>
               )}
