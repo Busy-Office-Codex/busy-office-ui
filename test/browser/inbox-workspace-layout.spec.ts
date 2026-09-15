@@ -74,3 +74,42 @@ test('below the breakpoint, Inbox falls back to the original stacked, page-scrol
   // not fit exactly.
   expect(overflow.scrollHeight).toBeGreaterThan(overflow.clientHeight);
 });
+
+// The two tests below cover findings from a "grill the design" pass (2026-09-15) against a live
+// screenshot — see examples/Inbox.tsx's file header comment for the full reasoning on both.
+
+test('the resize divider gets its own :focus-visible ring on real keyboard focus, not the browser default', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openInbox(page);
+
+  const handle = page.getByRole('separator', { name: 'Resize thread list' });
+
+  // A plain .focus() call right after a mouse click does NOT reliably trigger :focus-visible
+  // (confirmed live: the browser's own input-modality heuristic treats it as still "mouse") — a
+  // real Tab keypress is what an actual keyboard user does, and the only reliable way to assert
+  // this. Bounded loop since other focusable controls sit before the separator in tab order.
+  let reachedHandle = false;
+  for (let i = 0; i < 30 && !reachedHandle; i++) {
+    await page.keyboard.press('Tab');
+    reachedHandle = await handle.evaluate((el) => document.activeElement === el);
+  }
+  expect(reachedHandle).toBe(true);
+
+  const outline = await handle.evaluate((el) => getComputedStyle(el).outlineWidth);
+  expect(outline).toBe('2px');
+});
+
+test('a System-category thread offers only Archive, not Assign — there is no person to hand it off to', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openInbox(page);
+
+  // Each row's Archive/Assign button has an exact, per-thread aria-label ("Archive <subject>") —
+  // a more precise target than trying to scope a locator to "the row containing this text", which
+  // would match every ancestor div up the tree, not just the row itself.
+  await expect(page.getByRole('button', { name: 'Archive Weekly digest is ready', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Assign Weekly digest is ready', exact: true })).toHaveCount(0);
+
+  // A Mentions/Assigned thread still gets both.
+  await expect(page.getByRole('button', { name: 'Assign Assigned: expedite PO-1035', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Archive Assigned: expedite PO-1035', exact: true })).toBeVisible();
+});

@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { Button, Card, Chip, Density, Dropdown, Input, Text } from '../src/index.js';
 import { color } from '../src/tokens.stylex.js';
@@ -60,10 +61,20 @@ import { color } from '../src/tokens.stylex.js';
  * divider (pointer-drag with `setPointerCapture`, plus a real `role=
  * "separator"` keyboard contract — arrow keys, Home/End) lets the thread
  * list take more or less of the fixed width, clamped between 280 and
- * 480px; it gets only the browser's default focus outline, not a custom
- * `:focus-visible` ring, the same disclosed gap `docs/Shell.md` already
- * names for the palette trigger and dock tiles — a CSS pseudo-class no
- * plain inline `style` can express.
+ * 480px; it gets its own `:focus-visible` outline (`resizeHandleStyles`,
+ * a local `stylex.create` block — same precedent as `checkboxStyles.ts`)
+ * rather than the browser's default, which — confirmed from a live
+ * screenshot the owner sent — traced a visually broken-looking full-height
+ * rectangle around the handle's tall, narrow hit box.
+ *
+ * Two more findings from that same "grill the design" pass (2026-09-15):
+ * `Filter`/`Mark all read` only ever act on the thread list, but used to
+ * sit in the page-wide header, right-aligned over the DETAIL pane rather
+ * than the list they control — moved into `listToolbar`, which now sits
+ * directly above the thread list in both layouts. And "Assign" no longer
+ * renders on System-category rows (a digest or a backorder alert has no
+ * person's judgment call to hand off) — showing an action that doesn't
+ * semantically apply is inbox noise, not restraint.
  */
 
 type ThreadCategory = 'Mentions' | 'Assigned' | 'System';
@@ -218,12 +229,18 @@ function ThreadRow({ thread, selected, isLast }: { thread: Thread; selected: boo
             `@media` query. */}
         <Density value="compact">
           <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
-            {/* Every row's Assign/Archive repeats the same visible text — disambiguating
-                aria-label per row, same precedent as ListReport.tsx's row-selection
-                checkboxes ("Select ${order.po}"). */}
-            <Button type="button" variant="ghost" aria-label={`Assign ${thread.subject}`}>
-              Assign
-            </Button>
+            {/* "Assign" only for Mentions/Assigned threads (owner-directed, "grilled" from a
+                live screenshot): a System thread ("Weekly digest is ready", sender "System") has
+                no person's judgment call to hand off — offering "Assign" there anyway is the kind
+                of inbox noise that trains people to stop reading row actions. Every row's
+                Assign/Archive repeats the same visible text — disambiguating aria-label per row,
+                same precedent as ListReport.tsx's row-selection checkboxes ("Select
+                ${order.po}"). */}
+            {thread.category !== 'System' && (
+              <Button type="button" variant="ghost" aria-label={`Assign ${thread.subject}`}>
+                Assign
+              </Button>
+            )}
             <Button type="button" variant="ghost" aria-label={`Archive ${thread.subject}`}>
               Archive
             </Button>
@@ -241,6 +258,40 @@ const MAX_SIDEBAR_WIDTH = 480;
 const RESIZE_STEP = 16;
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+// `:focus-visible` is a CSS pseudo-class a plain React `style` object can't express — same
+// precedent as examples/checkboxStyles.ts (see that file's own comment for the fuller history).
+// Needed here specifically because the resize handle's default browser focus outline looked
+// broken in practice, not just unpolished: a thin 8px-wide but full-panel-tall hit box, with no
+// custom outline, gets the browser's own (comparatively thick, differently-colored) default ring
+// traced around that whole tall box — a wide vertical bar that reads as a rendering glitch, not
+// "this control has focus" (caught from a live screenshot the owner sent). Swapping in this
+// design system's own slim 2px `color.focusRing` outline — the same token/width/offset every
+// other focusable control here uses — turns that into the expected, deliberate treatment: a
+// full-height highlight along a divider is the normal way resizable-pane dividers indicate focus
+// (VS Code, browser DevTools' own panel dividers), the default browser ring just rendered it
+// clumsily.
+const resizeHandleStyles = stylex.create({
+  handle: {
+    flexShrink: 0,
+    width: '8px',
+    cursor: 'col-resize',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    touchAction: 'none',
+    outlineStyle: 'solid',
+    outlineOffset: '2px',
+    outlineColor: {
+      default: 'transparent',
+      ':focus-visible': color.focusRing,
+    },
+    outlineWidth: {
+      default: 0,
+      ':focus-visible': '2px',
+    },
+  },
+});
 
 /** `matchMedia`, not a CSS `@media` query: the two Inbox layouts differ in scroll MODEL (page
  * scroll vs. two independent internal scroll regions), not just styling — something a plain
@@ -298,15 +349,7 @@ function ResizeHandle({ width, onResize }: { width: number; onResize: (width: nu
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onKeyDown={handleKeyDown}
-      style={{
-        flexShrink: 0,
-        width: 8,
-        cursor: 'col-resize',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        touchAction: 'none',
-      }}
+      {...stylex.props(resizeHandleStyles.handle)}
     >
       {/* `borderStrong`, not the lighter `border` — this needs to read as a control sitting in
           the gap, not as more empty space next to it. */}
@@ -322,17 +365,31 @@ export function Inbox() {
 
   const visibleThreads = THREADS.filter((thread) => filter === 'All' || thread.category === filter);
 
+  // Split from a single header row (owner-directed, 2026-09-15, "grilled" from a live
+  // screenshot): `Filter`/`Mark all read` only ever act on the thread list, but used to sit in
+  // the page-wide header, right-aligned above the DETAIL pane rather than the list they actually
+  // control — a proximity mismatch that was easy to miss in the single-scrolling-page layout but
+  // reads as "what does this even apply to?" now that the wide layout is a genuine two-pane
+  // workspace. `headerRow` is now just the page identity; `listToolbar` sits directly above the
+  // thread list in both layouts.
   const headerRow = (
     <Density value="compact">
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <Text variant="heading">Inbox</Text>
-        <div style={{ flex: 1 }} />
+      </div>
+    </Density>
+  );
+
+  const listToolbar = (
+    <Density value="compact">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <Dropdown
           label={`Filter · ${filter}`}
           items={FILTER_ITEMS.map((label) => ({ label, selected: label === filter }))}
           onSelect={(label) => setFilter(label as 'All' | ThreadCategory)}
           active={filter !== 'All'}
         />
+        <div style={{ flex: 1 }} />
         <Button type="button" variant="secondary">
           Mark all read
         </Button>
@@ -466,7 +523,10 @@ export function Inbox() {
             than "there's a divider here" — caught from a live screenshot the owner flagged: the
             gap between panels looked far larger than the thin divider inside it justified. */}
         <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 12 }}>
-          <div style={{ width: sidebarWidth, flexShrink: 0, minHeight: 0, overflowY: 'auto' }}>{threadList}</div>
+          <div style={{ width: sidebarWidth, flexShrink: 0, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {listToolbar}
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>{threadList}</div>
+          </div>
           <ResizeHandle width={sidebarWidth} onResize={setSidebarWidth} />
           <div style={{ flex: 1, minWidth: 280, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -493,6 +553,7 @@ export function Inbox() {
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div style={{ flex: '1 1 400px', minWidth: 320, maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {listToolbar}
             {threadList}
           </div>
 
