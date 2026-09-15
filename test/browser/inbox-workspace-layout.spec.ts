@@ -49,11 +49,15 @@ test('the resize divider supports both pointer drag and full keyboard control', 
   await page.keyboard.press('ArrowRight');
   await expect(handle).toHaveAttribute('aria-valuenow', String(initialWidth + 116));
 
+  const min = await handle.getAttribute('aria-valuemin');
+  const max = await handle.getAttribute('aria-valuemax');
+  if (min === null || max === null) throw new Error('resize handle is missing aria-valuemin/aria-valuemax');
+
   await page.keyboard.press('Home');
-  await expect(handle).toHaveAttribute('aria-valuenow', await handle.getAttribute('aria-valuemin'));
+  await expect(handle).toHaveAttribute('aria-valuenow', min);
 
   await page.keyboard.press('End');
-  await expect(handle).toHaveAttribute('aria-valuenow', await handle.getAttribute('aria-valuemax'));
+  await expect(handle).toHaveAttribute('aria-valuenow', max);
 });
 
 test('below the breakpoint, Inbox falls back to the original stacked, page-scrolling layout with no resize handle', async ({ page }) => {
