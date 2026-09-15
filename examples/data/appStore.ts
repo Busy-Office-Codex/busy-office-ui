@@ -110,6 +110,55 @@ export const appActions = {
     });
   },
 
+  // --- Billing completions (Slice 10) -----------------------------------------------------
+
+  /** Bills a confirmed sales order that has no invoice yet — full invoicing of its own lines,
+   * Net 30, linked both ways. The worklist-driven "create invoice" the brief names, not a
+   * hand-typed blank invoice. */
+  createInvoice(salesOrderId: string, newInvoiceId: string) {
+    appStore.setState((state) => {
+      const order = state.salesOrders[salesOrderId];
+      if (!order || order.status !== 'confirmed' || order.invoiceIds.length > 0 || state.invoices[newInvoiceId]) return state;
+      const issueDate = new Date().toISOString().slice(0, 10);
+      const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const deliveryId = order.deliveryIds[0];
+      const newInvoice: Invoice = {
+        id: newInvoiceId,
+        customerId: order.customerId,
+        salesOrderId,
+        deliveryId,
+        status: 'sent',
+        issueDate,
+        dueDate,
+        lines: order.lines,
+        payments: [],
+      };
+      const nextState: AppState = {
+        ...state,
+        salesOrders: { ...state.salesOrders, [salesOrderId]: { ...order, invoiceIds: [...order.invoiceIds, newInvoiceId] } },
+        invoices: { ...state.invoices, [newInvoiceId]: newInvoice },
+      };
+      return logActivity(nextState, 'invoice', newInvoiceId, `Invoice ${newInvoiceId} created from ${salesOrderId} and sent`);
+    });
+  },
+
+  /** A credit/reversal for an invoice that hasn't been paid yet — this simple model doesn't
+   * support reversing a payment already received, matching how most real ERPs gate a plain
+   * cancellation (a paid invoice needs an actual credit note against it, a different, bigger
+   * feature this reference app doesn't model). */
+  cancelInvoice(invoiceId: string) {
+    appStore.setState((state) => {
+      const invoice = state.invoices[invoiceId];
+      if (!invoice || invoice.status === 'paid' || invoice.status === 'cancelled') return state;
+      return logActivity(
+        { ...state, invoices: { ...state.invoices, [invoiceId]: { ...invoice, status: 'cancelled' } } },
+        'invoice',
+        invoiceId,
+        `Invoice ${invoiceId} cancelled`,
+      );
+    });
+  },
+
   // --- Procurement + inventory (Slice 2) -------------------------------------------------
 
   /** Approved requisition → a new draft purchase order to a chosen supplier, linked both ways. */

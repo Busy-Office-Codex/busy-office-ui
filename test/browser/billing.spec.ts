@@ -48,3 +48,32 @@ test('recording a payment is a real state transition: balance due drops to zero 
   // And the worklist row itself reflects the new status, independent of the detail panel.
   await expect(page.getByRole('row', { name: /INV-3201.*Paid/ })).toBeVisible();
 });
+
+// M7 Slice 10 (Billing completions) — worklist-driven invoice creation and a real cancellation,
+// both closing gaps the brief itself named.
+test('creating an invoice bills a real un-invoiced confirmed sales order, and the "ready to invoice" card empties once it does', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoBilling(page);
+
+  // SO-1043 (Bluepeak Logistics, Slice 7's seed) starts confirmed with no invoice.
+  await expect(page.getByText('SO-1043 · Bluepeak Logistics')).toBeVisible();
+  await page.getByRole('button', { name: 'Create invoice' }).click();
+
+  await expect(page.getByRole('heading', { name: /^INV-\d+$/ })).toBeVisible();
+  await expect(page.getByText('Sales order · SO-1043')).toBeVisible();
+  await expect(page.getByText('Delivery · DL-3102')).toBeVisible();
+  // No more un-invoiced confirmed orders left, so the card is honestly gone, not empty-but-shown.
+  await expect(page.getByText('Ready to invoice')).toHaveCount(0);
+});
+
+test('cancelling an invoice is a real state transition, and both actions honestly disappear afterward', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoBilling(page);
+
+  await page.getByRole('row', { name: /INV-3201/ }).click();
+  await page.getByRole('button', { name: 'Cancel invoice' }).click();
+
+  await expect(page.getByRole('row', { name: /INV-3201.*Cancelled/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Cancel invoice' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Record payment/ })).toHaveCount(0);
+});
