@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
-import { appActions, appStore } from './data/appStore.js';
+import { appActions, appStore, useFocusRecord } from './data/appStore.js';
 import { documentTotal } from './data/types.js';
 import { useStoreState } from './data/store.js';
 
@@ -67,6 +67,10 @@ export function Requisitions() {
   const state = useStoreState(appStore, (s) => s);
   const requisitionList = Object.values(state.requisitions).sort((a, b) => (a.id < b.id ? 1 : -1));
   const [selectedId, setSelectedId] = useState(requisitionList[0]?.id ?? '');
+  useFocusRecord(
+    (id) => Boolean(state.requisitions[id]),
+    (id) => setSelectedId(id),
+  );
   const selected = state.requisitions[selectedId];
   const linkedOrder = selected?.purchaseOrderId ? state.purchaseOrders[selected.purchaseOrderId] : undefined;
 
