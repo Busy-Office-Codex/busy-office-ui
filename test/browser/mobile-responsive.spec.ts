@@ -37,6 +37,9 @@ const PAGE_LABELS = [
   // M7 Slice 2 (Procurement-to-stock).
   'Requisitions',
   'Inventory',
+  // M7 Slice 3 (Production planning).
+  'Planning',
+  'Production orders',
 ];
 
 for (const label of PAGE_LABELS) {

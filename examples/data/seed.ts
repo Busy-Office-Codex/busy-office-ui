@@ -205,6 +205,38 @@ export const seed: AppState = {
     { id: 'mv-5', productId: 'mat-switch', warehouseId: 'wh-west', type: 'adjustment', qty: -1, date: '2026-09-10', reference: 'Cycle count variance' },
   ],
 
+  // Slice 3 (Production planning). "Production" here means assembling switches from received
+  // components — this fictional distributor also does light final-assembly, not just resale —
+  // consistent with mat-switch/mat-cable already being stocked materials, not finished goods
+  // bought pre-built.
+  demandForecasts: [
+    { id: 'fc-1', productId: 'mat-switch', warehouseId: 'wh-west', period: '2026-10', forecastQty: 20 },
+    { id: 'fc-2', productId: 'mat-switch', warehouseId: 'wh-main', period: '2026-10', forecastQty: 15 },
+    { id: 'fc-3', productId: 'mat-cable', warehouseId: 'wh-east', period: '2026-10', forecastQty: 30 },
+  ],
+
+  planningRecommendations: {
+    'REC-5001': {
+      id: 'REC-5001',
+      productId: 'mat-switch',
+      warehouseId: 'wh-west',
+      suggestedQty: 20,
+      reason: 'Forecast demand (20) exceeds available stock (0) for Oct 2026',
+      status: 'open',
+    },
+    'REC-5002': {
+      id: 'REC-5002',
+      productId: 'mat-cable',
+      warehouseId: 'wh-east',
+      suggestedQty: 25,
+      reason: 'Forecast demand (30) exceeds available stock (1) for Oct 2026',
+      status: 'open',
+    },
+  },
+
+  plannedOrders: {},
+  productionOrders: {},
+
   activity: [
     { id: 'act-1', at: '2026-08-20', recordType: 'quotation', recordId: 'QUO-3001', message: 'Quotation QUO-3001 sent to Northwind Traders' },
     { id: 'act-2', at: '2026-08-22', recordType: 'quotation', recordId: 'QUO-3001', message: 'Quotation QUO-3001 accepted — Sales order SO-1042 created' },

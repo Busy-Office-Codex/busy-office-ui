@@ -147,10 +147,68 @@ export type StockMovement = {
   reference: string;
 };
 
+// --- Production planning (Slice 3) ------------------------------------------------------------
+
+export type DemandForecast = {
+  id: string;
+  productId: string;
+  warehouseId: string;
+  period: string; // "2026-10" — a month bucket, enough resolution for a reference app
+  forecastQty: number;
+};
+
+export type RecommendationStatus = 'open' | 'actioned' | 'dismissed';
+
+export type PlanningRecommendation = {
+  id: string;
+  productId: string;
+  warehouseId: string;
+  suggestedQty: number;
+  reason: string;
+  status: RecommendationStatus;
+  plannedOrderId?: string;
+};
+
+export type PlannedOrderStatus = 'planned' | 'released' | 'cancelled';
+
+export type PlannedOrder = {
+  id: string;
+  productId: string;
+  warehouseId: string;
+  qty: number;
+  dueDate: string;
+  status: PlannedOrderStatus;
+  recommendationId?: string;
+  productionOrderId?: string;
+};
+
+export type ProductionOrderStatus = 'released' | 'in_progress' | 'completed' | 'cancelled';
+
+export type ProductionOrder = {
+  id: string;
+  plannedOrderId: string;
+  productId: string;
+  warehouseId: string;
+  qty: number;
+  status: ProductionOrderStatus;
+  startDate: string;
+  dueDate: string;
+};
+
 export type ActivityEntry = {
   id: string;
   at: string;
-  recordType: 'quotation' | 'salesOrder' | 'delivery' | 'invoice' | 'requisition' | 'purchaseOrder' | 'goodsReceipt';
+  recordType:
+    | 'quotation'
+    | 'salesOrder'
+    | 'delivery'
+    | 'invoice'
+    | 'requisition'
+    | 'purchaseOrder'
+    | 'goodsReceipt'
+    | 'planningRecommendation'
+    | 'plannedOrder'
+    | 'productionOrder';
   recordId: string;
   message: string;
 };
@@ -169,6 +227,10 @@ export type AppState = {
   goodsReceipts: Record<string, GoodsReceipt>;
   stockLevels: StockLevel[];
   stockMovements: StockMovement[];
+  demandForecasts: DemandForecast[];
+  planningRecommendations: Record<string, PlanningRecommendation>;
+  plannedOrders: Record<string, PlannedOrder>;
+  productionOrders: Record<string, ProductionOrder>;
   activity: ActivityEntry[];
 };
 

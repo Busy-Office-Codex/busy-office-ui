@@ -24,6 +24,8 @@ import { Quotations } from '../examples/Quotations.js';
 import { Billing } from '../examples/Billing.js';
 import { Requisitions } from '../examples/Requisitions.js';
 import { Inventory } from '../examples/Inventory.js';
+import { Planning } from '../examples/Planning.js';
+import { ProductionOrders } from '../examples/ProductionOrders.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -66,6 +68,9 @@ const routes = [
   // M7, Slice 2 (Procurement-to-stock).
   { id: 'requisitions', module: 'Purchase', label: 'Requisitions' },
   { id: 'inventory', module: 'Purchase', label: 'Inventory' },
+  // M7, Slice 3 (Production planning) — Production's first two routes.
+  { id: 'planning', module: 'Production', label: 'Planning' },
+  { id: 'production-orders', module: 'Production', label: 'Production orders' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -91,6 +96,8 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   billing: <Billing />,
   requisitions: <Requisitions />,
   inventory: <Inventory />,
+  planning: <Planning />,
+  'production-orders': <ProductionOrders />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */

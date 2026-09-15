@@ -61,7 +61,7 @@ const notificationButtonStyles = stylex.create({
  * sample data; a host supplies real ones through `Shell`'s props.
  */
 
-export type AppShellModule = 'General' | 'Sales' | 'Purchase' | 'Finance' | 'BI' | 'Administration' | 'Builder' | 'Settings';
+export type AppShellModule = 'General' | 'Sales' | 'Purchase' | 'Production' | 'Finance' | 'BI' | 'Administration' | 'Builder' | 'Settings';
 
 const NAV: Record<AppShellModule, string[]> = {
   General: ['Home', 'Role page', 'Inbox', 'Approvals', 'Notifications', 'Profile', 'Help'],
@@ -76,6 +76,15 @@ const NAV: Record<AppShellModule, string[]> = {
   // 'Requisitions' added M7, Slice 2 (Procurement-to-stock) — purely additive. 'Inventory' was
   // already an unbuilt placeholder entry here (M6); its route now exists.
   Purchase: ['Requisitions', 'Purchase orders', 'Suppliers', 'Inventory', 'Approvals', 'Receiving'],
+  // M7, Slice 3 (Production planning) — this ERP reference-app's 3rd transaction family and
+  // first new top-level module since M6. 'Planning' covers demand + recommendations
+  // (Planning.tsx); 'Production orders' covers the planned-order → production-order →
+  // schedule chain (ProductionOrders.tsx). Kept as its own module rather than folded under
+  // Purchase (which already covers procurement's own separate demand signal, requisitions)
+  // since production planning is materials/manufacturing, a distinct ERP transaction family
+  // per the brief's own list (Procurement, Inventory, Sales, Distribution, Billing,
+  // Production planning).
+  Production: ['Planning', 'Production orders'],
   Finance: ['Overview', 'Ledger', 'Receivables', 'Payables', 'Reports'],
   BI: ['Dashboards', 'Explore', 'Datasets', 'Schedules'],
   // ROADMAP M6 (issue #17, batch 4): the reference's "22 · Users and roles" screen is one
@@ -89,7 +98,7 @@ const NAV: Record<AppShellModule, string[]> = {
   Settings: ['General', 'Organization', 'Numbering', 'Tax', 'Email', 'Security'],
 };
 
-const MODULE_NAMES: readonly AppShellModule[] = ['General', 'Sales', 'Purchase', 'Finance', 'BI', 'Administration', 'Builder', 'Settings'];
+const MODULE_NAMES: readonly AppShellModule[] = ['General', 'Sales', 'Purchase', 'Production', 'Finance', 'BI', 'Administration', 'Builder', 'Settings'];
 
 const PINNED: readonly { label: string; module: AppShellModule; screen?: string; count?: number }[] = [
   { label: 'My work', module: 'General', screen: 'Role page', count: 12 },
