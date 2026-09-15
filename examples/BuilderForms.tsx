@@ -1,9 +1,77 @@
 import * as stylex from '@stylexjs/stylex';
-import { Button, Card, Density, Dropdown, Input, Text } from '../src/index.js';
-// This repo's shared native-checkbox treatment (see examples/ListReport.tsx/Settings.tsx for the
-// full history) — reused here for the Properties panel's Required/Read-only/Show on mobile rows.
-import { checkboxStyles } from './checkboxStyles.js';
+import { Button, Card, Chip, Density, Dropdown, Input, Text } from '../src/index.js';
+import { color, motion, radius, shadow } from '../src/tokens.stylex.js';
 import { FilterTabs } from './filterTabs.js';
+
+const toggleStyles = stylex.create({
+  // A hand-rolled toggle-switch VISUAL, not a new shared component — this page's Required/
+  // Read-only after approval/Show on mobile rows are the first place this shape is needed
+  // anywhere in the repo (docs/design-conventions.md's "two named consumers" threshold for a
+  // new shared component isn't met yet; `examples/checkboxStyles.ts`/`filterTabs.tsx` were only
+  // extracted once actually reused). Purely decorative (`aria-hidden`, no click handler) — this
+  // whole panel is a fixed "currently selected field" sample, not a live form (see the file
+  // header), so there's nothing here for a toggle to actually DO yet.
+  track: {
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+    width: '36px',
+    height: '20px',
+    borderRadius: radius.pill,
+    backgroundColor: color.border,
+    flexShrink: 0,
+    transitionProperty: 'background-color',
+    transitionDuration: motion.durationFast,
+    transitionTimingFunction: motion.easeStandard,
+  },
+  trackOn: {
+    backgroundColor: color.action,
+  },
+  thumb: {
+    position: 'absolute',
+    top: '2px',
+    left: '2px',
+    width: '16px',
+    height: '16px',
+    borderRadius: '50%',
+    backgroundColor: color.bgSurface,
+    boxShadow: shadow.xs,
+    transitionProperty: 'transform',
+    transitionDuration: motion.durationFast,
+    transitionTimingFunction: motion.easeStandard,
+  },
+  thumbOn: {
+    transform: 'translateX(16px)',
+  },
+  // The canvas field currently mirrored in the Properties panel — a real highlighted border plus
+  // a small "Selected" badge, matching the reference's visual link between the two panes (found
+  // live: this repo's version had no such link at all; the Properties panel was hardcoded to a
+  // fixed "Customer" sample independent of anything drawn on the canvas).
+  selectedField: {
+    position: 'relative',
+  },
+  selectedBadge: {
+    position: 'absolute',
+    top: '-10px',
+    right: '10px',
+    paddingInline: '8px',
+    paddingBlock: '2px',
+    borderRadius: radius.pill,
+    backgroundColor: color.action,
+    color: color.textOnInk,
+    fontSize: '10px',
+    fontWeight: 600,
+    letterSpacing: '0.02em',
+  },
+});
+
+function Toggle({ on }: { on: boolean }) {
+  return (
+    <span aria-hidden="true" {...stylex.props(toggleStyles.track, on && toggleStyles.trackOn)}>
+      <span {...stylex.props(toggleStyles.thumb, on && toggleStyles.thumbOn)} />
+    </span>
+  );
+}
 
 /**
  * A static 3-pane form/page editor layout. Mirrors `templates/erp-skeleton`'s "23 Builder (forms)"
@@ -15,13 +83,18 @@ import { FilterTabs } from './filterTabs.js';
  *
  * Per ROADMAP M6 batch 4's classification, this is a STATIC treatment — no drag-and-drop, no
  * canvas/diagram library. The palette is a plain labeled list (not draggable), the center pane is
- * a real but non-interactive form preview, and the right panel shows the Customer field's
- * properties as a fixed "currently selected field" sample rather than wiring real selection state.
+ * a real but non-interactive form preview, and the right panel shows the Order date field's
+ * properties as a fixed "currently selected field" sample rather than wiring real selection state
+ * (owner-directed, 2026-09-15: matches the reference's own sample, which highlights Order date on
+ * the canvas — a static Customer/Properties pairing that didn't correspond to anything visibly
+ * "selected" was a real gap, not a deliberate simplification, so the canvas field now carries a
+ * matching highlight + badge instead of the two panes disagreeing).
  *
  * Same tab convention Profile.tsx/RolePage.tsx established: this package has no `Tab` component,
- * so Design/Logic/Data/Preview reuse filter `Chip` (`variant="filter"`). Only "Design" is selected
- * and has real content below it — "Logic"/"Data"/"Preview" render as present-but-inactive chips
- * with no switching logic, per this milestone's structural-first-pass scope.
+ * so Design/Logic/Data/Preview (and, in the Properties panel, Properties/Rules/Access) reuse
+ * filter `Chip` (`variant="filter"`) via `FilterTabs`. Only "Design"/"Properties" are selected and
+ * have real content below them — the rest render as present-but-inactive chips with no switching
+ * logic, per this milestone's structural-first-pass scope.
  */
 
 type PaletteGroup = { title: string; items: string[] };
@@ -37,8 +110,7 @@ const TABS = ['Design', 'Logic', 'Data', 'Preview'];
 const PAYMENT_TERMS_ITEMS = ['Net 30', 'Net 15', 'Due on receipt', 'Net 60'];
 const WAREHOUSE_ITEMS = ['Main warehouse', 'East distribution center', 'West distribution center'];
 
-const VISIBLE_TO_ITEMS = ['Everyone', 'Sales', 'Sales Manager', 'Finance', 'Administrator'];
-const EDITABLE_BY_ITEMS = ['Sales', 'Sales Manager', 'Finance', 'Administrator'];
+const PROPERTIES_TABS = ['Properties', 'Rules', 'Access'];
 
 export function BuilderForms() {
   return (
@@ -57,9 +129,11 @@ export function BuilderForms() {
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Text variant="heading">Sales order form</Text>
-            <Text variant="caption">Draft v4</Text>
+            <Chip variant="status" tone="neutral">
+              Draft v4
+            </Chip>
           </div>
           <Density value="compact">
             <div style={{ display: 'flex', gap: 4 }}>
@@ -126,7 +200,12 @@ export function BuilderForms() {
                     live form (matches this pass's structural-first-pass scope: real components,
                     non-interactive content). */}
                 <Input label="Customer *" placeholder="Select a customer…" disabled />
-                <Input label="Order date *" placeholder="Select a date…" disabled />
+                {/* The field currently mirrored in the Properties panel to the right — see the
+                    file header comment. */}
+                <div {...stylex.props(toggleStyles.selectedField)}>
+                  <span {...stylex.props(toggleStyles.selectedBadge)}>Selected</span>
+                  <Input label="Order date *" placeholder="Select a date…" disabled style={{ borderColor: color.accent }} />
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <Text variant="caption" as="span">
                     Payment terms
@@ -159,6 +238,25 @@ export function BuilderForms() {
               >
                 <Text variant="caption">Line items block</Text>
               </div>
+
+              {/* A second, distinct placeholder region — found live: the reference has two
+                  separate dashed areas (a placed "Line items block" plus an empty canvas drop
+                  target below it for adding more fields/blocks), this file previously had only
+                  the one, collapsing "a block that's already on the canvas" and "empty space to
+                  add a new one" into the same box. */}
+              <div
+                style={{
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: 10,
+                  padding: 24,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#f8fafc',
+                }}
+              >
+                <Text variant="caption">drop zone</Text>
+              </div>
             </div>
           </Card>
         </div>
@@ -166,47 +264,35 @@ export function BuilderForms() {
         <div style={{ flex: '1 1 260px', minWidth: 240, maxWidth: 340 }}>
           <Card>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <Text variant="title">Properties</Text>
-              <Text variant="caption">Field: Customer</Text>
+              <FilterTabs tabs={PROPERTIES_TABS} selected="Properties" />
 
-              <Input label="Label" defaultValue="Customer" />
-              <Input label="Field key" defaultValue="customer_id" />
+              <Input label="Label" defaultValue="Order date" />
+              <Input label="Field key" defaultValue="order_date" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <Text variant="caption" as="span">
                   Type
                 </Text>
-                <Dropdown label="Lookup" items={[{ label: 'Lookup', selected: true }]} active={false} />
+                <Dropdown label="Date" items={[{ label: 'Date', selected: true }]} active={false} />
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <input type="checkbox" defaultChecked {...stylex.props(checkboxStyles.checkbox)} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                   <Text variant="body">Required</Text>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <input type="checkbox" {...stylex.props(checkboxStyles.checkbox)} />
-                  <Text variant="body">Read-only</Text>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <input type="checkbox" defaultChecked {...stylex.props(checkboxStyles.checkbox)} />
+                  <Toggle on />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                  <Text variant="body">Read-only after approval</Text>
+                  <Toggle on />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                   <Text variant="body">Show on mobile</Text>
-                </label>
+                  <Toggle on={false} />
+                </div>
               </div>
 
-              <Input label="Default value" placeholder="None" />
+              <Input label="Default value" defaultValue="today()" />
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Text variant="caption" as="span">
-                  Visible to
-                </Text>
-                <Dropdown label={VISIBLE_TO_ITEMS[0]} items={VISIBLE_TO_ITEMS.map((label) => ({ label, selected: label === VISIBLE_TO_ITEMS[0] }))} active={false} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Text variant="caption" as="span">
-                  Editable by
-                </Text>
-                <Dropdown label={EDITABLE_BY_ITEMS[0]} items={EDITABLE_BY_ITEMS.map((label) => ({ label, selected: label === EDITABLE_BY_ITEMS[0] }))} active={false} />
-              </div>
+              <Text variant="caption">Visible to: Sales, Finance · Editable by: Sales</Text>
             </div>
           </Card>
         </div>
