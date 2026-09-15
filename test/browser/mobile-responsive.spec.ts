@@ -40,6 +40,9 @@ const PAGE_LABELS = [
   // M7 Slice 3 (Production planning).
   'Planning',
   'Production orders',
+  // M7 Slice 4 (Administration + role-based config).
+  'Users',
+  'Audit log',
 ];
 
 for (const label of PAGE_LABELS) {
@@ -49,9 +52,15 @@ for (const label of PAGE_LABELS) {
 
     // Same direct palette-button click `test/browser/sample-pages-navigation.spec.ts` uses — no
     // query typing needed, every page label is already visible and unique with no filter applied.
+    // A page command's accessible name is `label + hint` (Shell.tsx renders them as two Text
+    // nodes inside one button — see its `command.hint` line), and every hint is the route's
+    // Capitalized module name — so requiring whitespace then a capital right after `label` finds
+    // the real command even when `label` is itself a prefix of another page's label (e.g. 'Users'
+    // is a prefix of 'Users and roles', but only 'Users Administration' — not 'Users and roles
+    // Administration' — matches `\s+[A-Z]` immediately after 'Users').
     const dialog = page.getByRole('dialog', { name: 'Command palette' });
     await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
-    await dialog.getByRole('button', { name: new RegExp(`^${label}\\b`) }).click();
+    await dialog.getByRole('button', { name: new RegExp(`^${label}\\s+[A-Z]`) }).click();
     await expect(dialog).toBeHidden();
 
     const overflow = await page.evaluate(() => {

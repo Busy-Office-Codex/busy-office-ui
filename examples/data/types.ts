@@ -195,6 +195,29 @@ export type ProductionOrder = {
   dueDate: string;
 };
 
+// --- Administration + role-based config (Slice 4) ----------------------------------------------
+
+// A role's grants are modeled as the set of AppShell modules it can open — coarser than
+// UsersAndRoles.tsx's per-action permissions matrix (View/Create/Edit/…), but that's the right
+// grain for THIS slice's own named journey ("preview access"): showing which parts of the actual
+// app a role can reach, not re-deriving that page's separate action-level grid.
+export type Role = {
+  id: string;
+  name: string;
+  moduleAccess: string[];
+};
+
+export type UserStatus = 'invited' | 'active' | 'deactivated';
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  department: string;
+  status: UserStatus;
+  roleId?: string;
+};
+
 export type ActivityEntry = {
   id: string;
   at: string;
@@ -208,7 +231,9 @@ export type ActivityEntry = {
     | 'goodsReceipt'
     | 'planningRecommendation'
     | 'plannedOrder'
-    | 'productionOrder';
+    | 'productionOrder'
+    | 'user'
+    | 'role';
   recordId: string;
   message: string;
 };
@@ -231,6 +256,8 @@ export type AppState = {
   planningRecommendations: Record<string, PlanningRecommendation>;
   plannedOrders: Record<string, PlannedOrder>;
   productionOrders: Record<string, ProductionOrder>;
+  roles: Record<string, Role>;
+  users: Record<string, User>;
   activity: ActivityEntry[];
 };
 
