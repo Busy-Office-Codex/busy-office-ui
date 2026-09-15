@@ -34,6 +34,11 @@ import { expect, test } from '@playwright/test';
 // already render at `border-box` — Chrome's own UA stylesheet defaults `<button>` to `border-box`
 // (unlike `<input>`), so its declared/rendered heights already matched and no fix or test for it
 // was needed.)
+//
+// Owner-directed removal (2026-09-15): the "Preview — sample data" banner itself was later
+// removed entirely (not needed) — the body-margin-reset assertion below still guards a real,
+// independent regression, but the two tests that asserted the banner's own out-of-flow
+// positioning and dock-overlap clearance no longer apply and were removed with it.
 
 const VIEWPORT = { width: 1280, height: 800 };
 
@@ -78,39 +83,11 @@ test('no sample page scrolls into empty canvas below its content: scrollHeight e
   expect(await scrollHeight()).toBe(800);
 });
 
-test('the preview host resets the UA body margin and keeps its banner out of the vertical flow', async ({ page }) => {
+test('the preview host resets the UA body margin', async ({ page }) => {
   await page.setViewportSize(VIEWPORT);
   await page.goto('/#examples');
 
   await expect(page.locator('body')).toHaveCSS('margin', '0px');
-
-  const banner = page.getByText('Preview — sample data', { exact: false });
-  await expect(banner).toBeVisible();
-  // `position: fixed` (not the UA default `static`) is what takes an element out of normal
-  // document flow — a fixed-position element contributes nothing to its container's
-  // scrollHeight, which the previous test already confirms lands at exactly 800px.
-  const bannerParent = banner.locator('..');
-  await expect(bannerParent).toHaveCSS('position', 'fixed');
-});
-
-test('the banner does not visually overlap the dock, at a wide or narrow viewport', async ({ page }) => {
-  // Independent review finding (2026-09-14, fixed same batch): the banner's original bottom:12
-  // placement was clear of clicks (pointerEvents:'none', proven above) but not clear of the
-  // centered dock's footprint — a real visual collision, worst at narrow widths where the
-  // banner's text wraps taller. bottom:84 (the ERP skeleton reference's own reserved band for
-  // the dock, ErpSkeleton.dc.html: content inset bottom:84) sits the banner above it instead.
-  const banner = page.getByText('Preview — sample data', { exact: false });
-  const dock = page.getByRole('region', { name: 'App dock' });
-
-  for (const size of [{ width: 1280, height: 800 }, { width: 380, height: 720 }]) {
-    await page.setViewportSize(size);
-    await page.goto('/#examples');
-    const bannerBox = await banner.boundingBox();
-    const dockBox = await dock.boundingBox();
-    if (!bannerBox || !dockBox) throw new Error('banner or dock not found');
-    const overlapsVertically = bannerBox.y < dockBox.y + dockBox.height && bannerBox.y + bannerBox.height > dockBox.y;
-    expect(overlapsVertically, `banner ${JSON.stringify(bannerBox)} vs dock ${JSON.stringify(dockBox)} at ${size.width}px`).toBe(false);
-  }
 });
 
 test('the Purchase-orders stat tile renders as a real Card, not the old hand-rolled div', async ({ page }) => {
