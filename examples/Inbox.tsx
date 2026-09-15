@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button, Card, Chip, Density, Dropdown, Input, Text } from '../src/index.js';
+import { color } from '../src/tokens.stylex.js';
 
 /**
  * A two-pane inbox: a filterable thread list on the left, and a linked-record
@@ -23,6 +24,17 @@ import { Button, Card, Chip, Density, Dropdown, Input, Text } from '../src/index
  * Northwind Traders sample data (same order total, same "Awaiting approval"
  * status/tone) rather than inventing a new record — one consistent sample
  * order across the example pages that reference it.
+ *
+ * The thread list (owner-directed restyle, 2026-09-15, inspired by a Linear
+ * inbox screenshot) trades a full bordered `Card` per thread for flat,
+ * single-line-truncated rows inside ONE wrapping `Card`, separated by a
+ * hairline — the same group-of-flat-rows pattern `NotificationRow` already
+ * established in Notifications.tsx, not a new one invented for this file.
+ * Each row gets a small category-colored initial badge (existing color
+ * tokens only — `accent` for Mentions, `action` for Assigned, `textDisabled`
+ * for System — not a new arbitrary palette) so category reads as more than
+ * text alone, and the row is markedly shorter (one line of context instead
+ * of a full card), closer to a scannable list than a stack of cards.
  */
 
 type ThreadCategory = 'Mentions' | 'Assigned' | 'System';
@@ -117,6 +129,82 @@ const MESSAGES = [
 const FILTER_ITEMS: Array<'All' | ThreadCategory> = ['All', 'Mentions', 'Assigned', 'System'];
 const SELECTED_THREAD_ID = 'th-1';
 
+const CATEGORY_COLOR: Record<ThreadCategory, string> = {
+  Mentions: color.accent,
+  Assigned: color.action,
+  System: color.textDisabled,
+};
+
+function ThreadRow({ thread, selected, isLast }: { thread: Thread; selected: boolean; isLast: boolean }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 12,
+        padding: '10px 4px',
+        background: selected ? color.bgSubtle : 'transparent',
+        borderBottom: isLast ? 'none' : `1px solid ${color.borderSubtle}`,
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: '50%',
+          flexShrink: 0,
+          background: CATEGORY_COLOR[thread.category],
+          color: color.textOnInk,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 12,
+          fontWeight: 600,
+        }}
+      >
+        {thread.sender.charAt(0)}
+      </div>
+
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+            <Text variant="body">{thread.subject}</Text>
+          </div>
+          <Text variant="caption" as="span">
+            {thread.timestamp}
+          </Text>
+        </div>
+        <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+          <Text variant="caption">
+            {thread.sender} · {thread.preview}
+          </Text>
+        </div>
+
+        {/* Assign/Archive get their own line, not the title's — sharing the title's row with
+            two buttons squeezed a long subject down to 1-2 characters before ellipsis on a
+            narrow/mobile row (caught visually, not just by the no-horizontal-overflow check:
+            that check passed while the title was already unreadable). This keeps the row
+            compact — no per-thread Card — while staying legible at every width, without a
+            `@media` query. */}
+        <Density value="compact">
+          <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
+            {/* Every row's Assign/Archive repeats the same visible text — disambiguating
+                aria-label per row, same precedent as ListReport.tsx's row-selection
+                checkboxes ("Select ${order.po}"). */}
+            <Button type="button" variant="ghost" aria-label={`Assign ${thread.subject}`}>
+              Assign
+            </Button>
+            <Button type="button" variant="ghost" aria-label={`Archive ${thread.subject}`}>
+              Archive
+            </Button>
+          </div>
+        </Density>
+      </div>
+    </div>
+  );
+}
+
 export function Inbox() {
   const [filter, setFilter] = useState<'All' | ThreadCategory>('All');
 
@@ -153,32 +241,21 @@ export function Inbox() {
         </Density>
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div style={{ flex: '1 1 360px', minWidth: 320, maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {visibleThreads.map((thread) => (
-              <Card key={thread.id} selected={thread.id === SELECTED_THREAD_ID}>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-                  <Text variant="title">{thread.subject}</Text>
-                  <Text variant="caption">{thread.timestamp}</Text>
+          <div style={{ flex: '1 1 400px', minWidth: 320, maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {visibleThreads.length > 0 ? (
+              <Card>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {visibleThreads.map((thread, index) => (
+                    <ThreadRow
+                      key={thread.id}
+                      thread={thread}
+                      selected={thread.id === SELECTED_THREAD_ID}
+                      isLast={index === visibleThreads.length - 1}
+                    />
+                  ))}
                 </div>
-                <Text variant="caption">
-                  {thread.sender} · {thread.preview}
-                </Text>
-                <Density value="compact">
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {/* Every row's Assign/Archive repeats the same visible text — disambiguating
-                        aria-label per row, same precedent as ListReport.tsx's row-selection
-                        checkboxes ("Select ${order.po}"). */}
-                    <Button type="button" variant="secondary" aria-label={`Assign ${thread.subject}`}>
-                      Assign
-                    </Button>
-                    <Button type="button" variant="ghost" aria-label={`Archive ${thread.subject}`}>
-                      Archive
-                    </Button>
-                  </div>
-                </Density>
               </Card>
-            ))}
-            {visibleThreads.length === 0 && (
+            ) : (
               <Card role="status">
                 <Text variant="body">No threads match this filter.</Text>
               </Card>
