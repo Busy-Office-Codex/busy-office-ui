@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { useCallback, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { AppShell, type AppShellRoute } from '../examples/AppShell.js';
 import { ListReport } from '../examples/ListReport.js';
 import { RecordDetail } from '../examples/RecordDetail.js';
@@ -30,6 +30,11 @@ import { Users } from '../examples/Users.js';
 import { AuditLog } from '../examples/AuditLog.js';
 import { Analytics } from '../examples/Analytics.js';
 import { BuilderScreens } from '../examples/BuilderScreens.js';
+import { PasswordReset } from '../examples/PasswordReset.js';
+import { AccountLocked } from '../examples/AccountLocked.js';
+import { SessionExpired } from '../examples/SessionExpired.js';
+import { AccessDenied } from '../examples/AccessDenied.js';
+import { NotFound } from '../examples/NotFound.js';
 import { DensityLab } from './DensityLab.js';
 import '../fonts/ibm-plex-sans.css';
 
@@ -141,11 +146,30 @@ function SamplePreview() {
 // `#density-lab` mounts a bare, isolated harness for test/browser/density.spec.ts (ROADMAP item
 // 10) instead of the sample host — see DensityLab.tsx for why. `#login` mounts the pre-auth
 // Login screen standalone (ROADMAP M6, issue #17) — it precedes the shell conceptually (a real
-// host shows it before Shell ever mounts), so it isn't one of `routes` above.
-function currentView() {
-  if (window.location.hash === '#density-lab') return <DensityLab />;
-  if (window.location.hash === '#login') return <Login />;
+// host shows it before Shell ever mounts), so it isn't one of `routes` above. M7 Slice 8
+// (Entry/nav) added the rest of this pre-shell family (password reset, account locked, session
+// expired, access denied, 404) — same standalone-mount precedent.
+//
+// `App` (not a plain `currentView()` function) because these screens link to each other via real
+// `<a href="#...">`/`window.location.hash =` navigation now (PasswordReset ↔ Login, etc.) — a
+// hash change alone doesn't re-render a React tree with no listener, so this needs to actually
+// watch `hashchange` and re-render, not just read `location.hash` once at module load.
+function App() {
+  const [hash, setHash] = useState(() => window.location.hash);
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  if (hash === '#density-lab') return <DensityLab />;
+  if (hash === '#login') return <Login />;
+  if (hash === '#password-reset') return <PasswordReset />;
+  if (hash === '#account-locked') return <AccountLocked />;
+  if (hash === '#session-expired') return <SessionExpired />;
+  if (hash === '#access-denied') return <AccessDenied />;
+  if (hash === '#404') return <NotFound />;
   return <SamplePreview />;
 }
 
-createRoot(document.getElementById('root')!).render(currentView());
+createRoot(document.getElementById('root')!).render(<App />);
