@@ -47,6 +47,8 @@ const PAGE_LABELS = [
   'Analytics',
   // M7 Slice 6 (Builder).
   'Pages',
+  // M7 Slice 9 (Administration, role management).
+  'Roles',
 ];
 
 for (const label of PAGE_LABELS) {

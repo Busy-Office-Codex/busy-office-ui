@@ -27,6 +27,7 @@ import { Inventory } from '../examples/Inventory.js';
 import { Planning } from '../examples/Planning.js';
 import { ProductionOrders } from '../examples/ProductionOrders.js';
 import { Users } from '../examples/Users.js';
+import { Roles } from '../examples/Roles.js';
 import { AuditLog } from '../examples/AuditLog.js';
 import { Analytics } from '../examples/Analytics.js';
 import { BuilderScreens } from '../examples/BuilderScreens.js';
@@ -88,6 +89,9 @@ const routes = [
   { id: 'analytics', module: 'BI', label: 'Analytics' },
   // M7, Slice 6 (Builder) — fills the pre-existing NAV.Builder 'Pages' placeholder (M6).
   { id: 'builder-screens', module: 'Builder', label: 'Pages' },
+  // M7, Slice 9 (Administration, role management) — fills the pre-existing NAV.Administration
+  // 'Roles' placeholder (M6).
+  { id: 'roles', module: 'Administration', label: 'Roles' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -119,6 +123,7 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   'audit-log': <AuditLog />,
   analytics: <Analytics />,
   'builder-screens': <BuilderScreens />,
+  roles: <Roles />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */

@@ -207,6 +207,11 @@ export type Role = {
   moduleAccess: string[];
 };
 
+/** The full set of AppShell modules a role's `moduleAccess` can name — kept here (not
+ * `examples/AppShell.tsx`'s own `AppShellModule` union) since this is the data layer's list of
+ * valid grant values, read by both Users.tsx (preview access) and Roles.tsx (editing grants). */
+export const ALL_MODULES = ['General', 'Sales', 'Purchase', 'Production', 'Finance', 'BI', 'Administration', 'Builder', 'Settings'] as const;
+
 export type UserStatus = 'invited' | 'active' | 'deactivated';
 
 export type User = {
