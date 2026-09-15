@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState, type ReactNode } from 'react';
-import { Density, Text } from '../src/index.js';
+import { Density } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
-import { color, radius } from '../src/tokens.stylex.js';
+import { color } from '../src/tokens.stylex.js';
 import { ControlCenterButton, type ControlCenterDensity } from './ControlCenter.js';
 import { Launcher } from './Launcher.js';
 
@@ -179,97 +179,56 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
   ];
 
   return (
-    <>
-      {/* ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): this banner used
-          to sit in normal document flow ABOVE `Shell`, adding its own height to every page's
-          `document.scrollingElement.scrollHeight` for no design-system reason (it's host-preview
-          chrome, not page content). `position: fixed` takes it out of the vertical flow entirely
-          (the ROADMAP's own wording) — a small corner label instead of a full-width banner, so it
-          no longer contributes to scroll height and doesn't compete with Shell's own command bar
-          for the same vertical space. `pointerEvents: 'none'` is load-bearing, not decorative: the
-          app dock spans nearly the full viewport width at narrow breakpoints (confirmed live — a
-          full `pnpm build:preview`/`pnpm preview` run of this repo's existing narrow-viewport
-          modal-focus.spec.ts test), so a fixed bottom-left label without it silently intercepted
-          clicks meant for the dock's "Sales" tile underneath. A purely informational label needs
-          no pointer interaction of its own, so this is a safe, permanent way to guarantee it never
-          blocks a click at any viewport width, not just the 1280px one this ROADMAP item's own
-          tests use. */}
-      <div
-        style={{
-          position: 'fixed',
-          left: 12,
-          // 84, not 12: the dock is centered (Shell.tsx: left:0;right:0;justifyContent:center),
-          // so no horizontal position for this left-aligned banner avoids it at every viewport
-          // width — verified directly (independent review measurement): at 1280px the banner's
-          // rect (x:12-504) overlapped the dock's (x:410.5-869.5); at 380px, where the banner's
-          // text wraps to two lines and grows taller, it covered ~78% of the dock's height.
-          // pointerEvents:'none' already keeps clicks passing through, but the visual collision
-          // was real. 84 reuses the ERP skeleton reference's own reserved band for the dock
-          // (ErpSkeleton.dc.html: content inset bottom:84) rather than an arbitrary number,
-          // clearing the dock's own measured ~74px footprint with margin.
-          bottom: 84,
-          zIndex: 1,
-          pointerEvents: 'none',
-          padding: '4px 10px',
-          borderRadius: radius.pill,
-          background: color.bgSurface,
-          border: `1px solid ${color.border}`,
-          boxShadow: '0 1px 3px rgba(15,23,42,.08)',
-        }}
-      >
-        <Text variant="caption">Preview — sample data; commands, counts and app destinations are not connected.</Text>
-      </div>
-      <Shell
-        navigation={{ routes, activeRouteId, onNavigate }}
-        pinned={pinned}
-        commands={commands}
-        brand={
-          <>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: color.textPrimary, flexShrink: 0 }} />
-            <span style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>Busy Office</span>
-            <span style={{ fontSize: 12, color: color.textTertiary, whiteSpace: 'nowrap' }}>Acme Co ▾</span>
-          </>
-        }
-        // Owner-directed removal (2026-09-15): a global "+ New" sitting next to Notifications
-        // read as confusing, not convenient, once weighed against how many modules this ERP
-        // actually has — "new WHAT?" has no good context-free answer here, and this design
-        // system already has two better-scoped ways to create a record: the command palette's
-        // own "Actions" category (`commands`, e.g. "Create sales order" — see docs/Shell.md's
-        // own example) for cross-module quick-create, and every list page's own contextual
-        // "+ New PO"/"+ New SO" button (ListReport.tsx etc.) for the common case of creating
-        // the thing you're already looking at. A third, global, unscoped "+ New" duplicated both
-        // without being as good as either — removed rather than kept as a decorative redundancy.
-        account={
-          <>
-            <ControlCenterButton
-              density={density}
-              onDensityChange={setDensity}
-              onOpenSettings={settingsRoute ? () => onNavigate(settingsRoute.id) : undefined}
-            />
-            <button
-              type="button"
-              aria-label="Notifications, 3 unread"
-              title="Notifications"
-              {...stylex.props(notificationButtonStyles.button)}
-            >
-              <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: 4, background: color.textDisabled }} />
-              <span aria-hidden="true" style={{ position: 'absolute', top: 4, right: 4, width: 7, height: 7, borderRadius: '50%', background: color.accent, border: `1.5px solid ${color.bgSurface}` }} />
-            </button>
-            <div style={{ width: 32, height: 32, borderRadius: 999, background: color.border, flexShrink: 0 }} />
-          </>
-        }
-        // `Shell` renders `home` separately from `children` (only one of the two is ever visible
-        // at once, but both need their own `Density` wrap — `Shell` doesn't merge them into one
-        // subtree), so the Control Center's Density selection reaches the launcher/home view too,
-        // not just whichever page `children` currently holds.
-        home={
-          <Density value={density}>
-            <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />
-          </Density>
-        }
-      >
-        <Density value={density}>{children ?? <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />}</Density>
-      </Shell>
-    </>
+    <Shell
+      navigation={{ routes, activeRouteId, onNavigate }}
+      pinned={pinned}
+      commands={commands}
+      brand={
+        <>
+          <div style={{ width: 26, height: 26, borderRadius: 7, background: color.textPrimary, flexShrink: 0 }} />
+          <span style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>Busy Office</span>
+          <span style={{ fontSize: 12, color: color.textTertiary, whiteSpace: 'nowrap' }}>Acme Co ▾</span>
+        </>
+      }
+      // Owner-directed removal (2026-09-15): a global "+ New" sitting next to Notifications
+      // read as confusing, not convenient, once weighed against how many modules this ERP
+      // actually has — "new WHAT?" has no good context-free answer here, and this design
+      // system already has two better-scoped ways to create a record: the command palette's
+      // own "Actions" category (`commands`, e.g. "Create sales order" — see docs/Shell.md's
+      // own example) for cross-module quick-create, and every list page's own contextual
+      // "+ New PO"/"+ New SO" button (ListReport.tsx etc.) for the common case of creating
+      // the thing you're already looking at. A third, global, unscoped "+ New" duplicated both
+      // without being as good as either — removed rather than kept as a decorative redundancy.
+      account={
+        <>
+          <ControlCenterButton
+            density={density}
+            onDensityChange={setDensity}
+            onOpenSettings={settingsRoute ? () => onNavigate(settingsRoute.id) : undefined}
+          />
+          <button
+            type="button"
+            aria-label="Notifications, 3 unread"
+            title="Notifications"
+            {...stylex.props(notificationButtonStyles.button)}
+          >
+            <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: 4, background: color.textDisabled }} />
+            <span aria-hidden="true" style={{ position: 'absolute', top: 4, right: 4, width: 7, height: 7, borderRadius: '50%', background: color.accent, border: `1.5px solid ${color.bgSurface}` }} />
+          </button>
+          <div style={{ width: 32, height: 32, borderRadius: 999, background: color.border, flexShrink: 0 }} />
+        </>
+      }
+      // `Shell` renders `home` separately from `children` (only one of the two is ever visible
+      // at once, but both need their own `Density` wrap — `Shell` doesn't merge them into one
+      // subtree), so the Control Center's Density selection reaches the launcher/home view too,
+      // not just whichever page `children` currently holds.
+      home={
+        <Density value={density}>
+          <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />
+        </Density>
+      }
+    >
+      <Density value={density}>{children ?? <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />}</Density>
+    </Shell>
   );
 }
