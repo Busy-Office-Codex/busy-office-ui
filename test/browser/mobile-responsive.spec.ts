@@ -34,6 +34,9 @@ const PAGE_LABELS = [
   // way rather than assumed to inherit it.
   'Quotations',
   'Billing',
+  // M7 Slice 2 (Procurement-to-stock).
+  'Requisitions',
+  'Inventory',
 ];
 
 for (const label of PAGE_LABELS) {

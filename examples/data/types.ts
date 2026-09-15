@@ -89,10 +89,68 @@ export type Invoice = {
   payments: Payment[];
 };
 
+// --- Procurement + inventory (Slice 2) --------------------------------------------------------
+
+export type Warehouse = { id: string; name: string };
+
+export type RequisitionStatus = 'draft' | 'pending_approval' | 'approved' | 'rejected' | 'converted';
+
+export type Requisition = {
+  id: string;
+  requestedBy: string;
+  department: string;
+  status: RequisitionStatus;
+  requestDate: string;
+  lines: LineItem[];
+  /** Set once approved and converted — the document-flow link. */
+  purchaseOrderId?: string;
+};
+
+export type PurchaseOrderStatus = 'draft' | 'awaiting_approval' | 'sent' | 'partially_received' | 'received' | 'cancelled';
+
+export type PurchaseOrder = {
+  id: string;
+  supplierId: string;
+  warehouseId: string;
+  status: PurchaseOrderStatus;
+  orderDate: string;
+  requisitionId?: string;
+  lines: LineItem[];
+  goodsReceiptIds: string[];
+};
+
+export type GoodsReceiptLine = LineItem & { qtyReceived: number };
+
+export type GoodsReceipt = {
+  id: string;
+  purchaseOrderId: string;
+  receivedDate: string;
+  lines: GoodsReceiptLine[];
+};
+
+export type StockLevel = {
+  productId: string;
+  warehouseId: string;
+  qtyOnHand: number;
+  qtyReserved: number;
+};
+
+export type StockMovementType = 'receipt' | 'shipment' | 'adjustment' | 'transfer';
+
+export type StockMovement = {
+  id: string;
+  productId: string;
+  warehouseId: string;
+  type: StockMovementType;
+  qty: number;
+  date: string;
+  reference: string;
+};
+
 export type ActivityEntry = {
   id: string;
   at: string;
-  recordType: 'quotation' | 'salesOrder' | 'delivery' | 'invoice';
+  recordType: 'quotation' | 'salesOrder' | 'delivery' | 'invoice' | 'requisition' | 'purchaseOrder' | 'goodsReceipt';
   recordId: string;
   message: string;
 };
@@ -101,10 +159,16 @@ export type AppState = {
   customers: Record<string, Customer>;
   suppliers: Record<string, Supplier>;
   products: Record<string, Product>;
+  warehouses: Record<string, Warehouse>;
   quotations: Record<string, Quotation>;
   salesOrders: Record<string, SalesOrder>;
   deliveries: Record<string, Delivery>;
   invoices: Record<string, Invoice>;
+  requisitions: Record<string, Requisition>;
+  purchaseOrders: Record<string, PurchaseOrder>;
+  goodsReceipts: Record<string, GoodsReceipt>;
+  stockLevels: StockLevel[];
+  stockMovements: StockMovement[];
   activity: ActivityEntry[];
 };
 
