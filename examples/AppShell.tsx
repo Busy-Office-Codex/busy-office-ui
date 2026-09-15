@@ -1,8 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState, type ReactNode } from 'react';
-import { Text } from '../src/index.js';
+import { Density, Text } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
 import { color, radius } from '../src/tokens.stylex.js';
+import { ControlCenterButton, type ControlCenterDensity } from './ControlCenter.js';
 import { Launcher } from './Launcher.js';
 
 // Only interactive element in this file that needs hover/active/focus-visible pseudo-classes —
@@ -159,6 +160,11 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
   const routes: readonly ShellRoute[] = navigation ? (hostErrors.length === 0 ? navigation.routes : []) : sampleRoutes();
   const activeRouteId = navigation ? (hostErrors.length === 0 ? navigation.activeRouteId : '') : sampleActiveId;
   const onNavigate = navigation ? navigation.onNavigate : setSampleActiveId;
+  // Control center (owner-directed, 2026-09-15): drives the whole app's ambient Density tier —
+  // see examples/ControlCenter.tsx's file header for why this one is real/functional while
+  // Appearance (dark/system) is deliberately disclosed as not-yet-available instead.
+  const [density, setDensity] = useState<ControlCenterDensity>('comfortable');
+  const settingsRoute = routes.find((route) => route.module === 'Settings');
 
   const pinned: ShellPinnedApp[] = PINNED.map((app) => ({
     id: app.label,
@@ -235,6 +241,11 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
         // without being as good as either — removed rather than kept as a decorative redundancy.
         account={
           <>
+            <ControlCenterButton
+              density={density}
+              onDensityChange={setDensity}
+              onOpenSettings={settingsRoute ? () => onNavigate(settingsRoute.id) : undefined}
+            />
             <button
               type="button"
               aria-label="Notifications, 3 unread"
@@ -247,9 +258,17 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
             <div style={{ width: 32, height: 32, borderRadius: 999, background: color.border, flexShrink: 0 }} />
           </>
         }
-        home={<Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />}
+        // `Shell` renders `home` separately from `children` (only one of the two is ever visible
+        // at once, but both need their own `Density` wrap — `Shell` doesn't merge them into one
+        // subtree), so the Control Center's Density selection reaches the launcher/home view too,
+        // not just whichever page `children` currently holds.
+        home={
+          <Density value={density}>
+            <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />
+          </Density>
+        }
       >
-        {children ?? <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />}
+        <Density value={density}>{children ?? <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />}</Density>
       </Shell>
     </>
   );
