@@ -45,6 +45,8 @@ const PAGE_LABELS = [
   'Audit log',
   // M7 Slice 5 (Analytics).
   'Analytics',
+  // M7 Slice 6 (Builder).
+  'Pages',
 ];
 
 for (const label of PAGE_LABELS) {
