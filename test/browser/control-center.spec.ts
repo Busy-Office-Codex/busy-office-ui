@@ -63,12 +63,12 @@ test('Density selection is real: it re-themes density-aware controls across the 
   // is plain useState, not persisted anywhere) can otherwise leak into this one depending on
   // execution order.
   await page.getByRole('button', { name: 'Control center' }).click();
-  await page.getByRole('button', { name: 'Comfortable', exact: true }).click();
+  await page.getByRole('radio', { name: 'Comfortable', exact: true }).click();
   await page.keyboard.press('Escape');
   expect((await supplierDropdown.boundingBox())?.height).toBe(36); // comfortable density's controlHeight
 
   await page.getByRole('button', { name: 'Control center' }).click();
-  await page.getByRole('button', { name: 'Compact', exact: true }).click();
+  await page.getByRole('radio', { name: 'Compact', exact: true }).click();
   await page.keyboard.press('Escape');
   expect((await supplierDropdown.boundingBox())?.height).toBe(28); // compact density's controlHeight
 });
@@ -79,11 +79,15 @@ test('Appearance: Light is selected and real; Dark/System are disabled, not sile
 
   await page.getByRole('button', { name: 'Control center' }).click();
 
-  const light = page.getByRole('button', { name: 'Light', exact: true });
-  const dark = page.getByRole('button', { name: 'Dark — not available yet', exact: true });
-  const system = page.getByRole('button', { name: 'System — not available yet', exact: true });
+  // ButtonGroup (owner-directed, 2026-09-15: "pls use group button") — a WAI-ARIA radiogroup,
+  // not filter Chip's row of `role="button"`/`aria-pressed` pills. See docs/ButtonGroup.md and
+  // test/browser/button-group.spec.ts for the component's own keyboard/roving-tabindex contract;
+  // this test only checks the Control Center-specific claim (Light real, Dark/System disabled).
+  const light = page.getByRole('radio', { name: 'Light', exact: true });
+  const dark = page.getByRole('radio', { name: 'Dark — not available yet', exact: true });
+  const system = page.getByRole('radio', { name: 'System — not available yet', exact: true });
 
-  await expect(light).toHaveAttribute('aria-pressed', 'true');
+  await expect(light).toHaveAttribute('aria-checked', 'true');
   await expect(dark).toBeDisabled();
   await expect(system).toBeDisabled();
 });
@@ -94,7 +98,7 @@ test('focus moves into the panel on open; Escape closes it and returns focus to 
 
   const trigger = page.getByRole('button', { name: 'Control center' });
   await trigger.click();
-  await expect(page.getByRole('button', { name: 'Light', exact: true })).toBeFocused();
+  await expect(page.getByRole('radio', { name: 'Light', exact: true })).toBeFocused();
 
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog', { name: 'Control center' })).toHaveCount(0);

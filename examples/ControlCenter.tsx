@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Button, Chip, Text } from '../src/index.js';
+import { Button, ButtonGroup, Text } from '../src/index.js';
 import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.js';
 
 /**
@@ -49,6 +49,12 @@ import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.
  * No Icon component exists in this package yet (`docs/Shell.md` already discloses this gap for
  * the palette trigger and dock tiles) — `SlidersGlyph` below is the same class of plain-shape
  * stand-in `examples/AppShell.tsx`'s notification bell already uses, not a new pattern.
+ *
+ * Density and Appearance render as `ButtonGroup` (owner-directed, 2026-09-15: "pls use group
+ * button" — a joined single-select pill, not a row of separately-spaced filter `Chip`s). This
+ * was the first real call site for that component — it did not exist before this request; see
+ * `docs/ButtonGroup.md`. Appearance's Dark/System segments carry the same `disabled` + `ariaLabel`
+ * disclosure the filter-`Chip` version used, now expressed through `ButtonGroup`'s own `options`.
  */
 
 export type ControlCenterDensity = 'compact' | 'comfortable' | 'spacious';
@@ -60,6 +66,16 @@ const DENSITY_OPTIONS: { value: ControlCenterDensity; label: string }[] = [
 ];
 
 type Appearance = 'light' | 'dark' | 'system';
+
+const APPEARANCE_OPTIONS: { value: Appearance; label: string; disabled?: boolean; ariaLabel?: string }[] = [
+  { value: 'light', label: 'Light' },
+  // Disabled, not a silent no-op segment: this design system has no dark palette or theming
+  // mechanism today (see the file header comment) — a segment that looked selectable but did
+  // nothing on click would be worse than one that's honestly unavailable. `ButtonGroup` dims
+  // `disabled` options itself (the shared 0.4-opacity convention).
+  { value: 'dark', label: 'Dark', disabled: true, ariaLabel: 'Dark — not available yet' },
+  { value: 'system', label: 'System', disabled: true, ariaLabel: 'System — not available yet' },
+];
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -249,21 +265,12 @@ export function ControlCenterButton({
         <Text variant="caption" as="h3">
           Appearance
         </Text>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Chip variant="filter" selected={appearance === 'light'} onClick={() => setAppearance('light')}>
-            Light
-          </Chip>
-          {/* Disabled, not a silent no-op toggle: this design system has no dark palette or
-              theming mechanism today (see the file header comment) — a Chip that looked
-              selectable but did nothing on click would be worse than one that's honestly
-              unavailable. Chip's own `filterBase` already dims `:disabled` (0.4 opacity). */}
-          <Chip variant="filter" selected={false} disabled aria-label="Dark — not available yet">
-            Dark
-          </Chip>
-          <Chip variant="filter" selected={false} disabled aria-label="System — not available yet">
-            System
-          </Chip>
-        </div>
+        <ButtonGroup
+          aria-label="Appearance"
+          value={appearance}
+          onChange={(value) => setAppearance(value as Appearance)}
+          options={APPEARANCE_OPTIONS}
+        />
         <Text variant="caption">Dark and system themes aren&apos;t available in this design system yet.</Text>
       </div>
 
@@ -271,13 +278,12 @@ export function ControlCenterButton({
         <Text variant="caption" as="h3">
           Density
         </Text>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {DENSITY_OPTIONS.map((option) => (
-            <Chip key={option.value} variant="filter" selected={density === option.value} onClick={() => onDensityChange(option.value)}>
-              {option.label}
-            </Chip>
-          ))}
-        </div>
+        <ButtonGroup
+          aria-label="Density"
+          value={density}
+          onChange={(value) => onDensityChange(value as ControlCenterDensity)}
+          options={DENSITY_OPTIONS}
+        />
       </div>
 
       {onOpenSettings && (
