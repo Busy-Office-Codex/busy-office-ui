@@ -3,6 +3,12 @@ import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell
 import { appActions, appStore, useFocusRecord } from './data/appStore.js';
 import { documentTotal } from './data/types.js';
 import { useStoreState } from './data/store.js';
+// Theme-safe page chrome (docs/design-conventions.md's "Theme-safe page chrome" recipe, extending
+// the ListReport.tsx/RecordDetail.tsx pass to this page): this page's own background/border/
+// timeline-dot literals were raw hex duplicating color.* token values without reading them, so
+// they stayed the light-mode value under dark mode instead of re-tinting. Same established idiom
+// 9 other examples/*.tsx files already use.
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * Deliveries list + detail, now reading live from the shared store (ROADMAP M7's ERP
@@ -64,7 +70,7 @@ function TrackingTimeline({ status }: { status: string }) {
         const current = index === currentIndex;
         const filled = done || current;
         return (
-          <li key={step} aria-current={current ? 'step' : undefined} style={{ display: 'flex', gap: 12 }}>
+          <li key={step} aria-current={current ? 'step' : undefined} style={{ display: 'flex', gap: space.space3 }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 12, flexShrink: 0 }}>
               <span
                 aria-hidden="true"
@@ -74,13 +80,13 @@ function TrackingTimeline({ status }: { status: string }) {
                   borderRadius: 999,
                   flexShrink: 0,
                   boxSizing: 'border-box',
-                  background: filled ? '#0f172a' : '#ffffff',
-                  border: `2px solid ${filled ? '#0f172a' : '#cbd5e1'}`,
+                  background: filled ? color.textPrimary : color.bgSurface,
+                  border: `2px solid ${filled ? color.textPrimary : color.borderStrong}`,
                 }}
               />
-              {!isLast && <span aria-hidden="true" style={{ width: 2, flex: 1, minHeight: 24, background: done ? '#0f172a' : '#e2e8f0' }} />}
+              {!isLast && <span aria-hidden="true" style={{ width: 2, flex: 1, minHeight: 24, background: done ? color.textPrimary : color.border }} />}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: isLast ? 0 : 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: isLast ? 0 : space.space4 }}>
               <Text variant={current ? 'body' : 'caption'} as="span">
                 {STATUS_LABEL[step]}
               </Text>
@@ -108,20 +114,20 @@ export function Delivery() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Delivery</Text>
 
         <div
           role="region"
           aria-label="Deliveries table"
           tabIndex={0}
-          style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+          style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
         >
           <div style={{ minWidth: 640 }}>
             <Density value="compact">
@@ -140,6 +146,13 @@ export function Delivery() {
                     <TableRow
                       key={delivery.id}
                       onClick={() => setSelectedId(delivery.id)}
+                      // `#eff6ff` (the selected-row tint) has no matching `color.*` token — every
+                      // candidate in lightPalette (`accent` #0057b8, `bgSubtle` #f1f5f9) is a
+                      // different value, and forcing the nearest one would silently change the
+                      // shade, the exact mismatch this recipe warns against. Left as a genuinely
+                      // bespoke literal (same carve-out the recipe gives a bespoke spacing number)
+                      // rather than guessed — flagged for the reviewer as the one literal this pass
+                      // did not close under dark mode.
                       style={{ cursor: 'pointer', backgroundColor: delivery.id === selectedId ? '#eff6ff' : undefined }}
                     >
                       <TableCell>{delivery.id}</TableCell>
@@ -161,8 +174,8 @@ export function Delivery() {
 
         {selected && customer && (
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                 <Text variant="title">{selected.id}</Text>
                 <Chip variant="status" tone={STATUS_TONE[selected.status]}>
                   {STATUS_LABEL[selected.status]}
@@ -175,8 +188,8 @@ export function Delivery() {
 
               <TrackingTimeline status={selected.status} />
 
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                <div style={{ flex: '1 1 220px', minWidth: 220, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', gap: space.space4, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                <div style={{ flex: '1 1 220px', minWidth: 220, display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                   <Text variant="caption" as="span">
                     Ship to
                   </Text>
@@ -187,7 +200,7 @@ export function Delivery() {
                     {selected.trackingNumber ? ` · Tracking ${selected.trackingNumber}` : ''}
                   </Text>
                 </div>
-                <div style={{ flex: '1 1 220px', minWidth: 220, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ flex: '1 1 220px', minWidth: 220, display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                   <Text variant="caption" as="span">
                     Contents
                   </Text>
@@ -202,7 +215,7 @@ export function Delivery() {
 
               {nextStatus && (
                 <Density value="compact">
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end' }}>
                     <Button type="button" variant="primary" onClick={() => appActions.advanceDeliveryStatus(selected.id)}>
                       Advance to {STATUS_LABEL[nextStatus]}
                     </Button>
