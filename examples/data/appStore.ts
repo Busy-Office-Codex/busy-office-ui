@@ -504,6 +504,21 @@ export const appActions = {
     appStore.setState((state) => (state.focusRecordId === null ? state : { ...state, focusRecordId: null }));
   },
 
+  // --- Billing → Invoice live data connection (this change) ------------------------------
+
+  /** Billing.tsx's own hop to Invoice.tsx — see `focusInvoiceId`'s own comment (examples/data/
+   * types.ts) on why this can't share `focusRecord`/`clearFocus` with Analytics.tsx's
+   * cross-module exceptions. */
+  viewInvoice(invoiceId: string) {
+    appStore.setState((state) => ({ ...state, focusInvoiceId: invoiceId }));
+  },
+
+  /** Consumed by Invoice.tsx right after it acts on `focusInvoiceId` — same reason `clearFocus`
+   * clears `focusRecordId`. */
+  clearInvoiceFocus() {
+    appStore.setState((state) => (state.focusInvoiceId === null ? state : { ...state, focusInvoiceId: null }));
+  },
+
   // --- Entry/nav — favorites (Slice 14) --------------------------------------------------
 
   /** Not logged to `state.activity`: starring is a personal preference, not a business event —

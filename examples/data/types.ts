@@ -307,6 +307,17 @@ export type AppState = {
    * that consume it clear it right after, so a plain later visit doesn't re-trigger a stale jump.
    */
   focusRecordId: string | null;
+  /**
+   * A narrower sibling of `focusRecordId` for the one case where two screens share the same
+   * record type as a focus target. Billing.tsx's own worklist already consumes any invoice id
+   * `focusRecordId` carries (Analytics.tsx's unpaid-invoices exception), so Invoice.tsx's own
+   * "View invoice" hop from Billing.tsx needs a separate slot — sharing `focusRecordId` would
+   * have Billing.tsx's already-mounted `useFocusRecord` immediately reconsume it before
+   * Invoice.tsx ever mounted to see it (found live, not assumed: every visited route in
+   * `preview/client.tsx` stays mounted, hidden, after its first visit — Billing.tsx's own focus
+   * effect keeps running even while hidden).
+   */
+  focusInvoiceId: string | null;
 };
 
 export function lineTotal(line: LineItem): number {
