@@ -70,6 +70,24 @@ test.describe('prefers-color-scheme: dark flips color.* tokens with no Theme wra
     const pageRoot = page.getByRole('navigation', { name: 'Breadcrumb' }).locator('xpath=../..');
     await expect(pageRoot).toHaveCSS('background-color', 'rgb(2, 6, 23)'); // darkPalette.bgCanvas, #020617
   });
+
+  // Independent review of the fix above found a real gap it exposed: examples/breadcrumbTrail.tsx
+  // (rendered by RecordDetail.tsx and Requisitions.tsx) hardcoded its own text colors as raw hex,
+  // so once the page background above correctly flips dark, the breadcrumb's "current page" text
+  // (was #0f172a, textPrimary's exact light value) rendered near-black on the new near-black
+  // background — invisible, not just off-brand. Fixed in the same commit; this is the check that
+  // would have caught it (the page-background test above only ever asserted the ancestor's
+  // background-color, never this element's own color).
+  test('the breadcrumb\'s "current page" text uses dark textPrimary, not the old raw light-mode hex (would be invisible on the new dark background otherwise)', async ({
+    page,
+  }) => {
+    await page.goto('/#examples');
+    await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+    await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Sales order\b/ }).click();
+
+    const here = page.getByRole('navigation', { name: 'Breadcrumb' }).getByText('SO-1042', { exact: true });
+    await expect(here).toHaveCSS('color', 'rgb(248, 250, 252)'); // darkPalette.textPrimary, #f8fafc
+  });
 });
 
 test.describe('prefers-color-scheme: light keeps the existing light palette unchanged', () => {
