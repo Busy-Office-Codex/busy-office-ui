@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button, Card, Chip, Density, Input, Modal, Text } from '../src/index.js';
+import { BreadcrumbTrail } from './breadcrumbTrail.js';
 
 /**
  * `'ready'` (default) shows the header, the three summary cards and the
@@ -49,6 +50,18 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
           all). No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
           docs/design-conventions.md's "Page width and responsive layout"). */}
       <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {/* Issue #20 (agreed, project owner, 2026-09-16), ROADMAP item 37 — the trail back to
+            SalesOrderList.tsx this page had no way to show before ("reached today ... with no
+            visible trail back"). Every crumb here renders as plain, non-interactive text — no
+            `onClick` on "Sales orders" either, deliberately: this page is one of `preview/
+            client.tsx`'s route panes with no navigate callback of its own (see
+            examples/Analytics.tsx's own header comment — the same route-agnostic-content-pane
+            constraint applies here, and RecordDetail doesn't even have Analytics's own
+            `focusRecordId` fallback to reach for, since it isn't backed by the shared store).
+            Giving "Sales orders" a fake onClick that does nothing observable would be a lie, not
+            a convenience — so the trail is honestly display-only; "SO-1042" is last, matching
+            Shell's own breadcrumb contract for "here" (see `examples/breadcrumbTrail.tsx`). */}
+        <BreadcrumbTrail items={[{ label: 'Sales orders' }, { label: 'SO-1042' }]} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Text variant="heading">SO-1042 · Northwind Traders</Text>

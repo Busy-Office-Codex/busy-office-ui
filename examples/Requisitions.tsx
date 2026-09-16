@@ -4,6 +4,7 @@ import { appActions, appStore, useFocusRecord } from './data/appStore.js';
 import { documentTotal } from './data/types.js';
 import { useStoreState } from './data/store.js';
 import { ConfirmDialog } from './confirmDialog.js';
+import { BreadcrumbTrail } from './breadcrumbTrail.js';
 
 /**
  * Requisitions list + detail — the first hop of the Procurement-to-stock journey (ROADMAP M7's
@@ -185,9 +186,24 @@ export function Requisitions() {
 
               {linkedOrder ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <Text variant="body">
-                    Linked: Purchase order {linkedOrder.id} · {state.suppliers[linkedOrder.supplierId]?.name}
-                  </Text>
+                  {/* Issue #20 (agreed, project owner, 2026-09-16), ROADMAP item 37 — replaces
+                      the old plain-text "Linked: Purchase order ..." line with the real
+                      breadcrumb-shaped trail the issue names (Requisitions > REQ-4001 >
+                      PO-4011). Same honest-onClick reasoning as RecordDetail.tsx, applied to
+                      this page's own shape: list and detail live on this ONE route (unlike
+                      RecordDetail there's a real `setSelectedId` here), but neither earlier
+                      crumb has a genuine destination a click could reach — "Requisitions" is
+                      the table already visible above, on this same scroll, not a separate page
+                      to navigate back to, and `selected.id` is already the record this whole
+                      card is about, so re-selecting it on click would be a no-op dressed up as
+                      navigation. Every crumb renders as plain, non-interactive text; only the
+                      final crumb (the linked PO — the newest, "you are here" record in this
+                      chain) carries `aria-current="page"`, same contract as Shell's own
+                      `ShellBreadcrumbTrail` (src/shell/Shell.tsx). Supplier name and status stay
+                      next to the trail, not folded into it — they're record attributes, not
+                      trail steps. */}
+                  <BreadcrumbTrail items={[{ label: 'Requisitions' }, { label: selected.id }, { label: linkedOrder.id }]} />
+                  <Text variant="caption">{state.suppliers[linkedOrder.supplierId]?.name}</Text>
                   <Chip variant="status" tone={PO_STATUS_TONE[linkedOrder.status]}>
                     {PO_STATUS_LABEL[linkedOrder.status]}
                   </Chip>
