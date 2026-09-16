@@ -29,8 +29,28 @@ test('the full chain — approve, then receive goods — is two real, independen
   await page.getByRole('button', { name: 'Approve — create purchase order' }).click();
 
   // A real, freshly-created purchase order appears, sent to the material's real supplier — not a
-  // canned success message.
-  await expect(page.getByText(/^Linked: Purchase order PO-\d+ · Alden Paper Co\.$/)).toBeVisible();
+  // canned success message. Issue #20/ROADMAP item 37: the linked document now renders as a real
+  // breadcrumb trail (Requisitions > REQ-4001 > PO-<id>) instead of the old "Linked: Purchase
+  // order ..." sentence — asserted on structure (the WAI-ARIA breadcrumb nav, and the final
+  // crumb's `aria-current="page"`), not on that old raw text.
+  const linkedTrail = page.getByRole('navigation', { name: 'Breadcrumb' });
+  await expect(linkedTrail).toBeVisible();
+  await expect(linkedTrail.getByText('Requisitions', { exact: true })).toBeVisible();
+  await expect(linkedTrail.getByText('REQ-4001', { exact: true })).toBeVisible();
+  const linkedPurchaseOrder = linkedTrail.getByText(/^PO-\d+$/);
+  await expect(linkedPurchaseOrder).toBeVisible();
+  await expect(linkedPurchaseOrder).toHaveAttribute('aria-current', 'page');
+  // Scoped to the trail's own row, not page-wide: `page.goto('/#examples')` mounts the Purchase
+  // Orders sample page first (this app's default route, kept mounted-but-hidden after
+  // navigating away, same as every route), and ListReport.tsx's own static sample data
+  // (examples/ListReport.tsx) coincidentally also names a supplier "Alden Paper Co." — an
+  // unscoped page-wide getByText resolves to both, a real strict-mode violation found live.
+  // `.last()`, not `.first()`: `.filter({ has: ... })` matches every matching ancestor div (the
+  // whole page wrapper included, since every visited route's pane is a sibling under one shared
+  // ancestor here), and Playwright orders matches in document order — outermost first, so the
+  // closest/most specific ancestor (the actual flex row wrapping the trail) is the LAST match.
+  const linkedRow = page.locator('div').filter({ has: linkedTrail }).last();
+  await expect(linkedRow.getByText('Alden Paper Co.', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Approve — create purchase order' })).toHaveCount(0);
   await expect(page.getByRole('row', { name: /REQ-4001.*Converted/ })).toBeVisible();
 

@@ -109,7 +109,7 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('>Dark</button>');
   });
 
-  it('renders a Chart as an aria-hidden canvas plus a real, visually-hidden accessible data table', () => {
+  it('renders a Chart as an aria-hidden render surface plus a real, visually-hidden accessible data table', () => {
     const markup = renderToStaticMarkup(
       createElement(designSystem.Chart, {
         type: 'bar',
@@ -122,11 +122,13 @@ describe('design-system rendered contracts', () => {
       }),
     );
 
-    // Chart.js itself only draws once mounted in a real browser (useEffect never runs during
-    // server rendering) — this checks the markup SSR can produce: the canvas shell and the real
-    // accessible-table fallback, not the drawn chart.
-    expect(markup).toContain('<canvas');
-    expect(markup).toContain('aria-hidden="true"');
+    // ECharts itself only draws once mounted in a real browser — it creates its own <canvas>
+    // imperatively via `init()` inside a `useEffect`, which never runs during server rendering —
+    // so this checks the markup SSR can actually produce: the aria-hidden container ECharts will
+    // later render into, and the real accessible-table fallback, not the drawn chart itself.
+    // One combined substring, not two independent ones — proves `aria-hidden` lands on the same
+    // element as the `chart-canvas` render surface, not merely somewhere in the markup.
+    expect(markup).toContain('aria-hidden="true" data-testid="chart-canvas"');
     expect(markup).toContain('<table');
     expect(markup).toContain('<caption>Stock by warehouse</caption>');
     expect(markup).toContain('>East</td>');
@@ -211,6 +213,62 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('>PO-1042</td>');
     expect(markup).toContain('<span');
     expect(markup).toContain('>$1,240.00</span>');
+  });
+
+  it('renders a decorative Icon as aria-hidden with no accessible-name role', () => {
+    const markup = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'sliders' }));
+
+    expect(markup).toContain('<svg');
+    expect(markup).toContain('aria-hidden="true"');
+    expect(markup).not.toContain('role="img"');
+    expect(markup).not.toContain('<title>');
+  });
+
+  it('gives an icon-only-button Icon a real accessible name via title instead of aria-hidden', () => {
+    const markup = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'bell', title: 'Notifications' }));
+
+    expect(markup).toContain('<svg');
+    expect(markup).not.toContain('aria-hidden');
+    expect(markup).toContain('role="img"');
+    expect(markup).toContain('<title>Notifications</title>');
+  });
+
+  it('renders distinct structural glyphs per Icon name, sized and colored via props', () => {
+    const sliders = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'sliders', size: 24, color: '#0057b8' }));
+    const bell = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'bell' }));
+
+    // `sliders` is three tracks (<line>) each with a handle (<circle>) — a structural fingerprint
+    // distinguishing it from `bell`, which has no <line>/<circle> element at all.
+    expect(sliders.match(/<line /g)?.length).toBe(3);
+    expect(sliders.match(/<circle /g)?.length).toBe(3);
+    expect(sliders).toContain('width="24"');
+    expect(sliders).toContain('height="24"');
+    expect(sliders).toContain('stroke="#0057b8"');
+    expect(bell).not.toContain('<line');
+    expect(bell).not.toContain('<circle');
+    expect(bell).toContain('<path');
+    // No explicit color given — falls back to currentColor, not a hardcoded token literal.
+    expect(bell).toContain('fill="currentColor"');
+    expect(bell).toContain('width="16"');
+  });
+
+  it('renders Theme as a wrapping element carrying a real theme class, and light/dark apply different themes', () => {
+    const lightMarkup = renderToStaticMarkup(
+      createElement(designSystem.Theme, { value: 'light', children: createElement('span', null, 'Forced light') }),
+    );
+    const darkMarkup = renderToStaticMarkup(
+      createElement(designSystem.Theme, { value: 'dark', children: createElement('span', null, 'Forced dark') }),
+    );
+
+    expect(lightMarkup).toMatch(/^<div class="[^"]+"><span>Forced light<\/span><\/div>$/);
+    expect(darkMarkup).toMatch(/^<div class="[^"]+"><span>Forced dark<\/span><\/div>$/);
+    // `lightColor`/`darkColor` are two distinct `stylex.createTheme` themes (tokens.stylex.ts) —
+    // a real override, not the same class applied twice regardless of `value`.
+    const lightClass = lightMarkup.match(/^<div class="([^"]+)"/)?.[1];
+    const darkClass = darkMarkup.match(/^<div class="([^"]+)"/)?.[1];
+    expect(lightClass).toBeTruthy();
+    expect(darkClass).toBeTruthy();
+    expect(lightClass).not.toBe(darkClass);
   });
 
   it('renders each Text variant on its default element, and `as` overrides the element', () => {

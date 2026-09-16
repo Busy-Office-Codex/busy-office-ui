@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Button, ButtonGroup, Text } from '../src/index.js';
+import { Button, ButtonGroup, Icon, Text } from '../src/index.js';
 import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.js';
 
 /**
@@ -17,13 +17,16 @@ import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.
  * `<Density value={density}>`, driven by this component's own selection) — a genuine feature,
  * not a mockup.
  *
- * **Appearance** (Light/Dark/System) is NOT real, and says so: this design system has no
- * dark-mode infrastructure today — every `color.*` token in `tokens.stylex.ts` is a single
- * light-mode value, a deliberate decision from the M4 docs-site build, not an oversight. "Light"
- * is real (it's the only theme that exists) and stays selected; Dark/System render `disabled`
- * (Chip's filter variant already dims disabled options — no new styling needed) with a caption
- * explaining why, rather than a toggle that silently does nothing when pressed. A control that
- * looks interactive but has no effect is worse than one that's honestly unavailable.
+ * **Appearance** (Light/Dark/System) is NOT real, and says so — updated 2026-09-16: the package
+ * gained real dark/light/system theming (issue #19, `src/components/Theme.tsx`, every `color.*`
+ * token now carries a light/dark `prefers-color-scheme` pair), but this control was not part of
+ * that slice and is not wired to it — a separate, deliberate scope decision (Theme ships with no
+ * real named consumer yet; wiring this toggle to it is a plausible first one, not done here to
+ * avoid scope-creeping an unrelated batch). "Light" is real (it's what's currently selected) and
+ * stays selected; Dark/System render `disabled` (Chip's filter variant already dims disabled
+ * options — no new styling needed) with a caption explaining why, rather than a toggle that
+ * silently does nothing when pressed. A control that looks interactive but has no effect is worse
+ * than one that's honestly unavailable.
  *
  * The panel is rendered through a `createPortal` into `document.body`, positioned with
  * `position: 'fixed'` at coordinates computed from the trigger's own `getBoundingClientRect()` —
@@ -46,9 +49,10 @@ import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.
  * Tab is allowed to move focus back out to the rest of the page rather than wrapping, since
  * nothing behind this popover is blocked or inert).
  *
- * No Icon component exists in this package yet (`docs/Shell.md` already discloses this gap for
- * the palette trigger and dock tiles) — `SlidersGlyph` below is the same class of plain-shape
- * stand-in `examples/AppShell.tsx`'s notification bell already uses, not a new pattern.
+ * The trigger's glyph is a real `Icon` (`name="sliders"`, ROADMAP issue #18) — this file's own
+ * former hand-built `SlidersGlyph` stand-in is what that issue named as its first migration
+ * target; `docs/Shell.md` still discloses the same gap for the palette trigger and dock tiles,
+ * which stay out of this issue's scope (no named consumer there yet).
  *
  * Density and Appearance render as `ButtonGroup` (owner-directed, 2026-09-15: "pls use group
  * button" — a joined single-select pill, not a row of separately-spaced filter `Chip`s). This
@@ -69,10 +73,12 @@ type Appearance = 'light' | 'dark' | 'system';
 
 const APPEARANCE_OPTIONS: { value: Appearance; label: string; disabled?: boolean; ariaLabel?: string }[] = [
   { value: 'light', label: 'Light' },
-  // Disabled, not a silent no-op segment: this design system has no dark palette or theming
-  // mechanism today (see the file header comment) — a segment that looked selectable but did
-  // nothing on click would be worse than one that's honestly unavailable. `ButtonGroup` dims
-  // `disabled` options itself (the shared 0.4-opacity convention).
+  // Disabled, not a silent no-op segment: real dark/light/system theming exists in the package
+  // now (`src/components/Theme.tsx`, issue #19), but this control isn't wired to it yet — an
+  // out-of-scope decision for that slice, not a missing capability (see the file header comment).
+  // A segment that looked selectable but did nothing on click would be worse than one that's
+  // honestly unavailable. `ButtonGroup` dims `disabled` options itself (the shared 0.4-opacity
+  // convention).
   { value: 'dark', label: 'Dark', disabled: true, ariaLabel: 'Dark — not available yet' },
   { value: 'system', label: 'System', disabled: true, ariaLabel: 'System — not available yet' },
 ];
@@ -149,34 +155,6 @@ const styles = stylex.create({
     },
   },
 });
-
-function SlidersGlyph() {
-  const track = { position: 'relative' as const, height: 2, borderRadius: 1, background: color.borderStrong };
-  const handle = (leftPercent: number) => ({
-    position: 'absolute' as const,
-    top: '50%',
-    left: `${leftPercent}%`,
-    transform: 'translate(-50%, -50%)',
-    width: 6,
-    height: 6,
-    borderRadius: '50%',
-    background: color.textPrimary,
-    border: `1.5px solid ${color.bgSurface}`,
-  });
-  return (
-    <div aria-hidden="true" style={{ display: 'flex', flexDirection: 'column', gap: 5, width: 16 }}>
-      <div style={track}>
-        <span style={handle(30)} />
-      </div>
-      <div style={track}>
-        <span style={handle(65)} />
-      </div>
-      <div style={track}>
-        <span style={handle(45)} />
-      </div>
-    </div>
-  );
-}
 
 function focusableWithin(panel: HTMLElement): HTMLElement[] {
   return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
@@ -335,7 +313,8 @@ export function ControlCenterButton({
         onClick={() => setOpen((value) => !value)}
         {...stylex.props(styles.trigger)}
       >
-        <SlidersGlyph />
+        {/* Decorative: the button's own `aria-label` above already carries the accessible name. */}
+        <Icon name="sliders" color={color.textPrimary} />
       </button>
       {panel && createPortal(panel, document.body)}
     </div>

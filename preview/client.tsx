@@ -40,6 +40,7 @@ import { SessionExpired } from '../examples/SessionExpired.js';
 import { AccessDenied } from '../examples/AccessDenied.js';
 import { NotFound } from '../examples/NotFound.js';
 import { DensityLab } from './DensityLab.js';
+import { ShellBreadcrumbsLab } from './ShellBreadcrumbsLab.js';
 import '../fonts/ibm-plex-sans.css';
 
 // ROADMAP M6 (issue #17): grows one route per landed item, not a bulk switch to AppShell's own
@@ -165,7 +166,10 @@ function SamplePreview() {
 }
 
 // `#density-lab` mounts a bare, isolated harness for test/browser/density.spec.ts (ROADMAP item
-// 10) instead of the sample host — see DensityLab.tsx for why. `#login` mounts the pre-auth
+// 10) instead of the sample host — see DensityLab.tsx for why. `#shell-breadcrumbs-lab` is the
+// same idea for test/browser/shell-breadcrumbs.spec.ts (ROADMAP item 37, issue #20) — see
+// ShellBreadcrumbsLab.tsx for why it, not the sample host, is what exercises Shell's own
+// `breadcrumbs` prop. `#login` mounts the pre-auth
 // Login screen standalone (ROADMAP M6, issue #17) — it precedes the shell conceptually (a real
 // host shows it before Shell ever mounts), so it isn't one of `routes` above. M7 Slice 8
 // (Entry/nav) added the rest of this pre-shell family (password reset, account locked, session
@@ -184,6 +188,7 @@ function App() {
   }, []);
 
   if (hash === '#density-lab') return <DensityLab />;
+  if (hash === '#shell-breadcrumbs-lab') return <ShellBreadcrumbsLab />;
   if (hash === '#login') return <Login />;
   if (hash === '#password-reset') return <PasswordReset />;
   if (hash === '#account-locked') return <AccountLocked />;

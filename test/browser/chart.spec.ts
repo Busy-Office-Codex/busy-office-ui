@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test';
 // (Density, ButtonGroup). Reached via the command palette, same as every other route.
 //
 // Every test here emulates `prefers-reduced-motion: reduce` before navigating — found live, not
-// assumed necessary: Chart.js's default draw-in animation takes ~1s, so a pixel check run right
+// assumed necessary: ECharts' default draw-in animation takes ~1s, so a pixel check run right
 // after navigation (Playwright's own auto-waiting only waits for the canvas element to exist and
 // be visible, not for its 2D bitmap to finish an in-progress animation) caught the chart mid-
 // animation, with the line barely started — a real screenshot at that same moment showed
@@ -43,9 +43,15 @@ test('draws the actual data — the line itself, not just axes and grid scaffold
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoDashboard(page);
 
-  const canvas = page.locator('canvas');
+  // Chart.tsx's own render surface is the `chart-canvas` container it hands to ECharts, not the
+  // `<canvas>` — that element is created and appended by ECharts itself, imperatively, so it
+  // never carries `aria-hidden` directly; the container does, and an aria-hidden ancestor already
+  // removes every descendant (this canvas included) from the accessibility tree.
+  const surface = page.getByTestId('chart-canvas');
+  await expect(surface).toHaveAttribute('aria-hidden', 'true');
+
+  const canvas = surface.locator('canvas').first();
   await expect(canvas).toBeVisible();
-  await expect(canvas).toHaveAttribute('aria-hidden', 'true');
 
   // A 440x220 canvas with only grid/axis scaffolding (no line) has zero accent-colored pixels —
   // confirmed live by catching exactly that broken-looking state (an animation-timing artifact,
@@ -61,9 +67,9 @@ test('without a reduced-motion preference, the chart still finishes drawing the 
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
   await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Dashboards\b/ }).click();
 
-  const canvas = page.locator('canvas');
+  const canvas = page.getByTestId('chart-canvas').locator('canvas').first();
   await expect(canvas).toBeVisible();
-  // Chart.js's default draw-in animation is ~1s; wait past it rather than asserting mid-animation.
+  // ECharts' default draw-in animation is ~1s; wait past it rather than asserting mid-animation.
   await page.waitForTimeout(1200);
   expect(await countAccentPixels(canvas)).toBeGreaterThan(200);
 });
@@ -73,8 +79,8 @@ test('the canvas is not the accessible content — a real data table stands in f
   await gotoDashboard(page);
 
   // getByRole intentionally excludes aria-hidden subtrees, so this finding the table at all is
-  // itself proof the canvas (aria-hidden) is correctly out of the accessibility tree while the
-  // table stands in for it.
+  // itself proof the render surface (aria-hidden) is correctly out of the accessibility tree
+  // while the table stands in for it.
   const table = page.getByRole('table', { name: 'Revenue trend, last 6 months' });
   await expect(table).toBeAttached();
   await expect(table.getByRole('columnheader', { name: 'Category' })).toBeAttached();
@@ -92,6 +98,31 @@ test('the canvas is not the accessible content — a real data table stands in f
   const wrapperBox = await table.locator('..').evaluate((el) => el.getBoundingClientRect());
   expect(wrapperBox.width).toBeLessThanOrEqual(1);
   expect(wrapperBox.height).toBeLessThanOrEqual(1);
+});
+
+test('resizes the chart when its container changes size, instead of staying pinned to first-render dimensions', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoDashboard(page);
+
+  const canvas = page.getByTestId('chart-canvas').locator('canvas').first();
+  await expect(canvas).toBeVisible();
+  const initialBox = await canvas.boundingBox();
+  expect(initialBox).not.toBeNull();
+
+  // The chart's Card is full-width with no `maxWidth` (docs/design-conventions.md's "Page width
+  // and responsive layout"), so a narrower viewport genuinely narrows its container. Unlike
+  // Chart.js's own `<canvas>` (which resized itself via Chart.js's built-in responsive mode),
+  // ECharts does not resize its render surface when its container's box changes on its own —
+  // Chart.tsx wires a `ResizeObserver` on the container that calls the chart instance's own
+  // `resize()`. 700px stays above Shell's own 640px narrow-chrome breakpoint (src/shell/Shell.tsx)
+  // so this only exercises the resize wiring, not a structural chrome change that could also
+  // shrink or grow the content area for an unrelated reason.
+  await page.setViewportSize({ width: 700, height: 900 });
+  await expect(async () => {
+    const box = await canvas.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width).toBeLessThan(initialBox!.width - 150);
+  }).toPass({ timeout: 2000 });
 });
 
 test('agrees with the REVENUE THIS MONTH stat card instead of inventing its own number', async ({ page }) => {

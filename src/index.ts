@@ -20,3 +20,7 @@ export type { TableProps, TableHeaderCellProps, TableCellProps } from './compone
 export { Density } from './components/Density.js';
 export { Chart } from './components/Chart.js';
 export type { ChartProps, ChartSeries } from './components/Chart.js';
+export { Icon } from './components/Icon.js';
+export type { IconProps, IconName } from './components/Icon.js';
+export { Theme } from './components/Theme.js';
+export type { ThemeProps, ThemeMode } from './components/Theme.js';

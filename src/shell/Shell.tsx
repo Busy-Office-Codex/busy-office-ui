@@ -35,10 +35,22 @@ export type ShellCommand = {
   onRun: () => void;
 };
 
+// Issue #20 (agreed, project owner, 2026-09-16), ROADMAP item 37. Deliberately just this: no
+// route-hierarchy inference (a host/example supplies the trail explicitly, same as every other
+// Shell prop), no per-crumb dropdown, no truncation/overflow menu — v1 scope, "a prop and a small
+// render region" per this issue's own risk note. The last entry is "here": Shell renders it as
+// plain, non-interactive, `aria-current="page"` text regardless of whether it happens to carry an
+// `onClick` — see `ShellBreadcrumbTrail` below.
+export type ShellBreadcrumb = {
+  label: string;
+  onClick?: () => void;
+};
+
 export type ShellProps = {
   navigation: ShellNavigation;
   pinned?: readonly ShellPinnedApp[];
   commands?: readonly ShellCommand[];
+  breadcrumbs?: readonly ShellBreadcrumb[];
   brand?: ReactNode;
   account?: ReactNode;
   home?: ReactNode;
@@ -341,7 +353,81 @@ function DefaultHome({ routes, onNavigate }: { routes: readonly ShellRoute[]; on
   );
 }
 
-export function Shell({ navigation, pinned = [], commands = [], brand, account, home, children }: ShellProps) {
+/**
+ * Issue #20's own render region: the standard WAI-ARIA breadcrumb pattern
+ * (`nav[aria-label="Breadcrumb"]` > `ol` > `li`), a bespoke `<button>`/`<span>` pair styled
+ * directly off tokens — the same idiom Shell already uses for its other bespoke chrome (the
+ * palette trigger above, the dock tiles below) rather than reaching for `Button`: a breadcrumb
+ * crumb is inline trail text sharing one row, not a standalone capsule action beside peers of the
+ * same kind (docs/design-conventions.md's capsule-vs-rectangle test). Same disclosed gap as those
+ * other bespoke elements for the same reason — a plain inline `style` object can't express
+ * `:hover`/`:focus-visible` — so a clickable crumb gets the browser's default focus outline and no
+ * hover treatment.
+ *
+ * Deliberately rendered inside Shell's own content-area wrapper (`paddingTop: 96`), directly
+ * above `children`, NOT inside the fixed/scroll-collapsing header above it: a breadcrumb trail is
+ * per-route context tied to whatever page is active, not persistent global chrome, so it scrolls
+ * away with that page's own content (like the page's own heading does) instead of pinning itself
+ * alongside the brand/app-strip/dock. This is the whole reason adding it never touches
+ * `chromeExpanded`/`chromeIsNarrow` or the `aria-hidden`/`inert` dance those drive — see this
+ * issue's own risk note and test/browser/shell-scroll-chrome.spec.ts, both untouched by this
+ * feature.
+ */
+function ShellBreadcrumbTrail({ items }: { items: readonly ShellBreadcrumb[] }) {
+  return (
+    <nav aria-label="Breadcrumb" style={{ padding: '12px 24px 0' }}>
+      <ol style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, margin: 0, padding: 0, listStyle: 'none' }}>
+        {items.map((crumb, index) => {
+          const isLast = index === items.length - 1;
+          return (
+            <li key={`${crumb.label}-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {crumb.onClick && !isLast ? (
+                <button
+                  type="button"
+                  onClick={crumb.onClick}
+                  style={{
+                    fontFamily: 'inherit',
+                    fontSize: font.sizeCaption,
+                    color: color.textSecondary,
+                    background: 'none',
+                    border: 0,
+                    padding: 0,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {crumb.label}
+                </button>
+              ) : (
+                // Reached whenever there's no `onClick`, AND unconditionally for the last entry
+                // even if one was given — Shell's own contract: "here" is never a button,
+                // regardless of what data a host passes (see docs/Shell.md). An earlier entry
+                // with no `onClick` can also land here, honestly, when a host genuinely has no
+                // real destination for it.
+                <span
+                  aria-current={isLast ? 'page' : undefined}
+                  style={{
+                    fontSize: font.sizeCaption,
+                    color: isLast ? color.textPrimary : color.textSecondary,
+                    fontWeight: isLast ? font.weightSemibold : undefined,
+                  }}
+                >
+                  {crumb.label}
+                </span>
+              )}
+              {!isLast && (
+                <span aria-hidden="true" style={{ color: color.textTertiary, fontSize: font.sizeCaption }}>
+                  /
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
+export function Shell({ navigation, pinned = [], commands = [], breadcrumbs, brand, account, home, children }: ShellProps) {
   const [showLauncher, setShowLauncher] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const paletteOpenRef = useRef(false);
@@ -638,6 +724,7 @@ export function Shell({ navigation, pinned = [], commands = [], brand, account, 
           </div>
         ) : (
           <>
+            {!showLauncher && breadcrumbs && breadcrumbs.length > 0 && <ShellBreadcrumbTrail items={breadcrumbs} />}
             <div hidden={showLauncher} aria-hidden={showLauncher} inert={showLauncher}>{children}</div>
             {showLauncher && (home ?? <DefaultHome routes={navigation.routes} onNavigate={navigate} />)}
           </>
