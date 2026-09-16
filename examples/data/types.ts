@@ -295,6 +295,11 @@ export type AppState = {
   companies: Record<string, Company>;
   integrations: Record<string, Integration>;
   activity: ActivityEntry[];
+  /** Route ids the user has starred from Launcher.tsx's "All apps" grid (Slice 14) — genuinely
+   * user-curated, unlike `activity` (real business events) or "recent" (Slice 11, derived from
+   * `activity`): nothing seeds this, since there is no natural "already favorited" starting fact
+   * to reuse, honestly disclosed rather than forced. */
+  favoriteRouteIds: string[];
   /**
    * A record id another screen wants pre-selected the next time its owning list+detail screen
    * mounts or updates (Slice 5's dashboard-exception drill-down: "row Analytics.tsx surfaced" IS
