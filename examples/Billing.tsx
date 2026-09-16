@@ -21,9 +21,14 @@ import { ConfirmDialog } from './confirmDialog.js';
  * no invoice yet — real worklist-driven creation, not a hand-typed blank form) and "Cancel
  * invoice" (a real reversal for an unpaid invoice; this simple model doesn't try to model a
  * credit note against an already-paid one — see `appActions.cancelInvoice`'s own comment).
- * Print preview isn't wired here: Invoice.tsx's own richly-styled printed-document page
- * (letterhead, QR code, payment progress bar) stays the static M6 reference it already is,
- * a deliberate scope line rather than a half-connected rewrite of that page's own visual work.
+ * This screen still doesn't navigate to Invoice.tsx with a specific selected invoice's real
+ * data — Invoice.tsx's own richly-styled printed-document page (letterhead, QR code, payment
+ * progress bar) stays the static M6 reference it already is; making it store-connected is a
+ * separate, bigger decision (the same one Delivery.tsx's Slice 7 upgrade made for a different
+ * page), a deliberate scope line rather than a half-connected rewrite of that page's own visual
+ * work. What Invoice.tsx's own page COULD support on its own terms — a working Print action —
+ * is real now (Slice 16): `window.print()`, with a `@media print` rule hiding its action-button
+ * row and sidebar so only the document itself prints.
  *
  * "Cancel invoice" (not "Record payment" — only the destructive direction) confirms first via
  * `ConfirmDialog` (Slice 15, `./confirmDialog.js`).

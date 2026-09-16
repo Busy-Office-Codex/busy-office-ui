@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { Button, Card, Chip, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { color } from '../src/tokens.stylex.js';
 
@@ -24,7 +25,31 @@ import { color } from '../src/tokens.stylex.js';
  * only add to that pre-existing ambiguity, so this file's linked sales order
  * is a fresh "SO-1044" instead of reusing SO-1042's number under a
  * contradictory status.
+ *
+ * "Print" (Slice 16) is a real `window.print()` call, not a static button — the brief's own named
+ * "billing print-preview" gap Billing.tsx's own comment disclosed since Slice 10. Billing.tsx
+ * itself still doesn't navigate here with a specific selected invoice's real data (that's a
+ * separate, bigger "make this page store-connected" decision, the same one Delivery.tsx's Slice 7
+ * upgrade made for a different page — not bundled into this slice); what changes here is narrower
+ * and self-contained: this already-static printed-document page can now actually be printed, and
+ * printing it shows only the document itself (the action-button row and the payment-status/
+ * activity sidebar are app chrome, not part of what a customer would receive) via a real
+ * `@media print` rule — a plain inline `style` object can't express a media query, so (same
+ * precedent as `examples/AppShell.tsx`'s notification button, `checkboxStyles.ts`) a small scoped
+ * `stylex.create` block handles just this.
  */
+
+const printStyles = stylex.create({
+  // Only `display` is driven here — every other property on these two elements stays inline
+  // `style`, since an inline `style` always wins specificity over a class, which would otherwise
+  // silently defeat the `@media print` override.
+  hideOnPrint: {
+    display: {
+      default: 'flex',
+      '@media print': 'none',
+    },
+  },
+});
 
 type LineItem = { id: string; description: string; qty: number; unitPrice: number };
 
@@ -105,7 +130,7 @@ export function Invoice() {
           </div>
           <div style={{ flex: 1 }} />
           <Density value="compact">
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div style={{ gap: 8, flexWrap: 'wrap' }} {...stylex.props(printStyles.hideOnPrint)}>
               <Button type="button" variant="ghost" aria-label="More actions">
                 ···
               </Button>
@@ -114,6 +139,9 @@ export function Invoice() {
               </Button>
               <Button type="button" variant="secondary">
                 Send reminder
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => window.print()}>
+                Print
               </Button>
               <Button type="button" variant="primary">
                 Record payment
@@ -257,7 +285,7 @@ export function Invoice() {
             </Card>
           </div>
 
-          <div style={{ flex: '1 1 320px', minWidth: 280, maxWidth: 440, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '1 1 320px', minWidth: 280, maxWidth: 440, flexDirection: 'column', gap: 16 }} {...stylex.props(printStyles.hideOnPrint)}>
             <Card>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                 <Text variant="title">Payment status</Text>
