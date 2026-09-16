@@ -1,6 +1,12 @@
 import { Chart, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+// Theme-safe page chrome (docs/design-conventions.md's "Theme-safe page chrome" recipe, extending
+// the ListReport.tsx/RecordDetail.tsx pass to this page): this page's own background/border
+// literals were raw hex duplicating color.* token values without reading them, so they stayed the
+// light-mode value under dark mode instead of re-tinting. Same established idiom 9 other
+// examples/*.tsx files already use.
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * Stock overview + stock by location + movement history (ROADMAP M7's ERP reference-app
@@ -43,19 +49,19 @@ export function Inventory() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Inventory</Text>
 
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'stretch' }}>
+        <div style={{ display: 'flex', gap: space.space4, flexWrap: 'wrap', alignItems: 'stretch' }}>
           <div style={{ flex: '2 1 420px', minWidth: 320 }}>
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', padding: 24, boxSizing: 'border-box', height: '100%' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, padding: space.space6, boxSizing: 'border-box', height: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
                 <Text variant="title">Stock by warehouse</Text>
                 <Chart type="bar" title="Units on hand by warehouse" valueLabel="units" data={byWarehouse} />
               </div>
@@ -66,8 +72,8 @@ export function Inventory() {
               SHORT_NAME below) still clipped at 240-260px, Chart.js's legend column needing a
               bit more room than the bar chart's own card. */}
           <div style={{ flex: '1 1 300px', minWidth: 300 }}>
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', padding: 24, boxSizing: 'border-box', height: '100%' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, padding: space.space6, boxSizing: 'border-box', height: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
                 <Text variant="title">Mix by material</Text>
                 <Chart
                   type="donut"
@@ -91,7 +97,7 @@ export function Inventory() {
           role="region"
           aria-label="Stock by location table"
           tabIndex={0}
-          style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+          style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
         >
           <div style={{ minWidth: 640 }}>
             <Density value="compact">
@@ -130,7 +136,7 @@ export function Inventory() {
           role="region"
           aria-label="Movement history table"
           tabIndex={0}
-          style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+          style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
         >
           <div style={{ minWidth: 640 }}>
             <Density value="compact">

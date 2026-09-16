@@ -58,6 +58,8 @@ const TARGET_FILES = [
   'examples/ListReport.tsx',
   'examples/RecordDetail.tsx',
   'examples/breadcrumbTrail.tsx',
+  'examples/Delivery.tsx',
+  'examples/Inventory.tsx',
 ];
 const TOKEN_HEX_VALUES = colorTokenHexValues();
 

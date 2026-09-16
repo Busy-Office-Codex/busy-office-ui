@@ -1,9 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState, type ReactNode } from 'react';
-import { Density, Icon } from '../src/index.js';
+import { Density, Icon, Theme } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
 import { color } from '../src/tokens.stylex.js';
-import { ControlCenterButton, type ControlCenterDensity } from './ControlCenter.js';
+import { ControlCenterButton, type Appearance, type ControlCenterDensity } from './ControlCenter.js';
 import { Launcher } from './Launcher.js';
 
 // Only interactive element in this file that needs hover/active/focus-visible pseudo-classes —
@@ -182,9 +182,22 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
   const activeRouteId = navigation ? (hostErrors.length === 0 ? navigation.activeRouteId : '') : sampleActiveId;
   const onNavigate = navigation ? navigation.onNavigate : setSampleActiveId;
   // Control center (owner-directed, 2026-09-15): drives the whole app's ambient Density tier —
-  // see examples/ControlCenter.tsx's file header for why this one is real/functional while
-  // Appearance (dark/system) is deliberately disclosed as not-yet-available instead.
+  // see examples/ControlCenter.tsx's file header for the full rationale.
   const [density, setDensity] = useState<ControlCenterDensity>('comfortable');
+  // Appearance (ROADMAP item 36's own disclosed follow-up, issue #19): drives the real `Theme`
+  // component the same way `density` drives `Density` above — see examples/ControlCenter.tsx's
+  // file header. `'system'` is not a `Theme` value (Theme.tsx's own doc comment explains why:
+  // omitting the wrapper already is "system", since every `color.*` token's own `@media
+  // (prefers-color-scheme: dark)` default already follows the OS/browser setting for free), so
+  // `themed()` below renders no `Theme` wrapper at all for that case rather than passing it through.
+  // Defaults to `'system'`, NOT `'light'` — found live: defaulting to `'light'` would wrap every
+  // page in `<Theme value="light">` from first render, forcing an explicit light override (a real
+  // `stylex.createTheme` theme, which wins over the `@media` conditional on the bare `color` vars)
+  // for every viewer who never touches this toggle, silently defeating the "follow the OS setting
+  // automatically, zero host code needed" behavior issue #19 already shipped. `'system'` is the
+  // one starting value that changes nothing until a viewer actively opts into an override.
+  const [appearance, setAppearance] = useState<Appearance>('system');
+  const themed = (node: ReactNode): ReactNode => (appearance === 'system' ? node : <Theme value={appearance}>{node}</Theme>);
   const settingsRoute = routes.find((route) => route.module === 'Settings');
 
   const pinned: ShellPinnedApp[] = PINNED.map((app) => ({
@@ -225,6 +238,8 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
           <ControlCenterButton
             density={density}
             onDensityChange={setDensity}
+            appearance={appearance}
+            onAppearanceChange={setAppearance}
             onOpenSettings={settingsRoute ? () => onNavigate(settingsRoute.id) : undefined}
           />
           <button
@@ -243,16 +258,16 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
         </>
       }
       // `Shell` renders `home` separately from `children` (only one of the two is ever visible
-      // at once, but both need their own `Density` wrap — `Shell` doesn't merge them into one
-      // subtree), so the Control Center's Density selection reaches the launcher/home view too,
-      // not just whichever page `children` currently holds.
-      home={
+      // at once, but both need their own `Density`/`Theme` wrap — `Shell` doesn't merge them into
+      // one subtree), so the Control Center's Density and Appearance selections both reach the
+      // launcher/home view too, not just whichever page `children` currently holds.
+      home={themed(
         <Density value={density}>
           <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />
-        </Density>
-      }
+        </Density>,
+      )}
     >
-      <Density value={density}>{children ?? <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />}</Density>
+      {themed(<Density value={density}>{children ?? <Launcher destinations={routes.map(({ id, label }) => ({ id, label }))} onNavigate={onNavigate} />}</Density>)}
     </Shell>
   );
 }

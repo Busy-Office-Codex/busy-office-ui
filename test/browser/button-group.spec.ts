@@ -1,10 +1,15 @@
 import { expect, test } from '@playwright/test';
 
 // ButtonGroup's own keyboard/roving-tabindex/disabled-skip contract (docs/ButtonGroup.md) — the
-// Control Center's Density and Appearance segmented controls are its only real call site today
-// (examples/ControlCenter.tsx), so these tests exercise it there rather than a synthetic harness.
-// test/browser/control-center.spec.ts covers Control Center's own feature claims (Density
-// re-themes the app, Appearance is honestly disabled); this file covers the component contract.
+// Control Center's Density and Appearance segmented controls (examples/ControlCenter.tsx) are its
+// real, enabled call sites, so most of these tests exercise it there rather than a synthetic
+// harness. test/browser/control-center.spec.ts covers Control Center's own feature claims
+// (Density re-themes the app, Appearance forces the real Theme component); this file covers the
+// component contract. The one exception is the disabled-segment test below: wiring real Theme to
+// Appearance (ROADMAP item 36's own disclosed follow-up, issue #19) made every Appearance segment
+// a genuine, enabled option, leaving `option.disabled` with no real ButtonGroup consumer left
+// anywhere in `examples/` — that test now uses `preview/ButtonGroupLab.tsx` instead (see its own
+// header comment).
 
 async function openControlCenter(page: import('@playwright/test').Page) {
   await page.setViewportSize({ width: 1280, height: 800 });
@@ -81,18 +86,19 @@ test('Home/End jump to the first/last option', async ({ page }) => {
 });
 
 test('disabled segments are skipped by arrow-key navigation, not focused or selected', async ({ page }) => {
-  await openControlCenter(page);
+  // preview/ButtonGroupLab.tsx: 'Enabled' is the only enabled segment ('Skip 1'/'Skip 2' disabled
+  // — see its own header comment for why this moved off Control Center's Appearance control).
+  // Arrow-keying from 'Enabled' must stay on 'Enabled' rather than landing on a disabled segment.
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/#button-group-lab');
 
-  // Appearance: Light is the only enabled segment (Dark/System disabled — see
-  // test/browser/control-center.spec.ts). Arrow-keying from Light must stay on Light rather than
-  // landing on a disabled segment.
-  const light = page.getByRole('radio', { name: 'Light', exact: true });
-  await light.click();
+  const enabled = page.getByRole('radio', { name: 'Enabled', exact: true });
+  await enabled.click();
   await page.keyboard.press('ArrowRight');
-  await expect(light).toBeFocused();
-  await expect(light).toHaveAttribute('aria-checked', 'true');
+  await expect(enabled).toBeFocused();
+  await expect(enabled).toHaveAttribute('aria-checked', 'true');
   await page.keyboard.press('ArrowLeft');
-  await expect(light).toBeFocused();
+  await expect(enabled).toBeFocused();
 });
 
 test('a focused segment shows the shared focus-visible ring', async ({ page }) => {
@@ -110,9 +116,18 @@ test('a focused segment shows the shared focus-visible ring', async ({ page }) =
   await trigger.focus();
   await page.keyboard.press('Enter');
 
-  const comfortable = page.getByRole('radio', { name: 'Comfortable', exact: true });
-  await page.keyboard.press('Tab'); // Light (tabindex 0) -> Comfortable (tabindex 0, next group)
-  await expect(comfortable).toBeFocused();
-  await expect(comfortable).toHaveCSS('outline-width', '2px');
-  await expect(comfortable).toHaveCSS('outline-style', 'solid');
+  // Found live fixing this test for ROADMAP item 36's Theme-wiring: opening the panel
+  // programmatically focuses "Light" (the panel's first enabled button — see
+  // ControlCenter.tsx's own FOCUSABLE_SELECTOR comment — regardless of which segment is actually
+  // selected), which now carries `tabIndex={-1}` since "System" is the selected Appearance segment
+  // by default. Real Tab-key navigation (unlike that initial scripted focus) skips every
+  // `tabindex={-1}` element, so pressing Tab from "Light" lands on the very next `tabIndex={0}`
+  // stop in DOM order — "System" itself, not Density's "Comfortable" two groups later. Before
+  // Dark/System were real (enabled) segments, they had no tab stop at all (`disabled` buttons are
+  // removed from tab order entirely), so this same keystroke used to skip straight to Comfortable.
+  const system = page.getByRole('radio', { name: 'System', exact: true });
+  await page.keyboard.press('Tab');
+  await expect(system).toBeFocused();
+  await expect(system).toHaveCSS('outline-width', '2px');
+  await expect(system).toHaveCSS('outline-style', 'solid');
 });

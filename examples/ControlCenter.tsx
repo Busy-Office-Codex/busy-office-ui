@@ -17,16 +17,17 @@ import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.
  * `<Density value={density}>`, driven by this component's own selection) — a genuine feature,
  * not a mockup.
  *
- * **Appearance** (Light/Dark/System) is NOT real, and says so — updated 2026-09-16: the package
- * gained real dark/light/system theming (issue #19, `src/components/Theme.tsx`, every `color.*`
- * token now carries a light/dark `prefers-color-scheme` pair), but this control was not part of
- * that slice and is not wired to it — a separate, deliberate scope decision (Theme ships with no
- * real named consumer yet; wiring this toggle to it is a plausible first one, not done here to
- * avoid scope-creeping an unrelated batch). "Light" is real (it's what's currently selected) and
- * stays selected; Dark/System render `disabled` (Chip's filter variant already dims disabled
- * options — no new styling needed) with a caption explaining why, rather than a toggle that
- * silently does nothing when pressed. A control that looks interactive but has no effect is worse
- * than one that's honestly unavailable.
+ * **Appearance** (Light/Dark/System) is now real too — closing ROADMAP item 36's own disclosed
+ * gap ("`Theme` ships with no real named consumer yet... `ControlCenter.tsx`'s disabled Dark/
+ * System `Appearance` toggle is the obvious first candidate"). Selecting a segment here actually
+ * forces that color mode across the whole app's content (`AppShell.tsx` wraps its `home`/
+ * `children` in `<Theme value={appearance}>` when `appearance` is `'light'` or `'dark'`, driven
+ * by this component's own selection, the same lifted-controlled-prop shape `density`/
+ * `onDensityChange` already used) — a genuine feature, not a mockup. `'system'` renders no
+ * `Theme` wrapper at all rather than a third `Theme` value: `Theme.tsx`'s own doc comment already
+ * explains why — every `color.*` token's own `@media (prefers-color-scheme: dark)` default
+ * already follows the OS/browser setting with zero host code, so a `value="system"` would be an
+ * inert no-op wrapper, exactly what this framework's Objective 1 refuses.
  *
  * The panel is rendered through a `createPortal` into `document.body`, positioned with
  * `position: 'fixed'` at coordinates computed from the trigger's own `getBoundingClientRect()` —
@@ -57,8 +58,11 @@ import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.
  * Density and Appearance render as `ButtonGroup` (owner-directed, 2026-09-15: "pls use group
  * button" — a joined single-select pill, not a row of separately-spaced filter `Chip`s). This
  * was the first real call site for that component — it did not exist before this request; see
- * `docs/ButtonGroup.md`. Appearance's Dark/System segments carry the same `disabled` + `ariaLabel`
- * disclosure the filter-`Chip` version used, now expressed through `ButtonGroup`'s own `options`.
+ * `docs/ButtonGroup.md`. Appearance's own selection now lives in `AppShell.tsx` as a controlled
+ * prop (this component owns no appearance state of its own, same as `density`) — Dark/System are
+ * ordinary enabled segments now, not the `disabled` + `ariaLabel` placeholder pair they carried
+ * before real theming was wired up here (that pairing's only real `ButtonGroup` exerciser now
+ * lives in `preview/ButtonGroupLab.tsx`, see `test/browser/button-group.spec.ts`).
  */
 
 export type ControlCenterDensity = 'compact' | 'comfortable' | 'spacious';
@@ -69,18 +73,12 @@ const DENSITY_OPTIONS: { value: ControlCenterDensity; label: string }[] = [
   { value: 'spacious', label: 'Spacious' },
 ];
 
-type Appearance = 'light' | 'dark' | 'system';
+export type Appearance = 'light' | 'dark' | 'system';
 
-const APPEARANCE_OPTIONS: { value: Appearance; label: string; disabled?: boolean; ariaLabel?: string }[] = [
+const APPEARANCE_OPTIONS: { value: Appearance; label: string }[] = [
   { value: 'light', label: 'Light' },
-  // Disabled, not a silent no-op segment: real dark/light/system theming exists in the package
-  // now (`src/components/Theme.tsx`, issue #19), but this control isn't wired to it yet — an
-  // out-of-scope decision for that slice, not a missing capability (see the file header comment).
-  // A segment that looked selectable but did nothing on click would be worse than one that's
-  // honestly unavailable. `ButtonGroup` dims `disabled` options itself (the shared 0.4-opacity
-  // convention).
-  { value: 'dark', label: 'Dark', disabled: true, ariaLabel: 'Dark — not available yet' },
-  { value: 'system', label: 'System', disabled: true, ariaLabel: 'System — not available yet' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'System' },
 ];
 
 const FOCUSABLE_SELECTOR =
@@ -163,14 +161,17 @@ function focusableWithin(panel: HTMLElement): HTMLElement[] {
 export function ControlCenterButton({
   density,
   onDensityChange,
+  appearance,
+  onAppearanceChange,
   onOpenSettings,
 }: {
   density: ControlCenterDensity;
   onDensityChange: (value: ControlCenterDensity) => void;
+  appearance: Appearance;
+  onAppearanceChange: (value: Appearance) => void;
   onOpenSettings?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [appearance, setAppearance] = useState<Appearance>('light');
   // Viewport coordinates for the portaled panel — `null` until computed on open, matching the
   // trigger's own `getBoundingClientRect()` (bottom edge + 8px gap, right edge aligned).
   const [panelPosition, setPanelPosition] = useState<{ top: number; right: number } | null>(null);
@@ -269,10 +270,9 @@ export function ControlCenterButton({
         <ButtonGroup
           aria-label="Appearance"
           value={appearance}
-          onChange={(value) => setAppearance(value as Appearance)}
+          onChange={(value) => onAppearanceChange(value as Appearance)}
           options={APPEARANCE_OPTIONS}
         />
-        <Text variant="caption">Dark and system themes aren&apos;t available in this design system yet.</Text>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>

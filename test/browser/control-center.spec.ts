@@ -3,8 +3,8 @@ import { expect, test } from '@playwright/test';
 // Owner-directed, 2026-09-15: a quick-settings popover in AppShell's top bar, following the
 // "+ New" removal (a real, well-scoped need for a settings entry point once the confusing global
 // -create button was gone). See examples/ControlCenter.tsx's file header comment for the full
-// design rationale — Density is real/functional, Appearance (dark/system) is honestly disclosed
-// as unavailable rather than a silent no-op toggle.
+// design rationale — both Density and Appearance are real/functional, driving `Density`/`Theme`
+// across the whole app from a controlled prop lifted up to AppShell.tsx.
 //
 // The panel is portaled into `document.body` (not a plain child of the trigger) — this was NOT
 // the first implementation. The first attempt rendered it as a normal `position: absolute` child
@@ -73,7 +73,7 @@ test('Density selection is real: it re-themes density-aware controls across the 
   expect((await supplierDropdown.boundingBox())?.height).toBe(28); // compact density's controlHeight
 });
 
-test('Appearance: Light is selected and real; Dark/System are disabled, not silent no-ops', async ({ page }) => {
+test('Appearance: System starts selected, and every segment is a real, enabled option', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/#examples');
 
@@ -82,14 +82,71 @@ test('Appearance: Light is selected and real; Dark/System are disabled, not sile
   // ButtonGroup (owner-directed, 2026-09-15: "pls use group button") — a WAI-ARIA radiogroup,
   // not filter Chip's row of `role="button"`/`aria-pressed` pills. See docs/ButtonGroup.md and
   // test/browser/button-group.spec.ts for the component's own keyboard/roving-tabindex contract;
-  // this test only checks the Control Center-specific claim (Light real, Dark/System disabled).
+  // this test only checks the Control Center-specific claim. Dark/System used to render
+  // `disabled` here (a disclosed gap, ROADMAP item 36) — wiring the real `Theme` component below
+  // closed that, so all three are now ordinary enabled segments, not a placeholder pair.
+  // `System`, not `Light`, starts selected — found live: defaulting AppShell.tsx's own state to
+  // `'light'` silently forced every viewer into an explicit light override from first render,
+  // defeating issue #19's "follows the OS setting with zero host code" behavior for anyone who
+  // never opens this panel. `'system'` is the one starting value that changes nothing by default.
   const light = page.getByRole('radio', { name: 'Light', exact: true });
-  const dark = page.getByRole('radio', { name: 'Dark — not available yet', exact: true });
-  const system = page.getByRole('radio', { name: 'System — not available yet', exact: true });
+  const dark = page.getByRole('radio', { name: 'Dark', exact: true });
+  const system = page.getByRole('radio', { name: 'System', exact: true });
 
-  await expect(light).toHaveAttribute('aria-checked', 'true');
-  await expect(dark).toBeDisabled();
-  await expect(system).toBeDisabled();
+  await expect(system).toHaveAttribute('aria-checked', 'true');
+  await expect(light).toBeEnabled();
+  await expect(dark).toBeEnabled();
+  await expect(system).toBeEnabled();
+});
+
+// The real end-to-end proof that Appearance is wired to `src/components/Theme.tsx`, not just a
+// state variable that flips `aria-checked` (ROADMAP item 36's own disclosed gap: "Theme ships
+// with no real named consumer yet"). `examples/ListReport.tsx` is the `/#examples` route's own
+// default page content (see test/browser/theme-contrast.spec.ts's own comment), so its `<thead>`
+// is the same real element that test asserts the no-`Theme`-wrapper system default on — reused
+// here to prove the explicit override actually reaches page content, following the exact
+// hex-to-rgb values test/browser/theme-contrast.spec.ts already established for this palette.
+test('clicking "Dark" forces the dark palette on real page content — a genuine Theme override, not a mockup', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/#examples');
+
+  const head = page.locator('thead');
+  await expect(head).toHaveCSS('background-color', 'rgb(248, 250, 252)'); // lightPalette.bgCanvas, #f8fafc — starts light
+
+  await page.getByRole('button', { name: 'Control center' }).click();
+  await page.getByRole('radio', { name: 'Dark', exact: true }).click();
+  await page.keyboard.press('Escape');
+
+  await expect(head).toHaveCSS('background-color', 'rgb(2, 6, 23)'); // darkPalette.bgCanvas, #020617
+});
+
+test.describe('with the OS/browser itself emulating a dark preference', () => {
+  test.use({ colorScheme: 'dark' });
+
+  test('switching Dark -> Light forces the light palette anyway, proving a real override rather than a coincidental match', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/#examples');
+
+    const head = page.locator('thead');
+
+    // Appearance's own initial state is 'system' (see AppShell.tsx's own comment), so the page
+    // already renders dark here purely from the emulated OS preference — no `Theme` wrapper
+    // involved yet, so this first assertion alone wouldn't prove real wiring. Explicitly selecting
+    // "Dark" and confirming it stays dark, then switching to "Light" and confirming THAT forces
+    // light despite the still-emulated dark OS preference, is what proves a real, active override
+    // rather than an unchanged, lucky default.
+    await expect(head).toHaveCSS('background-color', 'rgb(2, 6, 23)'); // darkPalette.bgCanvas — system default, no override yet
+    await page.getByRole('button', { name: 'Control center' }).click();
+    await page.getByRole('radio', { name: 'Dark', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await expect(head).toHaveCSS('background-color', 'rgb(2, 6, 23)'); // darkPalette.bgCanvas
+
+    await page.getByRole('button', { name: 'Control center' }).click();
+    await page.getByRole('radio', { name: 'Light', exact: true }).click();
+    await page.keyboard.press('Escape');
+    // The real proof: forced light while the OS/test still emulates dark throughout.
+    await expect(head).toHaveCSS('background-color', 'rgb(248, 250, 252)'); // lightPalette.bgCanvas
+  });
 });
 
 test('focus moves into the panel on open; Escape closes it and returns focus to the trigger', async ({ page }) => {
@@ -98,6 +155,12 @@ test('focus moves into the panel on open; Escape closes it and returns focus to 
 
   const trigger = page.getByRole('button', { name: 'Control center' });
   await trigger.click();
+  // The panel's own open effect focuses `focusableWithin(panel)[0]` — the FIRST element matching
+  // FOCUSABLE_SELECTOR (examples/ControlCenter.tsx), which includes `button:not([disabled])`
+  // unconditionally, not just the segment currently carrying `tabIndex={0}`. "Light" is simply the
+  // first enabled button rendered anywhere in the panel (Appearance's own first option, before
+  // Dark/System, before Density's row) — true regardless of which segment is actually selected, so
+  // this doesn't change with Appearance's default value.
   await expect(page.getByRole('radio', { name: 'Light', exact: true })).toBeFocused();
 
   await page.keyboard.press('Escape');

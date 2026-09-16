@@ -88,6 +88,40 @@ test.describe('prefers-color-scheme: dark flips color.* tokens with no Theme wra
     const here = page.getByRole('navigation', { name: 'Breadcrumb' }).getByText('SO-1042', { exact: true });
     await expect(here).toHaveCSS('color', 'rgb(248, 250, 252)'); // darkPalette.textPrimary, #f8fafc
   });
+
+  // Theme-safe page chrome, extended (docs/design-conventions.md's "Theme-safe page chrome"
+  // recipe, applied to Delivery.tsx/Inventory.tsx after ListReport.tsx/RecordDetail.tsx). Same
+  // command-palette navigation RecordDetail's own test above uses — Delivery/Inventory aren't the
+  // default `/#examples` route. The regex anchors on the route label only (`\b` after it) rather
+  // than the full accessible name (label + the palette row's own module hint text concatenated),
+  // the same technique the pre-existing "Sales order" navigation above already relies on to avoid
+  // also matching "Sales orders"; no other command label starts with "Delivery" or "Inventory"
+  // here, so this is unambiguous.
+  test('the "Deliveries table" region border and background use dark tokens, not the old raw light-mode hex (Delivery.tsx)', async ({
+    page,
+  }) => {
+    await page.goto('/#examples');
+    await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+    await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Delivery\b/ }).click();
+
+    const region = page.getByRole('region', { name: 'Deliveries table' });
+    await expect(region).toHaveCSS('border-color', 'rgb(51, 65, 85)'); // darkPalette.border, #334155
+    await expect(region).toHaveCSS('background-color', 'rgb(15, 23, 42)'); // darkPalette.bgSurface, #0f172a
+  });
+
+  // Inventory.tsx's own page background (`color.bgCanvas`, was raw `#f8fafc`) is 2 DOM levels
+  // above its "Inventory" heading, same shape as RecordDetail's own page-background test above
+  // (walking up from a stable, real element rather than a fragile absolute selector) — this page
+  // has no breadcrumb to anchor on, but its heading is the inner content column's first child,
+  // same depth from the page root.
+  test('Inventory.tsx\'s own page background uses dark bgCanvas, not the old raw light-mode hex', async ({ page }) => {
+    await page.goto('/#examples');
+    await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+    await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Inventory\b/ }).click();
+
+    const pageRoot = page.getByRole('heading', { name: 'Inventory', exact: true }).locator('xpath=../..');
+    await expect(pageRoot).toHaveCSS('background-color', 'rgb(2, 6, 23)'); // darkPalette.bgCanvas, #020617
+  });
 });
 
 test.describe('prefers-color-scheme: light keeps the existing light palette unchanged', () => {
