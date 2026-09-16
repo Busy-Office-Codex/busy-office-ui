@@ -1,8 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import { readTokens } from '../lib/parseTokens.ts';
+import { readTokens, readColorTokens } from '../lib/parseTokens.ts';
 
-const colors = readTokens('color');
+const colors = readColorTokens();
 const space = readTokens('space');
 const font = readTokens('font');
 const fontSizes = font.filter((entry) => entry.name.startsWith('size'));
@@ -13,12 +13,16 @@ const fontSizes = font.filter((entry) => entry.name.startsWith('size'));
   <p>Read live from <code>src/tokens.stylex.ts</code> at build time — not a hand-copied table.</p>
 
   <h2>Color</h2>
+  <p>Each token's light value (the default) and dark value (applied under <code>prefers-color-scheme: dark</code>, or an explicit <code>Theme</code> override) — see <code>test/color-contrast.test.ts</code> for the verified AA contrast ratios behind these pairs.</p>
   <div class="swatch-grid">
     {colors.map((token) => (
       <div class="swatch">
-        <span class="swatch-color" style={`background:${token.value}`}></span>
+        <span class="swatch-pair">
+          <span class="swatch-color" style={`background:${token.light}`} title="light"></span>
+          <span class="swatch-color swatch-color-dark" style={`background:${token.dark}`} title="dark"></span>
+        </span>
         <code>{token.name}</code>
-        <span class="swatch-value">{token.value}</span>
+        <span class="swatch-value">{token.light} / {token.dark}</span>
       </div>
     ))}
   </div>
@@ -48,12 +52,25 @@ const fontSizes = font.filter((entry) => entry.name.startsWith('size'));
   <style>
     .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin: 16px 0; }
     .swatch { display: flex; flex-direction: column; gap: 4px; }
-    .swatch-color { display: block; width: 100%; height: 64px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .swatch-pair { display: flex; width: 100%; height: 64px; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
+    .swatch-color { display: block; flex: 1; }
+    .swatch-color-dark { border-left: 1px solid rgba(255, 255, 255, 0.15); }
     .swatch-value { font-size: 12px; color: #64748b; }
     .scale { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
     .scale-row { display: flex; align-items: center; gap: 12px; }
     .scale-row code { min-width: 140px; }
     .scale-bar { display: block; height: 12px; background: #0057b8; border-radius: 4px; }
     .scale-value { color: #64748b; font-size: 12px; }
+
+    /* Same fix as Base.astro's chrome, applied to this page's own local literals — a fresh
+       instance of the exact "still light under prefers-color-scheme: dark" bug this ROADMAP
+       item already fixes once, caught by an independent review before merge, 2026-09-17.
+       #64748b (textTertiary light) on the dark canvas measured ~4.24:1, under AA's 4.5:1. */
+    @media (prefers-color-scheme: dark) {
+      .swatch-pair { border-color: #334155; }
+      .swatch-value { color: #94a3b8; }
+      .scale-bar { background: #3b82f6; }
+      .scale-value { color: #94a3b8; }
+    }
   </style>
 </Base>

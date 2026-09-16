@@ -41,6 +41,38 @@ be wired into a real feature as-is.
 | `BuilderForms.tsx` | `templates/erp-skeleton`'s "23 · Builder (forms)" screen | Static 3-pane form editor: a field/layout/block palette, a form preview, and a field-properties panel |
 | `BuilderWorkflow.tsx` | `templates/erp-skeleton`'s "24 · Builder (workflow)" screen | Static vertical step-flow (trigger → condition → approval → actions) with an approval-step config panel |
 
+The 19 rows below are a second lineage, not an omission from the table
+above: ROADMAP M7's "ERP reference-app initiative" filled gaps the M6 batch
+never covered (a per-module gap inventory, not the Claude Design canvas),
+organized as named journeys built in numbered slices — so unlike every row
+above, none of these mirrors a `templates/*` canvas file; "Mirrors" says so
+directly instead of citing one that doesn't exist. Every file's own header
+comment names its slice and journey — read that first, not just this table.
+
+| File | Mirrors | Demonstrates |
+|---|---|---|
+| `Quotations.tsx` | None — M7 ERP reference-app initiative, Slice 1 (gap inventory; no Claude Design template) | List-plus-detail-in-one-route: the first hop of the Sales-to-billing journey |
+| `Billing.tsx` | None — Slice 1 | Billing worklist + detail, the last hop of the Sales-to-billing journey; its "View invoice" action hands off to `Invoice.tsx` via the shared store |
+| `Requisitions.tsx` | None — Slice 2 | Requisitions list + detail, the first hop of the Procurement-to-stock journey; a linked-purchase-order breadcrumb trail |
+| `Inventory.tsx` | None — Slice 2 | Stock overview: stock-by-warehouse bar `Chart`, mix-by-material donut `Chart`, movement-history `Table` |
+| `Planning.tsx` | None — Slice 3 | Production planning: demand, material availability, and recommendations shown together in one screen (a deliberate one-screen-per-chain judgment, not three separate routes) |
+| `ProductionOrders.tsx` | None — Slice 3 | Planned orders → production orders → a simple schedule, the second half of the chain `Planning.tsx`'s recommendations start |
+| `Users.tsx` | None — Slice 4 | Users + role assignment + access preview + audit history — "create user → assign role → preview access → inspect audit history" in one screen |
+| `AuditLog.tsx` | None — Slice 4 | Cross-domain audit trail, the last hop of `Users.tsx`'s own named journey; reads the same shared activity log every other M7 screen appends to |
+| `Analytics.tsx` | None — Slice 5 | Cross-domain exceptions dashboard — "dashboard exception → filtered worklist → record details → relevant action"; every figure is computed live from the shared store, not hardcoded |
+| `BuilderScreens.tsx` | None — Slice 6 | A screen/page-definition builder, filling `NAV.Builder`'s pre-existing "Pages" placeholder from M6 |
+| `Roles.tsx` | None — Slice 9 | Role management, filling `NAV.Administration`'s pre-existing "Roles" placeholder from M6 |
+| `Companies.tsx` | None — Slice 12 | Companies & entities: the entity-lifecycle half of `AdminOverview.tsx`'s "Manage legal entities" card |
+| `Integrations.tsx` | None — Slice 12 | Integrations & API, filling `NAV.Administration`'s pre-existing "Integrations" placeholder from M6 |
+| `BuilderReports.tsx` | None — Slice 13 | Report/dashboard-definition builder; adds a new `NAV.Builder` entry, "Reports & dashboards" |
+| `PasswordReset.tsx` | None — Slice 8 (Entry/nav) | Two-step password-reset flow, standalone pre-shell screen at `#password-reset`; genuinely stateful (submitting moves to a real "check your email" state, "Resend" is a repeatable action), unlike the single-message screens below |
+| `AccountLocked.tsx` | None — Slice 8 | Account-locked error state, standalone pre-shell screen at `#account-locked` — a real host shows this before `Shell` ever mounts |
+| `SessionExpired.tsx` | None — Slice 8 | Session-expired error state, standalone pre-shell screen at `#session-expired` |
+| `AccessDenied.tsx` | None — Slice 8 | Permission-denied error state, standalone pre-shell screen at `#access-denied` — the honest landing spot for a module a viewer's role doesn't grant (see `Users.tsx`'s real "Preview access" module chips, Slice 4) |
+| `NotFound.tsx` | None — Slice 8 | 404 error state, standalone pre-shell screen at `#404` |
+
+`PasswordReset.tsx`/`AccountLocked.tsx`/`SessionExpired.tsx`/`AccessDenied.tsx`/`NotFound.tsx` (with `Login.tsx` above) are reachable only by hand-typing their URL hash — nothing inside the running app links to any of them today (`AppShell`'s `Shell` never renders a sign-out/session-expired/404 trigger). Surfacing them as real, discoverable links is tracked separately (ROADMAP item 46).
+
 **`AppShell.tsx` is the one to read to understand navigation** — it composes
 a real, working command palette (open it with Ctrl/⌘K or its command button)
 and a real, working launcher (click the dark tile in the floating
