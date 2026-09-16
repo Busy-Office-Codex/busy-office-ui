@@ -19,6 +19,13 @@ import {
 // ROADMAP M6 (issue #17): extracted to examples/checkboxStyles.ts once examples/Settings.tsx
 // became a second consumer of this exact treatment — see that file for the full history/rationale.
 import { checkboxStyles } from './checkboxStyles.js';
+// Theme-safe ERP composition (owner-directed, 2026-09-16): this page's own background/border/text
+// literals were raw hex, duplicating color.* token values without reading them — meaning they
+// stayed the light-mode value under dark mode instead of re-tinting, unlike every real src/
+// component (issue #19). Same already-established idiom 7 other examples/*.tsx files already use
+// (AppShell.tsx, ControlCenter.tsx, Invoice.tsx, BuilderForms.tsx, Inbox.tsx, Login.tsx,
+// entryScreenLayout.tsx) — importing directly from tokens.stylex.ts, not a new pattern.
+import { color, radius, space } from '../src/tokens.stylex.js';
 
 type Order = {
   po: string;
@@ -155,7 +162,7 @@ const skeletonHeaderLabelStyle = {
   fontWeight: 600,
   letterSpacing: '0.06em',
   textTransform: 'uppercase' as const,
-  color: '#64748b',
+  color: color.textTertiary,
 };
 
 /**
@@ -174,7 +181,7 @@ function ShimmerBar({
   radius?: number;
   testId?: string;
 }) {
-  return <div data-testid={testId} style={{ height, borderRadius: radius, background: '#e2e8f0', width }} />;
+  return <div data-testid={testId} style={{ height, borderRadius: radius, background: color.border, width }} />;
 }
 
 // ROADMAP item 14 (2026-09-14 design review, confirmed LOW finding): this stat tile used to be a
@@ -278,21 +285,21 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): the reference
         // (`templates/erp-skeleton/ErpSkeleton.dc.html`, "14 · Purchase order") uses 24px content
         // padding, not this page's old 32px — one shared content frame across all three sample
         // pages (see RecordDetail.tsx/Dashboard.tsx for the matching change).
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
-        gap: 20,
+        gap: space.space5,
       }}
     >
       <Density value="compact">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
           <Text variant="heading">Purchase orders</Text>
           <div style={{ flex: 1 }} />
           <Button variant="secondary">From requisition</Button>
@@ -300,14 +307,14 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
         </div>
       </Density>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: space.space4 }}>
         <StatTile label="Awaiting approval" value={String(AWAITING_APPROVAL_COUNT)} shimmerWidth="40%" loading={state === 'loading'} />
         <StatTile label="Sent to supplier" value={String(SENT_TO_SUPPLIER_COUNT)} shimmerWidth="35%" loading={state === 'loading'} />
         <StatTile label="Due to receive this week" value={String(DUE_THIS_WEEK_COUNT)} shimmerWidth="45%" loading={state === 'loading'} />
         <StatTile label="Open commitments" value={formatCurrency(OPEN_COMMITMENTS_TOTAL)} shimmerWidth="60%" loading={state === 'loading'} />
       </div>
 
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: space.space2, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ width: 280 }}>
           <Input
             placeholder="Search POs…"
@@ -343,17 +350,17 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
       </div>
 
       {state === 'loading' && (
-        <div role="status" aria-label="Loading purchase orders" style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflow: 'hidden' }}>
+        <div role="status" aria-label="Loading purchase orders" style={{ border: `1px solid ${color.border}`, borderRadius: radius.md, background: color.bgSurface, overflow: 'hidden' }}>
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: SKELETON_GRID_COLUMNS,
               alignItems: 'center',
-              gap: 16,
-              paddingBlock: 12,
-              paddingInline: 16,
-              background: '#f1f5f9',
-              borderBottom: '1px solid #e2e8f0',
+              gap: space.space4,
+              paddingBlock: space.space3,
+              paddingInline: space.space4,
+              background: color.bgSubtle,
+              borderBottom: `1px solid ${color.border}`,
             }}
           >
             <input type="checkbox" aria-label="Select all rows" disabled />
@@ -372,10 +379,10 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
                 display: 'grid',
                 gridTemplateColumns: SKELETON_GRID_COLUMNS,
                 alignItems: 'center',
-                gap: 16,
-                paddingBlock: 12,
-                paddingInline: 16,
-                borderBottom: index < 7 ? '1px solid #e2e8f0' : 'none',
+                gap: space.space4,
+                paddingBlock: space.space3,
+                paddingInline: space.space4,
+                borderBottom: index < 7 ? `1px solid ${color.border}` : 'none',
               }}
             >
               <input type="checkbox" aria-label={`Row ${index + 1} loading`} disabled />
@@ -407,7 +414,7 @@ export function ListReport({ state = 'ready' }: { state?: ListReportState }) {
       )}
 
       {state === 'ready' && (
-        <div role="region" aria-label="Purchase orders table" tabIndex={0} style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}>
+        <div role="region" aria-label="Purchase orders table" tabIndex={0} style={{ border: `1px solid ${color.border}`, borderRadius: radius.md, background: color.bgSurface, overflowX: 'auto' }}>
           <div style={{ minWidth: 760 }}>
             <Density value="compact">
               <Table>

@@ -1,4 +1,11 @@
 import type { ShellBreadcrumb } from '../src/shell/index.js';
+// Theme-safe ERP composition (owner-directed, 2026-09-16, found by independent review of the
+// ListReport.tsx/RecordDetail.tsx pass): this file's own text colors were raw hex, so once
+// RecordDetail.tsx's page background correctly re-tints to dark bgCanvas, this trail's "current
+// page" text (was #0f172a, textPrimary's exact light value) rendered near-black-on-near-black —
+// well under WCAG AA contrast. Same recipe as docs/design-conventions.md's "Theme-safe page
+// chrome" section, applied to this file's own 3 literals.
+import { color } from '../src/tokens.stylex.js';
 
 // Issue #20 (agreed, project owner, 2026-09-16): shared by exactly Shell's own two named
 // breadcrumbs consumers, RecordDetail.tsx and Requisitions.tsx — internal to `examples/`, not a
@@ -33,7 +40,7 @@ export function BreadcrumbTrail({ items }: { items: readonly ShellBreadcrumb[] }
                   style={{
                     fontFamily: 'inherit',
                     fontSize: 12.5,
-                    color: '#475569',
+                    color: color.textSecondary,
                     background: 'none',
                     border: 0,
                     padding: 0,
@@ -48,13 +55,13 @@ export function BreadcrumbTrail({ items }: { items: readonly ShellBreadcrumb[] }
                 // button, regardless of what data a host passes.
                 <span
                   aria-current={isLast ? 'page' : undefined}
-                  style={{ fontSize: 12.5, color: isLast ? '#0f172a' : '#475569', fontWeight: isLast ? 600 : undefined }}
+                  style={{ fontSize: 12.5, color: isLast ? color.textPrimary : color.textSecondary, fontWeight: isLast ? 600 : undefined }}
                 >
                   {crumb.label}
                 </span>
               )}
               {!isLast && (
-                <span aria-hidden="true" style={{ color: '#64748b', fontSize: 12.5 }}>
+                <span aria-hidden="true" style={{ color: color.textTertiary, fontSize: 12.5 }}>
                   /
                 </span>
               )}

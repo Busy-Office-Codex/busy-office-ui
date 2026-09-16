@@ -10,7 +10,9 @@ runtime package setup. Real component prop types remain authoritative.
 
 ## Styling idiom: props only, no exposed classes or tokens
 
-This design system is built with StyleX (compile-time atomic CSS). The compiled `styles.css` contains only hashed, opaque custom-property names — **never write CSS or hand-author classes against these names**; they are internal implementation detail, not a public vocabulary, and are not guaranteed stable across builds (they are re-hashed on every rebuild). There is no utility-class family and no public design-token API to compose from directly.
+This design system is built with StyleX (compile-time atomic CSS). The compiled `styles.css` contains only hashed, opaque custom-property names — **never write CSS or hand-author classes against these names**; they are internal implementation detail, not a public vocabulary, and are not guaranteed stable across builds (they are re-hashed on every rebuild). There is no utility-class family, and this is not a promise to external hosts of a stable, versioned token API to build against.
+
+Within this repository, `examples/*.tsx` — first-party page compositions built from source, not an external consumer of the compiled package — already import `color`/`space`/`radius`/`font`/`shadow`/`glass` directly from `../src/tokens.stylex.js` for page-level chrome no component prop covers (a page's own background, a custom border, a one-off gap): `AppShell.tsx`, `BuilderForms.tsx`, `ControlCenter.tsx`, `Inbox.tsx`, `Invoice.tsx`, `Login.tsx`, `entryScreenLayout.tsx`, `ListReport.tsx` and `RecordDetail.tsx` all do this today. This is the approved way to keep a page theme-safe (issue #19) — see "Theme-safe page chrome" below — corrected here after this same statement's own "no design-token API" claim above was found to already be false in practice.
 
 Instead, style exclusively through each component's own props:
 
@@ -39,7 +41,7 @@ Instead, style exclusively through each component's own props:
 
 One-line test: is it a thing you click to *do* something, standing next to peers of the same kind? → capsule. Is it a container with structure, or a highlight showing current state/position? → rounded rectangle, radius scaled to size, never a capsule.
 
-For any layout or spacing outside these components (page structure, grids, gaps), use plain inline styles or your own CSS — this design system does not yet ship layout primitives or a spacing scale the agent can reach for.
+For layout structure and grids outside these components (a page's own flex/grid wrapper), use plain inline styles — this design system does not ship layout primitives (no `Stack`/`Grid`/`Box`). For the actual gap/padding *values* inside that structure, reach for the `space` scale (`space.space1`…`space.space16`, `4px`→`64px`) from `../src/tokens.stylex.js` rather than a raw number — see "Theme-safe page chrome" below.
 
 ### Page width and responsive layout
 
@@ -59,10 +61,22 @@ Every page above scrolls with the rest of the document — the normal case. A pa
 - Size against `height: 'calc(100vh - 192px)'` (96px top + 96px bottom, matching `Shell`'s fixed header/dock reservations), not `height: '100%'` — `Shell`'s own root uses `min-height: 100vh` (deliberately, so every normal page can grow taller than the viewport), which never gives the ancestor chain a *definite* height for a percentage to resolve against; anchoring to the viewport directly sidesteps that ambiguity. Confirmed live while building Inbox's version: `height: '100%'` silently rendered at whatever height the content demanded, `overflow: hidden` and all, never actually capping at the viewport.
 - `overflow: hidden` on the page's own root, then `overflow-y: auto` + `min-height: 0` on each internally-scrolling region (the classic nested-flexbox requirement — a flex item's default `min-height: auto` refuses to shrink below its content's size unless overridden).
 
+### Theme-safe page chrome (the minimal recipe)
+
+A page's own chrome — its outer background, a custom border, the gaps in its own layout `<div>`s — sits outside every component's props, so it's easy to hardcode a color/spacing literal that looks right once and then silently drifts from dark mode (`Theme`, issue #19) or from every other page's spacing scale. Fixed for `ListReport.tsx`/`RecordDetail.tsx` (owner-directed, 2026-09-16); apply the same 3 steps to any other page:
+
+1. **Import the tokens your page's own `<div>`s need** — `import { color, radius, space } from '../src/tokens.stylex.js';` (add only what you use; `font`/`shadow`/`glass` exist too).
+2. **Replace every raw hex color** in a page-level `style={{...}}` with the matching `color.*` token — `background: '#f8fafc'` → `background: color.bgCanvas`; `border: '1px solid #e2e8f0'` → `` border: `1px solid ${color.border}` ``. Grep your page for `#[0-9a-fA-F]{3,6}` before and after — zero matches when done (font-family strings are the one expected exception; they don't vary by theme).
+3. **Replace every raw spacing number that already matches the `space` scale** (`space1`=4 · `space2`=8 · `space3`=12 · `space4`=16 · `space5`=20 · `space6`=24 · `space8`=32 · `space10`=40 · `space12`=48 · `space16`=64) with `space.spaceN` — `gap: 16` → `gap: space.space4`. A number with no matching token (a deliberate fixed width like a 280px search box, or a genuinely bespoke value) stays a plain literal; don't force-fit the nearest token onto something that was never meant to track the scale.
+
+Verify: `pnpm typecheck && pnpm lint && pnpm test` (fast, catches import/type errors), then `pnpm test:browser` with a real dark-mode assertion on the specific element you changed — `test.use({ colorScheme: 'dark' })`, then `toHaveCSS('background-color', 'rgb(...)')` against the exact `darkPalette` value from `src/tokens.stylex.ts` (see `test/browser/theme-contrast.spec.ts`) — not just that the page still renders. `radius`/`font` values are theme-independent (they don't change between light and dark), so leaving a bespoke radius/font literal alone is not a theme-safety gap; only colors and spacing are in scope here.
+
+Known gap, not yet closed: this recipe has only been applied to `ListReport.tsx` and `RecordDetail.tsx` so far. Every other `examples/*.tsx` sample page still has its own raw hex/spacing literals (a pre-existing, disclosed condition since issue #19 shipped — see `docs/Theme.md`); each is a candidate for the same 3-step pass.
+
 ## Where the truth lives
 
 - `src/components/`: authoritative React prop types and implementation.
-- `src/tokens.stylex.ts`: private internal component styling, not a consumer API.
+- `src/tokens.stylex.ts`: authoritative token values — a private, unversioned surface for an *external* host (no compatibility promise, don't build a published integration against it), but the real source `examples/*.tsx` compositions in this repo import directly (see "Theme-safe page chrome" above).
 - `examples/`: real buildable page and shell compositions.
 - `dist/design-system.css`: generated stylesheet; do not edit or extract hashed tokens.
 

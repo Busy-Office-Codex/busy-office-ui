@@ -8,6 +8,8 @@ tests:
 
 `examples/RecordDetail.tsx` — a sales-order detail page (route id `sales-order-detail`, module `Sales`), composed only from package components (`Button`, `Card`, `Chip`, `Input`, `Modal`, `Text`). It renders the header (order title, status `Chip`, "Created…" caption) unconditionally, and takes a `state?: 'ready' | 'loading' | 'empty' | 'error' | 'forbidden'` prop (default `'ready'`) that controls what appears below the header. Not for a Claude Design canvas template — the reject-confirmation `Modal`'s open/close state is real React state; use it as a buildable page composition, not a static template.
 
+Theme-safe (2026-09-16): the page's own outer background and every layout gap read `color.bgCanvas`/`space.*` from `src/tokens.stylex.ts` rather than raw hex/pixel literals, so it re-tints correctly under `Theme`/`prefers-color-scheme` dark mode — see `docs/design-conventions.md`'s "Theme-safe page chrome" recipe.
+
 - **`'ready'`** (default): shows the three summary `Card`s (order total, line items, requested by) and the approve/reject action row.
 - **`'empty'`**: the record exists but has no summary/line-item data yet (e.g. a freshly-created draft) — the three summary cards are replaced by one placeholder `Card` ("This draft has no summary data yet. Add line items to see totals here."); the action row stays, since a draft can still be worked on.
 - **`'loading'`**: the cards and action row are both replaced by an announced `role="status"` message, "Loading order details…" — there is nothing to act on yet.
