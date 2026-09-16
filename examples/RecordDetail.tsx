@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Button, Card, Chip, Density, Input, Modal, Text } from '../src/index.js';
 import { BreadcrumbTrail } from './breadcrumbTrail.js';
+// Theme-safe ERP composition (owner-directed, 2026-09-16) — see ListReport.tsx's own comment on
+// this same import for the full rationale; this page had only the one raw literal (its own
+// comment below already called out that it duplicates color.bgCanvas's exact value).
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * `'ready'` (default) shows the header, the three summary cards and the
@@ -26,7 +30,7 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         // ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): matches
         // ListReport.tsx/Dashboard.tsx's 24px content padding (the reference's own value) instead
         // of this page's old 40px — one shared content frame across all three sample pages.
@@ -37,10 +41,11 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
         // Shell's own root already sets `minHeight: '100vh'` and its content-slot wrapper already
         // has `flex: 1` (stretches to fill), so this page setting the same 100vh minimum AGAIN,
         // nested inside that chrome, only pushed the total rendered height past the viewport.
-        // This page's content is naturally shorter than a full viewport, and that's fine — its
-        // background (`#f8fafc`) is the same literal as `color.bgCanvas`, the color Shell's own
-        // root already paints, so there's no visible seam below the content either way.
-        padding: 24,
+        // This page's content is naturally shorter than a full viewport, and that's fine —
+        // `color.bgCanvas` is the same color Shell's own root already paints, so there's no
+        // visible seam below the content either way (now a real token reference, not a duplicated
+        // literal that would silently diverge from Shell's own value under dark mode).
+        padding: space.space6,
         boxSizing: 'border-box',
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
@@ -49,7 +54,7 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
           sample page's left edge (see ListReport.tsx, which has no inner max-width wrapper at
           all). No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
           docs/design-conventions.md's "Page width and responsive layout"). */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
         {/* Issue #20 (agreed, project owner, 2026-09-16), ROADMAP item 37 — the trail back to
             SalesOrderList.tsx this page had no way to show before ("reached today ... with no
             visible trail back"). Every crumb here renders as plain, non-interactive text — no
@@ -62,8 +67,8 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
             a convenience — so the trail is honestly display-only; "SO-1042" is last, matching
             Shell's own breadcrumb contract for "here" (see `examples/breadcrumbTrail.tsx`). */}
         <BreadcrumbTrail items={[{ label: 'Sales orders' }, { label: 'SO-1042' }]} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
             <Text variant="heading">SO-1042 · Northwind Traders</Text>
             <Chip variant="status" tone="accent">
               Awaiting approval
@@ -100,10 +105,10 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
                 <Text variant="body">This draft has no summary data yet. Add line items to see totals here.</Text>
               </Card>
             ) : (
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: space.space4, flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
                   <Card>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                       <Text variant="caption" as="h3">Order total</Text>
                       <Text variant="heading">$24,300</Text>
                     </div>
@@ -111,7 +116,7 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
                 </div>
                 <div style={{ flex: 1, minWidth: 220 }}>
                   <Card>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                       <Text variant="caption" as="h3">Line items</Text>
                       <Text variant="heading">12</Text>
                     </div>
@@ -119,7 +124,7 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
                 </div>
                 <div style={{ flex: 1, minWidth: 220 }}>
                   <Card>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                       <Text variant="caption" as="h3">Requested by</Text>
                       <Text variant="heading">Sales — East region</Text>
                     </div>
@@ -129,7 +134,7 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
             )}
 
             <Density value="compact">
-              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end' }}>
                 <Button variant="ghost">Cancel</Button>
                 <Button variant="secondary">Request changes</Button>
                 <Button variant="primary">Approve</Button>
@@ -161,7 +166,7 @@ export function RecordDetail({ state = 'ready' }: { state?: RecordDetailState })
           </>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
           <Text variant="body">
             Rejecting this order will notify the requester and Finance. Your comment will be visible to both and
             saved to the record history.

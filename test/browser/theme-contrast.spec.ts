@@ -42,6 +42,34 @@ test.describe('prefers-color-scheme: dark flips color.* tokens with no Theme wra
     await expect(primaryButton).toHaveCSS('background-color', 'rgb(241, 245, 249)'); // darkPalette.action, #f1f5f9
     await expect(primaryButton).toHaveCSS('color', 'rgb(15, 23, 42)'); // darkPalette.textOnInk, #0f172a
   });
+
+  // Theme-safe ERP composition (owner-directed, 2026-09-16): ListReport.tsx's own page-level
+  // chrome (the "Purchase orders table" region's border/background, distinct from Table's own
+  // internal styling already covered above) used to be raw hex literals — `#e2e8f0`/`#ffffff` —
+  // duplicating color.border/color.bgSurface without reading them, so they stayed the light value
+  // under dark mode. Real red-proof: this exact test failed with the light-mode rgb values before
+  // the fix (border rgb(226,232,240), background rgb(255,255,255)).
+  test('the "Purchase orders table" region border and background use dark tokens, not the old raw light-mode hex', async ({
+    page,
+  }) => {
+    await page.goto('/#examples');
+
+    const region = page.getByRole('region', { name: 'Purchase orders table' });
+    await expect(region).toHaveCSS('border-color', 'rgb(51, 65, 85)'); // darkPalette.border, #334155
+    await expect(region).toHaveCSS('background-color', 'rgb(15, 23, 42)'); // darkPalette.bgSurface, #0f172a
+  });
+
+  // Same fix, RecordDetail.tsx: the page's own outer wrapper (`color.bgCanvas`, was raw
+  // `#f8fafc`) is 2 DOM levels above the breadcrumb trail in this page's own render tree —
+  // walking up from a stable, real element rather than a fragile absolute selector.
+  test('RecordDetail.tsx\'s own page background uses dark bgCanvas, not the old raw light-mode hex', async ({ page }) => {
+    await page.goto('/#examples');
+    await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+    await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Sales order\b/ }).click();
+
+    const pageRoot = page.getByRole('navigation', { name: 'Breadcrumb' }).locator('xpath=../..');
+    await expect(pageRoot).toHaveCSS('background-color', 'rgb(2, 6, 23)'); // darkPalette.bgCanvas, #020617
+  });
 });
 
 test.describe('prefers-color-scheme: light keeps the existing light palette unchanged', () => {
