@@ -3,6 +3,7 @@ import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell
 import { appActions, appStore, useFocusRecord } from './data/appStore.js';
 import { documentTotal } from './data/types.js';
 import { useStoreState } from './data/store.js';
+import { ConfirmDialog } from './confirmDialog.js';
 
 /**
  * Requisitions list + detail — the first hop of the Procurement-to-stock journey (ROADMAP M7's
@@ -73,6 +74,7 @@ export function Requisitions() {
   );
   const selected = state.requisitions[selectedId];
   const linkedOrder = selected?.purchaseOrderId ? state.purchaseOrders[selected.purchaseOrderId] : undefined;
+  const [confirmingReject, setConfirmingReject] = useState(false);
 
   return (
     <div
@@ -202,7 +204,7 @@ export function Requisitions() {
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                   {selected.status === 'pending_approval' && (
                     <>
-                      <Button type="button" variant="secondary" onClick={() => appActions.rejectRequisition(selected.id)}>
+                      <Button type="button" variant="secondary" onClick={() => setConfirmingReject(true)}>
                         Reject
                       </Button>
                       <Button
@@ -239,6 +241,21 @@ export function Requisitions() {
           </Card>
         )}
       </div>
+
+      {selected && (
+        <ConfirmDialog
+          open={confirmingReject}
+          title={`Reject ${selected.id}?`}
+          confirmLabel="Reject"
+          onConfirm={() => {
+            appActions.rejectRequisition(selected.id);
+            setConfirmingReject(false);
+          }}
+          onCancel={() => setConfirmingReject(false)}
+        >
+          The requester will see this requisition marked rejected.
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

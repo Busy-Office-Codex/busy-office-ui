@@ -3,6 +3,7 @@ import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell
 import { appActions, appStore, useFocusRecord } from './data/appStore.js';
 import { documentTotal } from './data/types.js';
 import { useStoreState } from './data/store.js';
+import { ConfirmDialog } from './confirmDialog.js';
 
 /**
  * Billing worklist + detail — the last hop of the Sales-to-billing journey (ROADMAP M7's ERP
@@ -23,6 +24,9 @@ import { useStoreState } from './data/store.js';
  * Print preview isn't wired here: Invoice.tsx's own richly-styled printed-document page
  * (letterhead, QR code, payment progress bar) stays the static M6 reference it already is,
  * a deliberate scope line rather than a half-connected rewrite of that page's own visual work.
+ *
+ * "Cancel invoice" (not "Record payment" — only the destructive direction) confirms first via
+ * `ConfirmDialog` (Slice 15, `./confirmDialog.js`).
  */
 
 const STATUS_TONE: Record<string, ChipTone> = {
@@ -49,6 +53,7 @@ export function Billing() {
   const state = useStoreState(appStore, (s) => s);
   const invoiceList = Object.values(state.invoices).sort((a, b) => (a.id < b.id ? 1 : -1));
   const [selectedId, setSelectedId] = useState(invoiceList[0]?.id ?? '');
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
   useFocusRecord(
     (id) => Boolean(state.invoices[id]),
     (id) => setSelectedId(id),
@@ -213,7 +218,7 @@ export function Billing() {
               {selected.status !== 'paid' && selected.status !== 'cancelled' && (
                 <Density value="compact">
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                    <Button type="button" variant="secondary" onClick={() => appActions.cancelInvoice(selected.id)}>
+                    <Button type="button" variant="secondary" onClick={() => setConfirmingCancel(true)}>
                       Cancel invoice
                     </Button>
                     {balanceDue > 0 && (
@@ -238,6 +243,21 @@ export function Billing() {
           </Card>
         )}
       </div>
+
+      {selected && (
+        <ConfirmDialog
+          open={confirmingCancel}
+          title={`Cancel ${selected.id}?`}
+          confirmLabel="Cancel invoice"
+          onConfirm={() => {
+            appActions.cancelInvoice(selected.id);
+            setConfirmingCancel(false);
+          }}
+          onCancel={() => setConfirmingCancel(false)}
+        >
+          {customer?.name} will need a new invoice if this order still needs to be billed.
+        </ConfirmDialog>
+      )}
     </div>
   );
 }
