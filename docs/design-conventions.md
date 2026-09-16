@@ -1,5 +1,19 @@
 # UI design conventions
 
+## Start here
+
+An entry map, not a summary — each row points to the one doc that already has
+the answer instead of restating it here.
+
+| Task | Read |
+| --- | --- |
+| Build a new page/composition from scratch | This file: "Example composition", "Page width and responsive layout", "Theme-safe page chrome" |
+| Need a specific component's props/behavior | `docs/<Component>.md` for each of: Button, ButtonGroup, Card, Chart, Chip, Density, Dropdown, Icon, Input, ListReport, Modal, RecordDetail, Shell, Table, Text, Theme |
+| Make a page/region theme-safe (dark mode) | This file's "Theme-safe page chrome" section, below |
+| Set density (compact/comfortable/spacious) on a region | `docs/Density.md` |
+| Work with Shell/routing/navigation/breadcrumbs | `docs/Shell.md` |
+| Verify a change | `pnpm typecheck && pnpm lint && pnpm test`; add `pnpm test:browser` for anything visual/interactive |
+
 ## Setup
 
 Use the React exports from `@busyoffice/design-system` and import
