@@ -3,6 +3,7 @@ import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell
 import { appActions, appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
 import { ConfirmDialog } from './confirmDialog.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * Companies & entities (ROADMAP M7's ERP reference-app initiative, Slice 12, Administration) —
@@ -34,20 +35,20 @@ export function Companies() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Companies &amp; entities</Text>
 
         <div
           role="region"
           aria-label="Companies table"
           tabIndex={0}
-          style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+          style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
         >
           <div style={{ minWidth: 560 }}>
             <Density value="compact">
@@ -64,7 +65,7 @@ export function Companies() {
                     <TableRow
                       key={company.id}
                       onClick={() => setSelectedId(company.id)}
-                      style={{ cursor: 'pointer', backgroundColor: company.id === selectedId ? '#eff6ff' : undefined }}
+                      style={{ cursor: 'pointer', backgroundColor: company.id === selectedId ? color.bgSelected : undefined }}
                     >
                       <TableCell>{company.legalName}</TableCell>
                       <TableCell>{company.businessUnit}</TableCell>
@@ -83,8 +84,8 @@ export function Companies() {
 
         {selected && (
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                 <Text variant="title">{selected.legalName}</Text>
                 <Chip variant="status" tone={STATUS_TONE[selected.status]}>
                   {STATUS_LABEL[selected.status]}
@@ -93,14 +94,14 @@ export function Companies() {
                 <Text variant="caption">{selected.businessUnit}</Text>
               </div>
 
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                <div style={{ flex: '1 1 220px', minWidth: 220, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', gap: space.space4, flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 220px', minWidth: 220, display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                   <Text variant="caption" as="span">
                     Tax ID
                   </Text>
                   <Text variant="body">{selected.taxId}</Text>
                 </div>
-                <div style={{ flex: '1 1 220px', minWidth: 220, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ flex: '1 1 220px', minWidth: 220, display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                   <Text variant="caption" as="span">
                     Address
                   </Text>
@@ -111,7 +112,7 @@ export function Companies() {
               </div>
 
               <Density value="compact">
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end' }}>
                   <Button
                     type="button"
                     variant={selected.status === 'active' ? 'secondary' : 'primary'}

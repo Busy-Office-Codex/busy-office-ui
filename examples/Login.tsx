@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, Card, Input, Text } from '../src/index.js';
-import { color } from '../src/tokens.stylex.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A two-column sign-in screen: an auth form (workspace switcher, email +
@@ -22,7 +22,7 @@ export function Login() {
         minHeight: '100vh',
         display: 'flex',
         flexWrap: 'wrap',
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
@@ -35,8 +35,8 @@ export function Login() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 20,
-          padding: 32,
+          gap: space.space5,
+          padding: space.space8,
         }}
       >
         {/* Workspace switcher — a plain, non-interactive label, same "Acme Co ▾" text and
@@ -51,26 +51,26 @@ export function Login() {
               gap: 6,
               padding: '6px 12px',
               borderRadius: 999,
-              border: '1px solid #e2e8f0',
-              background: '#ffffff',
+              border: `1px solid ${color.border}`,
+              background: color.bgSurface,
               fontSize: 13,
               fontWeight: 600,
-              color: '#334155',
+              color: color.textSecondary,
             }}
           >
-            Acme Co <span aria-hidden="true" style={{ color: '#94a3b8' }}>▾</span>
+            Acme Co <span aria-hidden="true" style={{ color: color.textDisabled }}>▾</span>
           </span>
         </div>
 
         <div style={{ width: '100%', maxWidth: 360 }}>
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                 <Text variant="heading">Busy Office</Text>
                 <Text variant="body">Sign in to your workspace</Text>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
                 <Input
                   label="Work email"
                   type="email"
@@ -88,7 +88,7 @@ export function Login() {
 
               {/* A real link (`#password-reset`, wired in preview/client.tsx's `App`), not inert
                   caption text — Slice 8 (Entry/nav) gave this a real destination. */}
-              <a href="#password-reset" style={{ fontSize: 12.5, color: '#475569' }}>
+              <a href="#password-reset" style={{ fontSize: 12.5, color: color.textSecondary }}>
                 Forgot your password?
               </a>
 
@@ -96,7 +96,7 @@ export function Login() {
                   bare-native-input pattern ListReport.tsx's row-selection checkboxes use, not a
                   new `Checkbox` export this package has no second consumer to justify), wrapped
                   in a `<label>` the way Input.tsx composes its own field + caption. */}
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: space.space2, cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={rememberDevice}
@@ -107,7 +107,7 @@ export function Login() {
                 </Text>
               </label>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                 <Button variant="primary" style={{ width: '100%' }}>
                   Continue
                 </Button>
@@ -136,13 +136,13 @@ export function Login() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 24,
-          padding: 48,
+          gap: space.space6,
+          padding: space.space12,
           background: color.textPrimary,
         }}
       >
-        <div style={{ width: 64, height: 64, borderRadius: 18, background: color.textOnInk }} />
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center' }}>
+        <div style={{ width: space.space16, height: space.space16, borderRadius: 18, background: color.textOnInk }} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: space.space2, textAlign: 'center' }}>
           <span style={{ fontSize: 28, fontWeight: 600, color: color.textOnInk }}>Busy Office</span>
           <span style={{ fontSize: 15, color: color.textDisabled, maxWidth: 320 }}>
             One workspace for sales, purchasing, finance and BI — built for teams that move fast.

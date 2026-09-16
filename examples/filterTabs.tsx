@@ -1,4 +1,5 @@
 import { Chip, Density } from '../src/index.js';
+import { space } from '../src/tokens.stylex.js';
 
 // ROADMAP M6 (issue #17): extracted once this exact static filter-Chip-as-tabs row (only one
 // tab ever selected, no onClick/switching logic — every M6 page using it is a structural-first-
@@ -16,7 +17,7 @@ export type FilterTabsProps = {
 export function FilterTabs({ tabs, selected }: FilterTabsProps) {
   return (
     <Density value="compact">
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: space.space2, flexWrap: 'wrap' }}>
         {tabs.map((tab) => (
           <Chip key={tab} variant="filter" selected={tab === selected}>
             {tab}

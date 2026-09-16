@@ -64,9 +64,9 @@ const lightPalette = parsePalette('lightPalette');
 const darkPalette = parsePalette('darkPalette');
 
 describe('both color palettes have real hex values to check (guards against a silently empty parse)', () => {
-  it('parsed at least the 17 named color vars from each palette', () => {
-    expect(Object.keys(lightPalette).length).toBeGreaterThanOrEqual(17);
-    expect(Object.keys(darkPalette).length).toBeGreaterThanOrEqual(17);
+  it('parsed at least the 18 named color vars from each palette', () => {
+    expect(Object.keys(lightPalette).length).toBeGreaterThanOrEqual(18);
+    expect(Object.keys(darkPalette).length).toBeGreaterThanOrEqual(18);
   });
 });
 
@@ -88,6 +88,17 @@ describe.each([
 
   it('textSecondary on bgSurface clears 4.5:1 (body text)', () => {
     expect(contrastRatio(palette.textSecondary, palette.bgSurface)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
+  });
+
+  // `bgSelected` (token-standardization sweep, 2026-09-17): the selected-row background every
+  // list-plus-detail-in-one-route screen uses. Same body-text pairs as bgCanvas/bgSurface above,
+  // since a selected row renders the same textPrimary/textSecondary row text as any other row.
+  it('textPrimary on bgSelected clears 4.5:1 (body text)', () => {
+    expect(contrastRatio(palette.textPrimary, palette.bgSelected)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
+  });
+
+  it('textSecondary on bgSelected clears 4.5:1 (body text)', () => {
+    expect(contrastRatio(palette.textSecondary, palette.bgSelected)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
   });
 
   // `textOnInk` is the text color placed on top of `action`/`accent`/`danger` when any of those

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, ButtonGroup, Card, Chip, type ChipTone, Density, Text } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A screen/page-definition builder (ROADMAP M7's ERP reference-app initiative, Slice 6, Builder)
@@ -109,17 +110,17 @@ export function BuilderScreens() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
-        gap: 20,
+        gap: space.space5,
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Text variant="heading">{selected.name}</Text>
             {isDirty ? (
@@ -147,16 +148,16 @@ export function BuilderScreens() {
         </Density>
       </div>
 
-      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 220px', minWidth: 200, maxWidth: 280, display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', gap: space.space4, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 220px', minWidth: 200, maxWidth: 280, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
             <Text variant="caption" as="span">
               PAGE DEFINITIONS
             </Text>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               {Object.values(definitions).map((definition) => (
                 <Card key={definition.id} selected={definition.id === selectedId} onClick={() => setSelectedId(definition.id)}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: space.space3 }}>
                     <Text variant="body">{definition.name}</Text>
                     <Text variant="caption">{definition.widgets.length} widgets</Text>
                   </div>
@@ -166,11 +167,11 @@ export function BuilderScreens() {
           </div>
 
           {tab === 'Design' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               <Text variant="caption" as="span">
                 ADD A WIDGET
               </Text>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                 {PALETTE.map((type) => (
                   <button
                     key={type}
@@ -179,8 +180,8 @@ export function BuilderScreens() {
                     style={{
                       padding: '8px 10px',
                       borderRadius: 8,
-                      border: '1px solid #e2e8f0',
-                      background: '#ffffff',
+                      border: `1px solid ${color.border}`,
+                      background: color.bgSurface,
                       textAlign: 'left',
                       cursor: 'pointer',
                       font: 'inherit',
@@ -197,18 +198,18 @@ export function BuilderScreens() {
         <div style={{ flex: '3 1 360px', minWidth: 320 }}>
           <Card>
             {tab === 'Design' ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
                 <Text variant="title">Canvas</Text>
                 {draftWidgets.length === 0 ? (
                   <div
                     style={{
-                      border: '1px dashed #cbd5e1',
+                      border: `1px dashed ${color.borderStrong}`,
                       borderRadius: 10,
-                      padding: 24,
+                      padding: space.space6,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      background: '#f8fafc',
+                      background: color.bgCanvas,
                     }}
                   >
                     <Text variant="caption">No widgets yet — add one from the palette.</Text>
@@ -220,11 +221,11 @@ export function BuilderScreens() {
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 12,
+                        gap: space.space3,
                         padding: '10px 14px',
                         borderRadius: 10,
-                        border: '1px solid #e2e8f0',
-                        background: '#ffffff',
+                        border: `1px solid ${color.border}`,
+                        background: color.bgSurface,
                       }}
                     >
                       <Chip variant="status" tone={WIDGET_TONE[widget.type]}>
@@ -243,20 +244,20 @@ export function BuilderScreens() {
                 )}
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
                 <Text variant="title">Preview</Text>
                 {draftWidgets.length === 0 ? (
                   <Text variant="caption">This page has no widgets to preview yet.</Text>
                 ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: space.space3 }}>
                     {draftWidgets.map((widget) => (
                       <div
                         key={widget.id}
                         style={{
-                          border: '1px solid #e2e8f0',
+                          border: `1px solid ${color.border}`,
                           borderRadius: 10,
-                          padding: 16,
-                          background: '#ffffff',
+                          padding: space.space4,
+                          background: color.bgSurface,
                           display: 'flex',
                           flexDirection: 'column',
                           gap: 6,

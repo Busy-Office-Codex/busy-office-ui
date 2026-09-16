@@ -49,21 +49,66 @@ function stripComments(source: string): string {
 // theme-safety ratchet — every examples/*.tsx file confirmed raw-hex-free stays that way. A file
 // is added here the moment its own theme-safe pass lands (docs/design-conventions.md's "Theme-safe
 // page chrome" recipe); this list only ever grows, never shrinks, so a later edit can't silently
-// reintroduce a literal a prior pass removed. 39 of 45 examples/*.tsx files are NOT yet in this
-// list — that's a known, disclosed backlog (ROADMAP item 38), not an oversight; adding one before
-// its own file is actually clean would just make this test permanently fail.
+// reintroduce a literal a prior pass removed.
+//
+// Token-standardization sweep (owner-directed, 2026-09-17, issue #21): widened to every
+// examples/*.tsx file plus src/shell/Shell.tsx — the full 45-file surface, not a partial list.
+// "No exception" is this array covering every real file and this test passing, not a narrative
+// claim; a small number of genuinely off-palette literals remain by design (see
+// docs/design-conventions.md's "Theme-safe page chrome" section) but each is either not a hex
+// literal duplicating a token value at all, or is out of THIS test's declared scope (comments are
+// stripped before the check, so an explanatory "was #xxxxxx" note doesn't trip it).
 const TARGET_FILES = [
   'src/shell/Shell.tsx',
+  'examples/AccessDenied.tsx',
+  'examples/AccountLocked.tsx',
+  'examples/AdminOverview.tsx',
+  'examples/Analytics.tsx',
+  'examples/Approvals.tsx',
   'examples/AppShell.tsx',
-  'examples/ListReport.tsx',
-  'examples/RecordDetail.tsx',
+  'examples/AuditLog.tsx',
+  'examples/Billing.tsx',
   'examples/breadcrumbTrail.tsx',
+  'examples/BuilderForms.tsx',
+  'examples/BuilderReports.tsx',
+  'examples/BuilderScreens.tsx',
+  'examples/BuilderWorkflow.tsx',
+  'examples/Companies.tsx',
+  'examples/confirmDialog.tsx',
+  'examples/ControlCenter.tsx',
+  'examples/Customers.tsx',
+  'examples/Dashboard.tsx',
   'examples/Delivery.tsx',
+  'examples/entryScreenLayout.tsx',
+  'examples/filterTabs.tsx',
+  'examples/Help.tsx',
+  'examples/Inbox.tsx',
+  'examples/Integrations.tsx',
   'examples/Inventory.tsx',
+  'examples/Invoice.tsx',
+  'examples/Launcher.tsx',
+  'examples/ListReport.tsx',
+  'examples/Login.tsx',
+  'examples/NotFound.tsx',
+  'examples/Notifications.tsx',
+  'examples/PasswordReset.tsx',
+  'examples/Planning.tsx',
+  'examples/ProductionOrders.tsx',
+  'examples/Profile.tsx',
+  'examples/Quotations.tsx',
+  'examples/RecordDetail.tsx',
+  'examples/Requisitions.tsx',
+  'examples/RolePage.tsx',
+  'examples/Roles.tsx',
+  'examples/SalesOrderList.tsx',
+  'examples/SessionExpired.tsx',
+  'examples/Settings.tsx',
+  'examples/Users.tsx',
+  'examples/UsersAndRoles.tsx',
 ];
 const TOKEN_HEX_VALUES = colorTokenHexValues();
 
-describe('Shell.tsx / AppShell.tsx / theme-safe examples/*.tsx carry no raw color value that duplicates an existing token (ROADMAP items 13, 38)', () => {
+describe('Shell.tsx and every examples/*.tsx file carry no raw color value that duplicates an existing token (ROADMAP items 13, 38, 49)', () => {
   it('found at least one color token value to check source files against (guards against a silently empty check)', () => {
     expect(TOKEN_HEX_VALUES.length).toBeGreaterThan(0);
   });

@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 import { Button, Card, Density, Dropdown, Input, Text } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 // This package has no Toggle/Switch export, so each Modules row below renders as a `<label>`
 // (text + control, giving the checkbox its accessible name for free) wrapping a real native
 // `<input type="checkbox">`, styled via the same shared examples/checkboxStyles.ts
@@ -65,11 +66,11 @@ export function Settings() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // Matches ListReport.tsx/RecordDetail.tsx/Dashboard.tsx's shared 24px content
         // padding/border-box frame (see RecordDetail.tsx for the full box-sizing reasoning).
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
@@ -78,9 +79,9 @@ export function Settings() {
           whatever width AppShell gives it (see docs/design-conventions.md's "Page width and
           responsive layout"); the settings-form column and "Recent changes" side panel below
           use flexible bases so the row wraps to a stacked mobile layout on its own. */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
         <Density value="compact">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
             <Text variant="heading">General</Text>
             <div style={{ flex: 1 }} />
             <Button variant="ghost">Discard</Button>
@@ -88,12 +89,12 @@ export function Settings() {
           </div>
         </Density>
 
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div style={{ flex: '2 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', gap: space.space6, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ flex: '2 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
             <Card>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
                 <Text variant="title">Company</Text>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: space.space4 }}>
                   <Input label="Legal name" value={legalName} onChange={(event) => setLegalName(event.target.value)} />
                   <Input label="Tax ID" value={taxId} onChange={(event) => setTaxId(event.target.value)} />
                 </div>
@@ -107,7 +108,7 @@ export function Settings() {
             </Card>
 
             <Card>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
                 <Text variant="title">Locale &amp; currency</Text>
                 {/* `active={false}` on every field here, deliberately not following ListReport.tsx's
                     toolbar-filter Dropdown pattern verbatim: `active` (docs/design-conventions.md) is
@@ -118,7 +119,7 @@ export function Settings() {
                     triggers and collapsing the very hierarchy ROADMAP item 11 introduced `active` to
                     preserve. These are value pickers, not filters, so they stay in the trigger's
                     normal (unfilled) rest style. */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: space.space4 }}>
                   <Dropdown
                     label={`Base currency · ${baseCurrency}`}
                     items={BASE_CURRENCY_ITEMS.map((label) => ({ label, selected: label === baseCurrency }))}
@@ -148,13 +149,13 @@ export function Settings() {
             </Card>
 
             <Card>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
                 <Text variant="title">Modules</Text>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
                   {MODULES.map((module) => (
                     <label
                       key={module.key}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space.space3 }}
                     >
                       <Text variant="body">{module.label}</Text>
                       <input
@@ -174,9 +175,9 @@ export function Settings() {
 
           <div style={{ flex: '1 1 300px', minWidth: 260, maxWidth: 420 }}>
             <Card>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
                 <Text variant="title">Recent changes</Text>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
                   {RECENT_CHANGES.map((entry, index) => (
                     <div
                       key={`${entry.who}-${entry.what}`}
@@ -184,8 +185,8 @@ export function Settings() {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 2,
-                        paddingBottom: 12,
-                        borderBottom: index === RECENT_CHANGES.length - 1 ? 'none' : '1px solid #e2e8f0',
+                        paddingBottom: space.space3,
+                        borderBottom: index === RECENT_CHANGES.length - 1 ? 'none' : `1px solid ${color.border}`,
                       }}
                     >
                       <Text variant="body">{entry.what}</Text>

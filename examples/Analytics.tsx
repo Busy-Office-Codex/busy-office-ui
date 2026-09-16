@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Card, Chart, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { appActions, appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A real cross-domain exceptions dashboard (ROADMAP M7's ERP reference-app initiative, Slice 5,
@@ -61,24 +62,24 @@ export function Analytics() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Analytics</Text>
 
-        <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', padding: 24, boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, padding: space.space6, boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
             <Text variant="title">Open work by module</Text>
             <Chart type="bar" title="Open work items by module" valueLabel="items" data={openByModule} height={200} />
           </div>
         </div>
 
         <Text variant="title">Exceptions</Text>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
           <ExceptionCard
             message={`${pendingRequisitions.length} requisition${pendingRequisitions.length === 1 ? '' : 's'} awaiting approval`}
             destination={`${MODULE_SHORT_NAME.Purchase} · Requisitions`}
@@ -113,7 +114,7 @@ export function Analytics() {
           />
 
           <Card>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Text variant="body">
                   {lowStock.length} material{lowStock.length === 1 ? '' : 's'} at or below 5 units available
@@ -129,7 +130,7 @@ export function Analytics() {
             role="region"
             aria-label="Low stock table"
             tabIndex={0}
-            style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+            style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
           >
             <div style={{ minWidth: 480 }}>
               <Density value="compact">
@@ -176,7 +177,7 @@ function ExceptionCard({
   const isReady = targetId !== undefined && targetId === readyId;
   return (
     <Card>
-      <div role="group" aria-label={message} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div role="group" aria-label={message} style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Text variant="body">{message}</Text>
           <Text variant="caption">{destination}</Text>

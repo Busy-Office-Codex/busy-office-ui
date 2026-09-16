@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button, Card, Chip, Density, Input, Text } from '../src/index.js';
 import { FilterTabs } from './filterTabs.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A cross-module approval queue: a mixed-type queue list on the left (purchase
@@ -203,15 +204,15 @@ export function Approvals() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Density value="compact">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Text variant="heading">Approvals</Text>
               <Text variant="caption">{QUEUE.length} waiting on you</Text>
@@ -228,11 +229,11 @@ export function Approvals() {
 
         <FilterTabs tabs={TABS} selected="Mine" />
 
-        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: space.space6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div
             role="region"
             aria-label="Approval queue"
-            style={{ flex: '1 1 380px', minWidth: 340, maxWidth: 500, display: 'flex', flexDirection: 'column', gap: 12 }}
+            style={{ flex: '1 1 380px', minWidth: 340, maxWidth: 500, display: 'flex', flexDirection: 'column', gap: space.space3 }}
           >
             {QUEUE.map((item) => (
               <Card
@@ -241,7 +242,7 @@ export function Approvals() {
                 onClick={() => setSelectedId(item.id)}
                 aria-label={`View ${item.title}`}
               >
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: space.space3 }}>
                   <Text variant="title">{item.title}</Text>
                   <Chip variant="status" tone="neutral">
                     {item.category}
@@ -254,9 +255,9 @@ export function Approvals() {
             ))}
           </div>
 
-          <div style={{ flex: '2 1 420px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '2 1 420px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: space.space4 }}>
             <Card>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                 <Text variant="title">{selected.title}</Text>
                 <Chip variant="status" tone="accent">
                   {selected.step}
@@ -272,9 +273,9 @@ export function Approvals() {
               <Text variant="caption" as="h3">
                 Record summary
               </Text>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: space.space4 }}>
                 {selected.summary.map((field) => (
-                  <div key={field.label} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div key={field.label} style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                     <Text variant="caption" as="span">
                       {field.label}
                     </Text>
@@ -295,7 +296,7 @@ export function Approvals() {
               <Text variant="caption" as="h3">
                 Attachments
               </Text>
-              <ul style={{ margin: 0, paddingInlineStart: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <ul style={{ margin: 0, paddingInlineStart: space.space5, display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                 {selected.attachments.map((file) => (
                   <li key={file}>
                     <Text variant="body" as="span">
@@ -308,7 +309,7 @@ export function Approvals() {
 
             <Card>
               <Density value="compact">
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: space.space2, alignItems: 'center' }}>
                   <div style={{ flex: 1 }}>
                     {/* This package's Input has no multiline/textarea variant — same disclosed
                         simplification as Inbox.tsx's reply composer: a single-line comment field
@@ -319,7 +320,7 @@ export function Approvals() {
                 </div>
               </Density>
               <Density value="compact">
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                   <Button type="button" variant="ghost">
                     Open record ↗
                   </Button>

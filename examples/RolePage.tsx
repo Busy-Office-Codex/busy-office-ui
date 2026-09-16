@@ -1,5 +1,6 @@
 import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { FilterTabs } from './filterTabs.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A role-scoped workspace: role identity header, a filter-Chip-as-tabs row, and — under the
@@ -63,21 +64,21 @@ export function RolePage() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // Matches ListReport.tsx/RecordDetail.tsx/Dashboard.tsx/AdminOverview.tsx/Settings.tsx's
         // shared 24px content padding / border-box frame (see RecordDetail.tsx for the full
         // box-sizing reasoning).
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligns, matching every other sample page's content
           frame. No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
           docs/design-conventions.md's "Page width and responsive layout"). */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: space.space4, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
             <Text variant="heading">{ROLE.name}</Text>
             <Text variant="caption">
               {ROLE.assignedRoles} roles assigned · scope: {ROLE.scope}
@@ -91,20 +92,20 @@ export function RolePage() {
               gap: 6,
               padding: '6px 12px',
               borderRadius: 999,
-              border: '1px solid #e2e8f0',
-              background: '#ffffff',
+              border: `1px solid ${color.border}`,
+              background: color.bgSurface,
               fontSize: 13,
               fontWeight: 600,
-              color: '#334155',
+              color: color.textSecondary,
             }}
           >
-            Switch role <span aria-hidden="true" style={{ color: '#94a3b8' }}>▾</span>
+            Switch role <span aria-hidden="true" style={{ color: color.textDisabled }}>▾</span>
           </span>
         </div>
 
         <FilterTabs tabs={TABS} selected="My work" />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: space.space4 }}>
           {ROLE_KPIS.map((kpi) => (
             <Card key={kpi.label}>
               <Text variant="caption" as="span">
@@ -116,13 +117,13 @@ export function RolePage() {
           ))}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
           <Text variant="title">My work queue</Text>
           <div
             role="region"
             aria-label="My work queue"
             tabIndex={0}
-            style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+            style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
           >
             <div style={{ minWidth: 560 }}>
               <Density value="compact">
@@ -155,12 +156,12 @@ export function RolePage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: space.space4, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 240 }}>
             <Card>
               <Text variant="title">Shortcuts</Text>
               <Density value="compact">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                   {SHORTCUTS.map((label) => (
                     <Button key={label} type="button" variant="ghost" style={{ width: '100%', justifyContent: 'flex-start' }}>
                       {label}
@@ -174,12 +175,12 @@ export function RolePage() {
           <div style={{ flex: 1, minWidth: 240 }}>
             <Card>
               <Text variant="title">Team &amp; delegation</Text>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
                 {TEAM.map((person) => (
                   <div key={person.name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     {/* Decorative placeholder avatar — same pattern as Profile.tsx's header avatar
                         div, sized down for a list row. */}
-                    <div aria-hidden="true" style={{ width: 32, height: 32, borderRadius: 999, background: '#e2e8f0', flexShrink: 0 }} />
+                    <div aria-hidden="true" style={{ width: 32, height: 32, borderRadius: 999, background: color.border, flexShrink: 0 }} />
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <Text variant="body">{person.name}</Text>
                       <Text variant="caption">{person.relationship}</Text>

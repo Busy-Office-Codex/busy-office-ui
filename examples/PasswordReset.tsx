@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button, Card, Input, Text } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A real two-step password-reset flow (ROADMAP M7's ERP reference-app initiative, Slice 8,
@@ -22,9 +23,9 @@ export function PasswordReset() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 32,
+        padding: space.space8,
         boxSizing: 'border-box',
       }}
     >
@@ -37,9 +38,9 @@ export function PasswordReset() {
                 if (!email.trim()) return;
                 setStep('sent');
               }}
-              style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+              style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                 <Text variant="heading">Reset your password</Text>
                 <Text variant="body">Enter your work email and we'll send you a link to reset it.</Text>
               </div>
@@ -52,7 +53,7 @@ export function PasswordReset() {
                 onChange={(event) => setEmail(event.target.value)}
               />
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                 <Button type="submit" variant="primary" disabled={!email.trim()} style={{ width: '100%' }}>
                   Send reset link
                 </Button>
@@ -62,8 +63,8 @@ export function PasswordReset() {
               </div>
             </form>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                 <Text variant="heading">Check your email</Text>
                 <Text variant="body">
                   If an account exists for <strong>{email}</strong>, a reset link is on its way.
@@ -71,7 +72,7 @@ export function PasswordReset() {
                 </Text>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                 <Button type="button" variant="secondary" onClick={() => setResendCount((n) => n + 1)} style={{ width: '100%' }}>
                   Resend link
                 </Button>

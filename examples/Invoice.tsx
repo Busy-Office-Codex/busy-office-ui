@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
-import { color } from '../src/tokens.stylex.js';
+import { color, space } from '../src/tokens.stylex.js';
 import { appActions, appStore } from './data/appStore.js';
 import { documentTotal } from './data/types.js';
 import { useStoreState } from './data/store.js';
@@ -93,13 +93,13 @@ export function Invoice() {
     return (
       <div
         style={{
-          background: '#f8fafc',
+          background: color.bgCanvas,
           fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          padding: 24,
+          padding: space.space6,
           boxSizing: 'border-box',
         }}
       >
-        <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space3 }}>
           <Text variant="heading">Invoice</Text>
           <Card>
             <Text variant="body">No invoice selected. Create or open one from Billing.</Text>
@@ -118,11 +118,11 @@ export function Invoice() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // Matches ListReport.tsx/RecordDetail.tsx/RolePage.tsx's shared 24px content
         // padding/border-box frame (see RecordDetail.tsx for the full box-sizing reasoning).
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
@@ -131,10 +131,10 @@ export function Invoice() {
           docs/design-conventions.md's "Page width and responsive layout"); the invoice document
           card and the sidebar panels below use flexible bases so the row wraps to a stacked
           mobile layout on its own. */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: space.space4, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
               <Text variant="heading">{selected.id}</Text>
               <Chip variant="status" tone={STATUS_TONE[selected.status]}>
                 {STATUS_LABEL[selected.status]}
@@ -146,7 +146,7 @@ export function Invoice() {
           </div>
           <div style={{ flex: 1 }} />
           <Density value="compact">
-            <div style={{ gap: 8, flexWrap: 'wrap' }} {...stylex.props(printStyles.hideOnPrint)}>
+            <div style={{ gap: space.space2, flexWrap: 'wrap' }} {...stylex.props(printStyles.hideOnPrint)}>
               <Button type="button" variant="ghost" aria-label="More actions">
                 ···
               </Button>
@@ -178,7 +178,7 @@ export function Invoice() {
           </Density>
         </div>
 
-        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: space.space6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div style={{ flex: '2 1 560px', minWidth: 320 }}>
             <Card>
               {/* The document's own letterhead — found live: this card jumped straight to
@@ -186,8 +186,8 @@ export function Invoice() {
                   page-level heading above the card (selected.id is real page content either
                   way; the reference shows it a second time INSIDE the printed document, the same
                   way a real invoice PDF repeats its own number on the page itself). */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: color.textPrimary, flexShrink: 0 }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: space.space4 }}>
+                <div style={{ width: space.space10, height: space.space10, borderRadius: 10, background: color.textPrimary, flexShrink: 0 }} />
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
                   <Text variant="caption">INVOICE</Text>
                   <Text variant="title" as="span">
@@ -196,8 +196,8 @@ export function Invoice() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 16 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: space.space4 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                   <Text variant="caption" as="span">
                     Bill to
                   </Text>
@@ -205,14 +205,14 @@ export function Invoice() {
                   <Text variant="caption">{customer.billingAddress.line1}</Text>
                   <Text variant="caption">{customer.billingAddress.cityStateZip}</Text>
                 </div>
-                <div style={{ display: 'flex', gap: 24 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ display: 'flex', gap: space.space6 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                     <Text variant="caption" as="span">
                       Issue date
                     </Text>
                     <Text variant="body">{selected.issueDate}</Text>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                     <Text variant="caption" as="span">
                       Due date
                     </Text>
@@ -221,7 +221,7 @@ export function Invoice() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3, paddingTop: space.space2 }}>
                 <Text variant="title">Line items</Text>
                 {/* Unlike ListReport.tsx/RolePage.tsx, this Table isn't wrapped in its own
                     bordered/overflow region — it already sits inside this Card's border, and a
@@ -255,11 +255,11 @@ export function Invoice() {
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  gap: 16,
+                  gap: space.space4,
                   alignSelf: 'flex-end',
                   minWidth: 220,
-                  paddingTop: 8,
-                  borderTop: '1px solid #e2e8f0',
+                  paddingTop: space.space2,
+                  borderTop: `1px solid ${color.border}`,
                 }}
               >
                 <Text variant="title" as="span">
@@ -270,8 +270,8 @@ export function Invoice() {
                 </Text>
               </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, paddingTop: 12, borderTop: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 240px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.space4, paddingTop: space.space3, borderTop: `1px solid ${color.border}` }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1, flex: '1 1 240px' }}>
                   <Text variant="title">Payment instructions</Text>
                   <Text variant="caption">
                     Remit payment via ACH or wire transfer to Northwind Traders, LLC — routing 021000021, account
@@ -297,12 +297,12 @@ export function Invoice() {
                     width: 72,
                     height: 72,
                     flexShrink: 0,
-                    border: '1px dashed #cbd5e1',
+                    border: `1px dashed ${color.borderStrong}`,
                     borderRadius: 8,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: '#f8fafc',
+                    background: color.bgCanvas,
                   }}
                 >
                   <Text variant="caption">QR</Text>
@@ -311,9 +311,9 @@ export function Invoice() {
             </Card>
           </div>
 
-          <div style={{ flex: '1 1 320px', minWidth: 280, maxWidth: 440, flexDirection: 'column', gap: 16 }} {...stylex.props(printStyles.hideOnPrint)}>
+          <div style={{ flex: '1 1 320px', minWidth: 280, maxWidth: 440, flexDirection: 'column', gap: space.space4 }} {...stylex.props(printStyles.hideOnPrint)}>
             <Card>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space.space3, flexWrap: 'wrap' }}>
                 <Text variant="title">Payment status</Text>
                 <Chip variant="status" tone={STATUS_TONE[selected.status]}>
                   {STATUS_LABEL[selected.status]}
@@ -328,18 +328,18 @@ export function Invoice() {
                   aria-valuenow={paidPercent}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  style={{ height: 8, borderRadius: 999, background: '#e2e8f0', overflow: 'hidden' }}
+                  style={{ height: space.space2, borderRadius: 999, background: color.border, overflow: 'hidden' }}
                 >
                   <div style={{ height: '100%', width: `${paidPercent}%`, background: color.action, borderRadius: 999 }} />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: space.space3 }}>
                   <Text variant="caption">Paid · {formatCurrency(totalPaid)}</Text>
                   <Text variant="caption">Outstanding · {formatCurrency(balanceDue)}</Text>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: space.space3, alignItems: 'baseline' }}>
                   <Text variant="caption" as="span">
                     Amount due
                   </Text>
@@ -347,19 +347,19 @@ export function Invoice() {
                     {formatCurrency(balanceDue)}
                   </Text>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: space.space3 }}>
                   <Text variant="caption" as="span">
                     Invoice total
                   </Text>
                   <Text variant="body">{formatCurrency(total)}</Text>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: space.space3 }}>
                   <Text variant="caption" as="span">
                     Paid to date
                   </Text>
                   <Text variant="body">{formatCurrency(totalPaid)}</Text>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: space.space3 }}>
                   <Text variant="caption" as="span">
                     Due date
                   </Text>
@@ -375,7 +375,7 @@ export function Invoice() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {selected.payments.map((payment) => (
-                    <div key={payment.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                    <div key={payment.id} style={{ display: 'flex', justifyContent: 'space-between', gap: space.space3 }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Text variant="body">{formatCurrency(payment.amount)}</Text>
                         <Text variant="caption">{payment.method}</Text>
@@ -390,7 +390,7 @@ export function Invoice() {
             {(selected.salesOrderId || selected.deliveryId) && (
               <Card>
                 <Text variant="title">Linked records</Text>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                   {selected.salesOrderId && <Text variant="body">Sales order · {selected.salesOrderId}</Text>}
                   {selected.deliveryId && <Text variant="body">Delivery · {selected.deliveryId}</Text>}
                 </div>

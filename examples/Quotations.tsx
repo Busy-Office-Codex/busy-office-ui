@@ -3,6 +3,7 @@ import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell
 import { appActions, appStore } from './data/appStore.js';
 import { documentTotal } from './data/types.js';
 import { useStoreState } from './data/store.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * Quotations list + detail — the first hop of the Sales-to-billing journey (ROADMAP M7's ERP
@@ -51,15 +52,15 @@ export function Quotations() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Density value="compact">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
             <Text variant="heading">Quotations</Text>
             <div style={{ flex: 1 }} />
             <Button type="button" variant="primary">
@@ -72,7 +73,7 @@ export function Quotations() {
           role="region"
           aria-label="Quotations table"
           tabIndex={0}
-          style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+          style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
         >
           <div style={{ minWidth: 640 }}>
             <Density value="compact">
@@ -92,7 +93,7 @@ export function Quotations() {
                     <TableRow
                       key={quotation.id}
                       onClick={() => setSelectedId(quotation.id)}
-                      style={{ cursor: 'pointer', backgroundColor: quotation.id === selectedId ? '#eff6ff' : undefined }}
+                      style={{ cursor: 'pointer', backgroundColor: quotation.id === selectedId ? color.bgSelected : undefined }}
                     >
                       <TableCell>{quotation.id}</TableCell>
                       <TableCell>{state.customers[quotation.customerId]?.name}</TableCell>
@@ -114,8 +115,8 @@ export function Quotations() {
 
         {selected && customer && (
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                 <Text variant="title">{selected.id}</Text>
                 <Chip variant="status" tone={STATUS_TONE[selected.status]}>
                   {STATUS_LABEL[selected.status]}
@@ -163,7 +164,7 @@ export function Quotations() {
 
               {selected.status === 'sent' && (
                 <Density value="compact">
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end' }}>
                     <Button type="button" variant="secondary">
                       Decline
                     </Button>

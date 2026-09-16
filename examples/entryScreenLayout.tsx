@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Card, Text } from '../src/index.js';
-import { color } from '../src/tokens.stylex.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A centered message-card layout shared by the standalone pre-auth/error screens (ROADMAP M7's
@@ -15,8 +15,10 @@ export type EntryScreenTone = 'neutral' | 'warn' | 'danger';
 
 const TONE_COLOR: Record<EntryScreenTone, string> = {
   neutral: color.textTertiary,
+  // amber — one-off warn tone, no semantic token for it (distinct shade/purpose from
+  // Launcher.tsx's favorited-star amber, so not a proven shared concept worth a token yet)
   warn: '#b45309',
-  danger: '#b91c1c',
+  danger: color.danger,
 };
 
 export function EntryScreen({
@@ -39,15 +41,15 @@ export function EntryScreen({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 32,
+        padding: space.space8,
         boxSizing: 'border-box',
       }}
     >
       <div style={{ width: '100%', maxWidth: 420 }}>
         <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center', textAlign: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4, alignItems: 'center', textAlign: 'center' }}>
             {code ? (
               <span aria-hidden="true" style={{ fontSize: 40, fontWeight: 700, color: TONE_COLOR[tone], letterSpacing: '-0.02em' }}>
                 {code}
@@ -57,7 +59,7 @@ export function EntryScreen({
             )}
             <Text variant="title">{title}</Text>
             <Text variant="body">{message}</Text>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', marginTop: 8 }}>{actions}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2, width: '100%', marginTop: space.space2 }}>{actions}</div>
           </div>
         </Card>
       </div>

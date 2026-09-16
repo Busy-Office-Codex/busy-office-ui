@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Button, Card, Chip, Density, Input, Text } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 import { FilterTabs } from './filterTabs.js';
 
 /**
@@ -46,7 +47,7 @@ const ACCOUNT_SUMMARY = {
 
 function SummaryRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space.space3 }}>
       <Text variant="caption">{label}</Text>
       {children}
     </div>
@@ -57,18 +58,18 @@ export function Profile() {
   return (
     <div
       style={{
-        background: '#f8fafc',
-        padding: 24,
+        background: color.bgCanvas,
+        padding: space.space6,
         boxSizing: 'border-box',
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: space.space4, flexWrap: 'wrap' }}>
           {/* Decorative placeholder avatar — same pattern as AppShell.tsx's account-slot avatar
               div, sized up for a header rather than a command-bar slot. */}
-          <div aria-hidden="true" style={{ width: 64, height: 64, borderRadius: 999, background: '#e2e8f0', flexShrink: 0 }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div aria-hidden="true" style={{ width: 64, height: 64, borderRadius: 999, background: color.border, flexShrink: 0 }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
             <Text variant="heading">{PROFILE.fullName}</Text>
             <Text variant="caption">
               {PROFILE.jobTitle} · {PROFILE.email}
@@ -82,13 +83,13 @@ export function Profile() {
           </Density>
         </div>
 
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div style={{ flex: '2 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', gap: space.space6, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ flex: '2 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
             <FilterTabs tabs={TABS} selected="Details" />
 
             <Card>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space5 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: space.space4 }}>
                   <Input label="Full name" defaultValue={PROFILE.fullName} />
                   <Input label="Job title" defaultValue={PROFILE.jobTitle} />
                   <Input label="Email" type="email" defaultValue={PROFILE.email} />
@@ -99,7 +100,7 @@ export function Profile() {
                   <Input label="Time zone" defaultValue={PROFILE.timeZone} />
                 </div>
                 <Density value="compact">
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end' }}>
                     <Button type="button" variant="ghost">
                       Cancel
                     </Button>
@@ -114,9 +115,9 @@ export function Profile() {
 
           <div style={{ flex: '1 1 280px', minWidth: 240, maxWidth: 400 }}>
             <Card>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
                 <Text variant="title">Account summary</Text>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
                   <SummaryRow label="Employee ID">
                     <Text variant="body">{ACCOUNT_SUMMARY.employeeId}</Text>
                   </SummaryRow>
