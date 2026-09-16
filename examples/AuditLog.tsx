@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Card, Chip, type ChipTone, Density, Dropdown, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 import { appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
 
@@ -62,13 +63,13 @@ export function AuditLog() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Audit log</Text>
 
         <Density value="compact">
@@ -89,7 +90,7 @@ export function AuditLog() {
             role="region"
             aria-label="Audit log table"
             tabIndex={0}
-            style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+            style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
           >
             <div style={{ minWidth: 640 }}>
               <Density value="compact">

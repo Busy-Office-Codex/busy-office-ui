@@ -5,6 +5,7 @@ import { appActions, appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
 import { ALL_MODULES } from './data/types.js';
 import { checkboxStyles } from './checkboxStyles.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * Role management (ROADMAP M7's ERP reference-app initiative, Slice 9, Administration +
@@ -38,20 +39,20 @@ export function Roles() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Roles</Text>
 
         <div
           role="region"
           aria-label="Roles table"
           tabIndex={0}
-          style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+          style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
         >
           <div style={{ minWidth: 480 }}>
             <Density value="compact">
@@ -68,7 +69,7 @@ export function Roles() {
                     <TableRow
                       key={role.id}
                       onClick={() => setSelectedId(role.id)}
-                      style={{ cursor: 'pointer', backgroundColor: role.id === selectedId ? '#eff6ff' : undefined }}
+                      style={{ cursor: 'pointer', backgroundColor: role.id === selectedId ? color.bgSelected : undefined }}
                     >
                       <TableCell>{role.name}</TableCell>
                       <TableCell align="end">{Object.values(state.users).filter((user) => user.roleId === role.id).length}</TableCell>
@@ -83,8 +84,8 @@ export function Roles() {
 
         {selected && (
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                 <Text variant="title">{selected.name}</Text>
                 <div style={{ flex: 1 }} />
                 <Text variant="caption">
@@ -92,16 +93,16 @@ export function Roles() {
                 </Text>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                 <Text variant="caption" as="span">
                   Module access
                 </Text>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 20px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: `${space.space2} ${space.space5}` }}>
                   {ALL_MODULES.map((module) => {
                     const key = permissionKey(selected.id, module);
                     const granted = selected.moduleAccess.includes(module);
                     return (
-                      <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                      <label key={key} style={{ display: 'flex', alignItems: 'center', gap: space.space2, cursor: 'pointer' }}>
                         <input
                           type="checkbox"
                           aria-label={`${selected.name} · ${module}`}
@@ -119,7 +120,7 @@ export function Roles() {
               </div>
 
               <Density value="compact">
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end' }}>
                   <Button
                     type="button"
                     variant="secondary"

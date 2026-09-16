@@ -1,5 +1,6 @@
 import { Button } from '../src/index.js';
 import { EntryScreen } from './entryScreenLayout.js';
+import { color } from '../src/tokens.stylex.js';
 
 /**
  * ROADMAP M7's ERP reference-app initiative, Slice 8 (Entry/nav) — standalone, pre-shell screen
@@ -22,7 +23,7 @@ export function AccountLocked() {
               it to, but the browser's own mail handoff is a genuine, working action. */}
           <a
             href="mailto:admin@acme.example?subject=Account%20locked"
-            style={{ fontSize: 13.5, color: '#475569', textAlign: 'center' }}
+            style={{ fontSize: 13.5, color: color.textSecondary, textAlign: 'center' }}
           >
             Contact your administrator
           </a>

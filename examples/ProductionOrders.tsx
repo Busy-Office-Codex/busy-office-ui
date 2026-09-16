@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { appActions, appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * Planned orders → production orders → a simple schedule (ROADMAP M7's ERP reference-app
@@ -38,13 +39,13 @@ export function ProductionOrders() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Production orders</Text>
 
         {plannedList.length === 0 ? (
@@ -57,7 +58,7 @@ export function ProductionOrders() {
               role="region"
               aria-label="Planned orders table"
               tabIndex={0}
-              style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+              style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
             >
               <div style={{ minWidth: 640 }}>
                 <Density value="compact">
@@ -77,7 +78,7 @@ export function ProductionOrders() {
                         <TableRow
                           key={planned.id}
                           onClick={() => setSelectedId(planned.id)}
-                          style={{ cursor: 'pointer', backgroundColor: planned.id === selectedId ? '#eff6ff' : undefined }}
+                          style={{ cursor: 'pointer', backgroundColor: planned.id === selectedId ? color.bgSelected : undefined }}
                         >
                           <TableCell>{planned.id}</TableCell>
                           <TableCell>{state.products[planned.productId]?.description}</TableCell>
@@ -99,8 +100,8 @@ export function ProductionOrders() {
 
             {selected && product && warehouse && (
               <Card>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                     <Text variant="title">{selected.id}</Text>
                     <Chip variant="status" tone={PLANNED_STATUS_TONE[selected.status]}>
                       {PLANNED_STATUS_LABEL[selected.status]}
@@ -125,7 +126,7 @@ export function ProductionOrders() {
                   )}
 
                   <Density value="compact">
-                    <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                    <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end' }}>
                       {selected.status === 'planned' && (
                         <Button
                           type="button"
@@ -168,7 +169,7 @@ export function ProductionOrders() {
             role="region"
             aria-label="Production schedule table"
             tabIndex={0}
-            style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+            style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
           >
             <div style={{ minWidth: 640 }}>
               <Density value="compact">

@@ -731,6 +731,70 @@ issues.
     content is sourced from `intent.md`/`ARCHITECTURE.md`/`AGENTS.md`'s
     real text, not restated from memory; check-links stays green. Serves:
     intent.md "documentation". Needs: issue #21.
+49. [x] **Token-standardization sweep — close the "no exception" gap items 38/39
+    disclosed.** Owner-directed, 2026-09-17, issue #21: extend the Theme-safe
+    page chrome recipe from the 7 files items 38/39 already covered to the
+    remaining 38 `examples/*.tsx` files, so raw color/spacing literals stop
+    being a matter of which file you happen to be in. A real token-scale gap
+    found along the way, not papered over: `#eff6ff` (a selected-row tint)
+    was duplicated raw across 10 files with no matching `color.*` token —
+    strong, pre-existing proof of reuse (Objective 3), so it became a new
+    token, `color.bgSelected` (light `#eff6ff`, matching every existing
+    instance exactly — zero light-mode visual change there; dark Tailwind
+    blue-950 `#172554`, both AA-verified in `test/color-contrast.test.ts`:
+    textPrimary/textSecondary on it clear 14.0:1/9.9:1). 35 files edited by
+    34 parallel single-file agents plus one direct fix (independent files, no
+    worktree isolation needed — no shared build step per agent, verified once
+    for the whole batch instead, per LOOP.md's own batch-verify shape): 129
+    hex literals and 339 spacing numbers replaced with real tokens. Two
+    literals left as disclosed exceptions, not force-fit: `Launcher.tsx`'s
+    favorited-star amber and `entryScreenLayout.tsx`'s local `warn` amber —
+    two different shades for two different one-off purposes, not a proven
+    shared concept. "No exception" is mechanically enforced for color, not a
+    narrative claim: `test/shell-token-audit.test.ts`'s ratchet now covers
+    all 45 `examples/*.tsx` files plus `src/shell/Shell.tsx` (was 7) and
+    passes 48/48 — a raw hex duplicating a token can't land in `examples/`
+    again without failing a running test (spacing has no equivalent ratchet
+    yet — a real, disclosed gap, not claimed as covered).
+
+    A required independent fresh-context review of the whole batch found the
+    batch mechanically sound but flagged two real issues, both fixed before
+    this line was written, not deferred: (1) `examples/filterTabs.tsx` was
+    added to the ratchet but never actually edited — a genuine miss (its one
+    `gap: 8` now reads `space.space2`, folded into the counts above). (2)
+    Three of the "matching-token" substitutions actually changed a light
+    value, not just its representation, and the original Accept clause below
+    claimed otherwise — disclosed here instead: `examples/Login.tsx`'s and
+    `examples/RolePage.tsx`'s workspace-switcher label read a raw `#334155`
+    that matches no LIGHT palette value at all (it's `darkPalette.border`) —
+    the ratchet correctly forced a real fix, not a cosmetic one: mapped to
+    `color.textSecondary` by visual role (a secondary-emphasis label, same
+    as this exact text already reads elsewhere), which the review confirmed
+    also fixed a real, pre-existing dark-mode bug — the old literal measured
+    ~1.7:1 against dark `bgSurface`, effectively invisible, now 12.0:1.
+    `examples/entryScreenLayout.tsx`'s local `danger: '#b91c1c'` (a close
+    but not exact duplicate of `color.danger`, `#b42318`) was corrected to
+    read the real token instead of hand-duplicating a near-miss of it —
+    unforced by the ratchet (no token matched the old literal exactly) but
+    the same right call: one danger red instead of two slightly different
+    ones, and a better dark-mode contrast as a direct result (3.1:1 → 5.4:1).
+    Verified: full gate suite green (`pnpm test` 202/202, `pnpm test:browser`
+    224/224 — zero regression across every existing assertion, including
+    every per-screen mobile-responsive and dark-mode check); the new
+    `bgSelected` token manually confirmed live in Chrome DevTools
+    color-scheme emulation on Companies.tsx (light: unchanged; dark: a
+    legible, correctly-tinted selected-row highlight where the raw literal
+    would previously have stayed a fixed light patch against a dark table).
+    Accept: `test/shell-token-audit.test.ts` covers all 45 `examples/*.tsx`
+    files plus Shell.tsx and passes; `pnpm build && pnpm lint && pnpm
+    typecheck && pnpm test && pnpm test:browser` all pass; every substituted
+    value is either byte-identical to the literal it replaced or a disclosed,
+    justified correction (the 3 named above) — not a silent visual change.
+    Serves: Objective 1 (simplicity — one token per color role, not a raw
+    literal per file); intent.md "documentation" doesn't drift from real
+    usage. Needs: issue #21 (owner-directed, 2026-09-17). Follow-up, not a
+    blocker for this item: extend the ratchet to spacing, and to discover new
+    `examples/*.tsx` files automatically instead of a hardcoded list.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).

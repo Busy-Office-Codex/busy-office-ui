@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { Fragment } from 'react';
 import { Button, Card, Chip, Density, Dropdown, Text } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 // Same shared native-checkbox treatment ListReport.tsx's row-selection column and Settings.tsx's
 // Modules toggles already use — see examples/checkboxStyles.ts for the full history.
 import { checkboxStyles } from './checkboxStyles.js';
@@ -78,7 +79,12 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
  * as Delivery.tsx's own `TrackingTimeline` spine.
  */
 function StepConnector() {
-  return <div aria-hidden="true" style={{ width: 2, height: 24, marginInline: 'auto', backgroundColor: '#cbd5e1' }} />;
+  return (
+    <div
+      aria-hidden="true"
+      style={{ width: 2, height: space.space6, marginInline: 'auto', backgroundColor: color.borderStrong }}
+    />
+  );
 }
 
 /**
@@ -93,14 +99,14 @@ function WorkflowStepCard({ step }: { step: WorkflowStep }) {
       <Text variant="title">{step.title}</Text>
       {step.detail && <Text variant="body">{step.detail}</Text>}
       {step.branches && (
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: space.space4, flexWrap: 'wrap' }}>
           {step.branches.map((branch) => (
             <div
               key={branch.label}
               style={{
                 flex: '1 1 160px',
                 minWidth: 140,
-                border: '1px solid #e2e8f0',
+                border: `1px solid ${color.border}`,
                 borderRadius: 8,
                 padding: 10,
                 display: 'flex',
@@ -117,11 +123,11 @@ function WorkflowStepCard({ step }: { step: WorkflowStep }) {
         </div>
       )}
       {step.chain && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: space.space2, flexWrap: 'wrap' }}>
           {step.chain.map((name, index) => (
             <Fragment key={name}>
               {index > 0 && (
-                <span aria-hidden="true" style={{ color: '#94a3b8' }}>
+                <span aria-hidden="true" style={{ color: color.textDisabled }}>
                   →
                 </span>
               )}
@@ -133,7 +139,7 @@ function WorkflowStepCard({ step }: { step: WorkflowStep }) {
         </div>
       )}
       {step.actions && (
-        <ul style={{ margin: 0, paddingInlineStart: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <ul style={{ margin: 0, paddingInlineStart: space.space5, display: 'flex', flexDirection: 'column', gap: space.space1 }}>
           {step.actions.map((action) => (
             <li key={action}>
               <Text variant="body" as="span">
@@ -186,12 +192,12 @@ export function BuilderWorkflow() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // Matches ListReport.tsx/RecordDetail.tsx/Dashboard.tsx/RolePage.tsx/Settings.tsx's shared
         // 24px content padding / border-box frame (see RecordDetail.tsx for the full box-sizing
         // reasoning).
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
@@ -200,9 +206,9 @@ export function BuilderWorkflow() {
           docs/design-conventions.md's "Page width and responsive layout"); the step sequence and
           "Approval step config" side panel below use flexible bases so the row wraps to a stacked
           mobile layout on its own. */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
         <Density value="compact">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
             <Text variant="heading">SO approval &gt; 10k</Text>
             <Chip variant="status" tone="strong">
               Active
@@ -214,7 +220,7 @@ export function BuilderWorkflow() {
           </div>
         </Density>
 
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: space.space6, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <div style={{ flex: '2 1 480px', minWidth: 320 }}>
             <ol aria-label="Workflow steps" style={{ margin: 0, padding: 0, listStyle: 'none' }}>
               {WORKFLOW_STEPS.map((step) => (
@@ -238,11 +244,19 @@ export function BuilderWorkflow() {
               <Text variant="title">Approval step config</Text>
               <Text variant="caption">Configures the APPROVAL step — Manager → Finance.</Text>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                 <Text variant="caption" as="span">
                   Approvers in sequence
                 </Text>
-                <ol style={{ margin: 0, paddingInlineStart: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <ol
+                  style={{
+                    margin: 0,
+                    paddingInlineStart: space.space5,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: space.space1,
+                  }}
+                >
                   {APPROVERS_IN_SEQUENCE.map((name) => (
                     <li key={name}>
                       <Text variant="body" as="span">
@@ -265,12 +279,16 @@ export function BuilderWorkflow() {
                 active={false}
               />
 
-              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <label
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space.space3 }}
+              >
                 <Text variant="body">Allow delegation</Text>
                 <input type="checkbox" defaultChecked {...stylex.props(checkboxStyles.checkbox)} />
               </label>
 
-              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <label
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space.space3 }}
+              >
                 <Text variant="body">Comment required</Text>
                 <input type="checkbox" {...stylex.props(checkboxStyles.checkbox)} />
               </label>

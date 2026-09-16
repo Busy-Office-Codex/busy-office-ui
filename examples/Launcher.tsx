@@ -1,6 +1,7 @@
 import { Button, Card, Chip, Text } from '../src/index.js';
 import { appActions, appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * The "Home" screen — the app launcher. Mirrors templates/erp-skeleton's
@@ -79,7 +80,7 @@ function AppTile({
   // placeholder has nothing real to navigate to yet.
   const canFavorite = Boolean(destination) && !folder && !muted;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: space.space2 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {canFavorite && (
           <button
@@ -87,7 +88,17 @@ function AppTile({
             aria-pressed={favorited}
             aria-label={`${favorited ? 'Remove' : 'Add'} ${label} ${favorited ? 'from' : 'to'} Favorites`}
             onClick={onToggleFavorite}
-            style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 2, fontSize: 16, lineHeight: 1, color: favorited ? '#f59e0b' : '#94a3b8' }}
+            style={{
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              padding: 2,
+              fontSize: 16,
+              lineHeight: 1,
+              // amber — one-off favorited-star tone, no semantic token for it (distinct shade/purpose from
+              // entryScreenLayout.tsx's warn amber, so not a proven shared concept worth a token yet)
+              color: favorited ? '#f59e0b' : color.textDisabled,
+            }}
           >
             {favorited ? '★' : '☆'}
           </button>
@@ -111,23 +122,23 @@ export function Launcher({ destinations, onNavigate }: { destinations?: readonly
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         minHeight: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         padding: '28px 48px 100px',
-        gap: 24,
+        gap: space.space6,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: space.space3 }}>
         <Text variant="overline">For you · Sales manager</Text>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: space.space3 }}>
           {FOR_YOU.map((tile) => (
             <Card key={tile.label}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
-                <div style={{ width: 40, height: 40, borderRadius: 11, background: '#0f172a' }} />
+                <div style={{ width: 40, height: 40, borderRadius: 11, background: color.textPrimary }} />
                 <Text variant="title">{tile.label}</Text>
                 <Text variant="caption">{tile.detail}</Text>
                 {tile.count && (
@@ -143,7 +154,7 @@ export function Launcher({ destinations, onNavigate }: { destinations?: readonly
         </div>
       </div>
 
-      <div role="region" aria-label="Favorites" style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div role="region" aria-label="Favorites" style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: space.space3 }}>
         <Text variant="overline">Favorites</Text>
         {favoriteDestinations.length === 0 ? (
           <Card>
@@ -166,12 +177,12 @@ export function Launcher({ destinations, onNavigate }: { destinations?: readonly
       </div>
 
       {recentActivity.length > 0 && (
-        <div role="region" aria-label="Recent activity" style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div role="region" aria-label="Recent activity" style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: space.space3 }}>
           <Text variant="overline">Recent activity</Text>
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               {recentActivity.map((entry) => (
-                <div key={entry.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div key={entry.id} style={{ display: 'flex', justifyContent: 'space-between', gap: space.space3 }}>
                   <Text variant="body">{entry.message}</Text>
                   <Text variant="caption">{entry.at}</Text>
                 </div>
@@ -181,7 +192,7 @@ export function Launcher({ destinations, onNavigate }: { destinations?: readonly
         </div>
       )}
 
-      <div role="region" aria-label="All apps" style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div role="region" aria-label="All apps" style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: space.space3 }}>
         <Text variant="overline">All apps</Text>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(96px, 1fr))', gap: '18px 12px' }}>
           {ALL_APPS.map((app) => {
@@ -199,13 +210,13 @@ export function Launcher({ destinations, onNavigate }: { destinations?: readonly
               />
             );
           })}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, fontSize: 12, color: '#64748b' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: space.space2, fontSize: 12, color: color.textTertiary }}>
             <div
               style={{
                 width: 60,
                 height: 60,
                 borderRadius: 16,
-                border: '1px dashed #94a3b8',
+                border: `1px dashed ${color.textDisabled}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

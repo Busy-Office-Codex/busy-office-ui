@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { Button, Card, Chip, Density, Dropdown, Input, Text } from '../src/index.js';
-import { color } from '../src/tokens.stylex.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A two-pane inbox: a filterable thread list on the left, and a linked-record
@@ -195,7 +195,7 @@ function ThreadRow({ thread, selected, isLast }: { thread: Thread; selected: boo
       style={{
         display: 'flex',
         alignItems: 'flex-start',
-        gap: 12,
+        gap: space.space3,
         padding: '10px 4px',
         background: selected ? color.bgSubtle : 'transparent',
         borderBottom: isLast ? 'none' : `1px solid ${color.borderSubtle}`,
@@ -221,7 +221,7 @@ function ThreadRow({ thread, selected, isLast }: { thread: Thread; selected: boo
       </div>
 
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: space.space2 }}>
           <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
             <Text variant="body">{thread.subject}</Text>
           </div>
@@ -362,7 +362,7 @@ export function Inbox() {
   // thread list in both layouts.
   const headerRow = (
     <Density value="compact">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
         <Text variant="heading">Inbox</Text>
       </div>
     </Density>
@@ -370,7 +370,7 @@ export function Inbox() {
 
   const listToolbar = (
     <Density value="compact">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: space.space2, flexWrap: 'wrap' }}>
         <Dropdown
           label={`Filter · ${filter}`}
           items={FILTER_ITEMS.map((label) => ({ label, selected: label === filter }))}
@@ -416,14 +416,14 @@ export function Inbox() {
   // two lines per row (subject + timestamp, sender + preview), matching the reference screenshot.
   const recordContext = (
     <Card>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
         <Text variant="title">SO-1042 · Northwind Traders</Text>
         <Chip variant="status" tone="accent">
           Awaiting approval
         </Chip>
         <div style={{ flex: 1 }} />
         <Density value="compact">
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: space.space2 }}>
             <Button type="button" variant="secondary">
               Assign
             </Button>
@@ -433,14 +433,14 @@ export function Inbox() {
           </div>
         </Density>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: space.space4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
           <Text variant="caption" as="span">
             Order total
           </Text>
           <Text variant="body">$24,300</Text>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
           <Text variant="caption" as="span">
             Requested by
           </Text>
@@ -451,7 +451,7 @@ export function Inbox() {
   );
 
   const messageThread = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
       {MESSAGES.map((message) => (
         <div key={message.id} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Text variant="caption">
@@ -466,7 +466,7 @@ export function Inbox() {
   const composer = (
     <Card>
       <Density value="compact">
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: space.space2, flexWrap: 'wrap' }}>
           <Button type="button" variant="ghost">
             @ Mention
           </Button>
@@ -479,7 +479,7 @@ export function Inbox() {
         </div>
       </Density>
       <Density value="compact">
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: space.space2, alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
             {/* This package's Input has no multiline/textarea variant — a disclosed
                 simplification: a single-line placeholder reply field stands in for what
@@ -512,14 +512,14 @@ export function Inbox() {
     return (
       <div
         style={{
-          background: '#f8fafc',
+          background: color.bgCanvas,
           fontFamily,
           height: 'calc(100vh - 192px)',
           boxSizing: 'border-box',
-          padding: 24,
+          padding: space.space6,
           display: 'flex',
           flexDirection: 'column',
-          gap: 20,
+          gap: space.space5,
           overflow: 'hidden',
         }}
       >
@@ -530,14 +530,14 @@ export function Inbox() {
             (48px total, plus the handle's own width) read as a wide stripe of empty space rather
             than "there's a divider here" — caught from a live screenshot the owner flagged: the
             gap between panels looked far larger than the thin divider inside it justified. */}
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 12 }}>
-          <div style={{ width: sidebarWidth, flexShrink: 0, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: space.space3 }}>
+          <div style={{ width: sidebarWidth, flexShrink: 0, minHeight: 0, display: 'flex', flexDirection: 'column', gap: space.space3 }}>
             {listToolbar}
             <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>{threadList}</div>
           </div>
           <ResizeHandle width={sidebarWidth} onResize={setSidebarWidth} />
-          <div style={{ flex: 1, minWidth: 280, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: 1, minWidth: 280, minHeight: 0, display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: space.space4 }}>
               {recordContext}
               {messageThread}
             </div>
@@ -551,21 +551,21 @@ export function Inbox() {
   // Narrow viewport: the original stacked, page-scrolling layout, unchanged — already verified
   // against test/browser/mobile-responsive.spec.ts.
   return (
-    <div style={{ background: '#f8fafc', fontFamily, padding: 24, boxSizing: 'border-box' }}>
+    <div style={{ background: color.bgCanvas, fontFamily, padding: space.space6, boxSizing: 'border-box' }}>
       {/* No page-level `maxWidth` cap — fills whatever width AppShell gives it (see
           docs/design-conventions.md's "Page width and responsive layout"); the thread-list and
           detail-pane columns below use flexible bases so the row wraps to a stacked mobile
           layout on its own. */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         {headerRow}
 
-        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div style={{ flex: '1 1 400px', minWidth: 320, maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', gap: space.space6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <div style={{ flex: '1 1 400px', minWidth: 320, maxWidth: 560, display: 'flex', flexDirection: 'column', gap: space.space3 }}>
             {listToolbar}
             {threadList}
           </div>
 
-          <div style={{ flex: '2 1 380px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '2 1 380px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: space.space4 }}>
             {recordContext}
             {messageThread}
             {composer}

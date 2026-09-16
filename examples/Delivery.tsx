@@ -146,14 +146,7 @@ export function Delivery() {
                     <TableRow
                       key={delivery.id}
                       onClick={() => setSelectedId(delivery.id)}
-                      // `#eff6ff` (the selected-row tint) has no matching `color.*` token — every
-                      // candidate in lightPalette (`accent` #0057b8, `bgSubtle` #f1f5f9) is a
-                      // different value, and forcing the nearest one would silently change the
-                      // shade, the exact mismatch this recipe warns against. Left as a genuinely
-                      // bespoke literal (same carve-out the recipe gives a bespoke spacing number)
-                      // rather than guessed — flagged for the reviewer as the one literal this pass
-                      // did not close under dark mode.
-                      style={{ cursor: 'pointer', backgroundColor: delivery.id === selectedId ? '#eff6ff' : undefined }}
+                      style={{ cursor: 'pointer', backgroundColor: delivery.id === selectedId ? color.bgSelected : undefined }}
                     >
                       <TableCell>{delivery.id}</TableCell>
                       <TableCell>{delivery.salesOrderId}</TableCell>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button, Card, Chart, Chip, Text } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 // Revenue trend — the first real consumer of `Chart` (ROADMAP issue #16's own "19 BI dashboard"
 // scenario: "revenue trend vs target"). Six months ending at the same $486K/+6.4% the REVENUE
@@ -24,7 +25,7 @@ export function Dashboard() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): 24px content
         // padding (the reference's own value), matching ListReport.tsx/RecordDetail.tsx — see
@@ -33,7 +34,7 @@ export function Dashboard() {
         // needed it added), so this page's `padding: 40` was already absorbed into its declared
         // height rather than adding to it — only the 40->24 padding value and the removed
         // `minHeight: '100vh'` are new.
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
@@ -42,15 +43,15 @@ export function Dashboard() {
           at the same x position. No page-level `maxWidth` cap — fills whatever width AppShell
           gives it (see docs/design-conventions.md's "Page width and responsive layout"); the KPI
           cards already reflow on their own via their `repeat(auto-fit, minmax(...))` grid. */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 32 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
           <Text variant="heading">Good morning, Priya</Text>
           <Text variant="body">Here's what needs your attention today.</Text>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: space.space4 }}>
           <Card selected={selected === 'open-orders'} onClick={() => setSelected('open-orders')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               <Text variant="overline">OPEN ORDERS</Text>
               <Text variant="display">128</Text>
               <Text variant="caption">+12 this week</Text>
@@ -58,7 +59,7 @@ export function Dashboard() {
           </Card>
 
           <Card selected={selected === 'approvals'} onClick={() => setSelected('approvals')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               <Text variant="overline">PENDING APPROVALS</Text>
               <Text variant="display">17</Text>
               <Text variant="caption">3 waiting over 48h</Text>
@@ -66,9 +67,9 @@ export function Dashboard() {
           </Card>
 
           <Card selected={selected === 'overdue'} onClick={() => setSelected('overdue')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               <Text variant="overline">OVERDUE INVOICES</Text>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space.space2 }}>
                 <Text variant="display">9</Text>
                 <Chip variant="status" tone="danger">
                   Overdue
@@ -79,7 +80,7 @@ export function Dashboard() {
           </Card>
 
           <Card selected={selected === 'revenue'} onClick={() => setSelected('revenue')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               <Text variant="overline">REVENUE THIS MONTH</Text>
               <Text variant="display">$486K</Text>
               <Text variant="caption">+6.4% vs last month</Text>
@@ -88,7 +89,7 @@ export function Dashboard() {
         </div>
 
         <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
             <Text variant="title">Revenue trend</Text>
             <Chart type="line" title="Revenue trend, last 6 months" valueLabel="$" data={REVENUE_TREND} />
           </div>

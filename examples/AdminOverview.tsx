@@ -1,4 +1,5 @@
 import { Card, Chip, Text } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 import { appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
 
@@ -48,25 +49,25 @@ export function AdminOverview() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // Matches the 24px content padding / border-box sizing shared by ListReport.tsx,
         // RecordDetail.tsx and Dashboard.tsx — one content frame across all sample pages.
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
       {/* `margin: 0`, not `'0 auto'` — left-aligned, matching the other sample pages'
           content frame rather than centering. */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
           <Text variant="heading">Administration</Text>
           <Text variant="body">
             Plan: Enterprise · 148 seats · {companyCount} compan{companyCount === 1 ? 'y' : 'ies'}
           </Text>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: space.space4 }}>
           {ADMIN_AREAS.map((area) => (
             <Card key={area.label}>
               <Text variant="title">{area.label}</Text>
@@ -76,13 +77,13 @@ export function AdminOverview() {
         </div>
 
         <Card>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space.space3 }}>
             <Text variant="title">Recent activity</Text>
             <Chip variant="status" tone="accent">
               All systems operational
             </Chip>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
             {RECENT_ACTIVITY.map((event) => (
               <Text key={event} variant="body">
                 {event}

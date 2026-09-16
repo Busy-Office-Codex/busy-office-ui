@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Card, Chart, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { appActions, appStore, useFocusRecord } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * Planning overview + demand + material availability + recommendations (ROADMAP M7's ERP
@@ -53,17 +54,17 @@ export function Planning() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Planning</Text>
 
-        <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', padding: 24, boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, padding: space.space6, boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
             <Text variant="title">Demand — October 2026</Text>
             <Chart type="bar" title="Forecast demand by material, October 2026" valueLabel="units" data={demandByProduct} height={180} />
           </div>
@@ -74,7 +75,7 @@ export function Planning() {
           role="region"
           aria-label="Planning recommendations table"
           tabIndex={0}
-          style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+          style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
         >
           <div style={{ minWidth: 640 }}>
             <Density value="compact">
@@ -93,7 +94,7 @@ export function Planning() {
                     <TableRow
                       key={rec.id}
                       onClick={() => setSelectedId(rec.id)}
-                      style={{ cursor: 'pointer', backgroundColor: rec.id === selectedId ? '#eff6ff' : undefined }}
+                      style={{ cursor: 'pointer', backgroundColor: rec.id === selectedId ? color.bgSelected : undefined }}
                     >
                       <TableCell>{rec.id}</TableCell>
                       <TableCell>{state.products[rec.productId]?.description}</TableCell>
@@ -114,8 +115,8 @@ export function Planning() {
 
         {selected && product && warehouse && (
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                 <Text variant="title">{selected.id}</Text>
                 <Chip variant="status" tone={REC_STATUS_TONE[selected.status]}>
                   {REC_STATUS_LABEL[selected.status]}
@@ -128,7 +129,7 @@ export function Planning() {
 
               <Text variant="body">{selected.reason}</Text>
 
-              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: space.space6, flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Text variant="caption">Available now</Text>
                   <Text variant="title" as="span">
@@ -151,7 +152,7 @@ export function Planning() {
 
               {selected.status === 'open' && (
                 <Density value="compact">
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end' }}>
                     <Button type="button" variant="secondary" onClick={() => appActions.dismissRecommendation(selected.id)}>
                       Dismiss
                     </Button>

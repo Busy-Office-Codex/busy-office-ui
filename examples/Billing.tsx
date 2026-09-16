@@ -4,6 +4,7 @@ import { appActions, appStore, useFocusRecord } from './data/appStore.js';
 import { documentTotal } from './data/types.js';
 import { useStoreState } from './data/store.js';
 import { ConfirmDialog } from './confirmDialog.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * Billing worklist + detail — the last hop of the Sales-to-billing journey (ROADMAP M7's ERP
@@ -80,13 +81,13 @@ export function Billing() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Billing</Text>
 
         {uninvoicedOrders.length > 0 && (
@@ -94,7 +95,7 @@ export function Billing() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <Text variant="title">Ready to invoice</Text>
               {uninvoicedOrders.map((order) => (
-                <div key={order.id} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div key={order.id} style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                   <div style={{ flex: 1 }}>
                     <Text variant="body">
                       {order.id} · {state.customers[order.customerId]?.name}
@@ -125,7 +126,7 @@ export function Billing() {
           role="region"
           aria-label="Invoices table"
           tabIndex={0}
-          style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+          style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
         >
           <div style={{ minWidth: 640 }}>
             <Density value="compact">
@@ -145,7 +146,7 @@ export function Billing() {
                     <TableRow
                       key={invoice.id}
                       onClick={() => setSelectedId(invoice.id)}
-                      style={{ cursor: 'pointer', backgroundColor: invoice.id === selectedId ? '#eff6ff' : undefined }}
+                      style={{ cursor: 'pointer', backgroundColor: invoice.id === selectedId ? color.bgSelected : undefined }}
                     >
                       <TableCell>{invoice.id}</TableCell>
                       <TableCell>{state.customers[invoice.customerId]?.name}</TableCell>
@@ -167,8 +168,8 @@ export function Billing() {
 
         {selected && customer && (
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                 <Text variant="title">{selected.id}</Text>
                 <Chip variant="status" tone={STATUS_TONE[selected.status]}>
                   {STATUS_LABEL[selected.status]}
@@ -179,7 +180,7 @@ export function Billing() {
                 </Text>
               </div>
 
-              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: space.space6, flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Text variant="caption">Invoice total</Text>
                   <Text variant="title" as="span">
@@ -206,7 +207,7 @@ export function Billing() {
                     Payments received
                   </Text>
                   {selected.payments.map((payment) => (
-                    <div key={payment.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                    <div key={payment.id} style={{ display: 'flex', justifyContent: 'space-between', gap: space.space3 }}>
                       <Text variant="body">
                         {formatCurrency(payment.amount)} · {payment.method}
                       </Text>
@@ -227,7 +228,7 @@ export function Billing() {
               )}
 
               <Density value="compact">
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: space.space3, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                   <Button type="button" variant="secondary" onClick={() => appActions.viewInvoice(selected.id)}>
                     View invoice
                   </Button>

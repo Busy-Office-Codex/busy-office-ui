@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { Button, Card, Chip, Density, Dropdown, Input, Text } from '../src/index.js';
-import { color, motion, radius, shadow } from '../src/tokens.stylex.js';
+import { color, motion, radius, shadow, space } from '../src/tokens.stylex.js';
 import { FilterTabs } from './filterTabs.js';
 
 const toggleStyles = stylex.create({
@@ -116,19 +116,19 @@ export function BuilderForms() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // Matches every other sample page's 24px content padding / border-box frame (see
         // RecordDetail.tsx for the full box-sizing reasoning).
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
-        gap: 20,
+        gap: space.space5,
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Text variant="heading">Sales order form</Text>
             <Chip variant="status" tone="neutral">
@@ -136,7 +136,7 @@ export function BuilderForms() {
             </Chip>
           </div>
           <Density value="compact">
-            <div style={{ display: 'flex', gap: 4 }}>
+            <div style={{ display: 'flex', gap: space.space1 }}>
               <Button type="button" variant="ghost">
                 Undo
               </Button>
@@ -147,7 +147,7 @@ export function BuilderForms() {
           </Density>
           <div style={{ flex: 1 }} />
           <Density value="compact">
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: space.space2 }}>
               <Button type="button" variant="secondary">
                 Version history
               </Button>
@@ -164,23 +164,23 @@ export function BuilderForms() {
       {/* Flexible (not fixed) column bases — see docs/design-conventions.md's "Page width and
           responsive layout" — so this 3-pane row wraps to full-width stacked panes on a narrow/
           mobile viewport with no `@media` query needed. */}
-      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 220px', minWidth: 200, maxWidth: 280, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', gap: space.space4, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 220px', minWidth: 200, maxWidth: 280, display: 'flex', flexDirection: 'column', gap: space.space4 }}>
           <Input aria-label="Search palette" placeholder="Search fields & blocks…" size="search" />
           {PALETTE_GROUPS.map((group) => (
-            <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               <Text variant="caption" as="span">
                 {group.title.toUpperCase()}
               </Text>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
                 {group.items.map((item) => (
                   <div
                     key={item}
                     style={{
                       padding: '8px 10px',
                       borderRadius: 8,
-                      border: '1px solid #e2e8f0',
-                      background: '#ffffff',
+                      border: `1px solid ${color.border}`,
+                      background: color.bgSurface,
                     }}
                   >
                     <Text variant="body">{item}</Text>
@@ -193,9 +193,9 @@ export function BuilderForms() {
 
         <div style={{ flex: '3 1 360px', minWidth: 320 }}>
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space5 }}>
               <Text variant="title">Sales order</Text>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: space.space4 }}>
                 {/* `disabled` on every field here — this pane is a rendered form PREVIEW, not a
                     live form (matches this pass's structural-first-pass scope: real components,
                     non-interactive content). */}
@@ -206,13 +206,13 @@ export function BuilderForms() {
                   <span {...stylex.props(toggleStyles.selectedBadge)}>Selected</span>
                   <Input label="Order date *" placeholder="Select a date…" disabled style={{ borderColor: color.accent }} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                   <Text variant="caption" as="span">
                     Payment terms
                   </Text>
                   <Dropdown label={PAYMENT_TERMS_ITEMS[0]} items={PAYMENT_TERMS_ITEMS.map((label) => ({ label, selected: label === PAYMENT_TERMS_ITEMS[0] }))} active={false} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                   <Text variant="caption" as="span">
                     Warehouse
                   </Text>
@@ -227,13 +227,13 @@ export function BuilderForms() {
                   accessible content, same as any other labeled placeholder Card in this package. */}
               <div
                 style={{
-                  border: '1px dashed #cbd5e1',
+                  border: `1px dashed ${color.borderStrong}`,
                   borderRadius: 10,
-                  padding: 24,
+                  padding: space.space6,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: '#f8fafc',
+                  background: color.bgCanvas,
                 }}
               >
                 <Text variant="caption">Line items block</Text>
@@ -246,13 +246,13 @@ export function BuilderForms() {
                   add a new one" into the same box. */}
               <div
                 style={{
-                  border: '1px dashed #cbd5e1',
+                  border: `1px dashed ${color.borderStrong}`,
                   borderRadius: 10,
-                  padding: 24,
+                  padding: space.space6,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: '#f8fafc',
+                  background: color.bgCanvas,
                 }}
               >
                 <Text variant="caption">drop zone</Text>
@@ -263,12 +263,12 @@ export function BuilderForms() {
 
         <div style={{ flex: '1 1 260px', minWidth: 240, maxWidth: 340 }}>
           <Card>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
               <FilterTabs tabs={PROPERTIES_TABS} selected="Properties" />
 
               <Input label="Label" defaultValue="Order date" />
               <Input label="Field key" defaultValue="order_date" />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                 <Text variant="caption" as="span">
                   Type
                 </Text>

@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 import { Button, Card, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 // ROADMAP M6 (issue #17): examples/checkboxStyles.ts's shared native-checkbox styling — see that
 // file for the full history/rationale. Third consumer alongside ListReport.tsx's row-selection
 // checkboxes and Settings.tsx's Modules toggle rows; this page's permissions-matrix cells are the
@@ -77,7 +78,7 @@ const permissionKey = (module: string, column: PermissionColumn) => `${module}:$
 function RoleListItem({ role, selected }: { role: Role; selected: boolean }) {
   return (
     <Card selected={selected}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: space.space3 }}>
         <Text variant="body">{role.name}</Text>
         <Text variant="caption">{role.users} users</Text>
       </div>
@@ -101,11 +102,11 @@ export function UsersAndRoles() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // Matches ListReport.tsx/RecordDetail.tsx/Dashboard.tsx/Settings.tsx/RolePage.tsx's shared
         // 24px content padding / border-box frame.
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
@@ -115,34 +116,34 @@ export function UsersAndRoles() {
           permissions editor below use flexible bases so the row wraps to a stacked mobile layout
           on its own, and the editor's 7-column matrix table gets more room to breathe on a wide
           desktop instead of being capped alongside it. */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space5 }}>
         <Text variant="heading">Users and roles</Text>
 
-        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div style={{ flex: '1 1 260px', minWidth: 240, maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', gap: space.space6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <div style={{ flex: '1 1 260px', minWidth: 240, maxWidth: 340, display: 'flex', flexDirection: 'column', gap: space.space3 }}>
             <Button type="button" variant="primary" style={{ width: '100%', justifyContent: 'center' }}>
               + New
             </Button>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               {SYSTEM_ROLES.map((role) => (
                 <RoleListItem key={role.name} role={role} selected={role.name === SELECTED_ROLE.name} />
               ))}
             </div>
 
-            <div style={{ marginTop: 8 }}>
+            <div style={{ marginTop: space.space2 }}>
               <Text variant="overline">Custom roles ({CUSTOM_ROLES.length})</Text>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
               {CUSTOM_ROLES.map((role) => (
                 <RoleListItem key={role.name} role={role} selected={false} />
               ))}
             </div>
           </div>
 
-          <div style={{ flex: '3 1 480px', minWidth: 360, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '3 1 480px', minWidth: 360, display: 'flex', flexDirection: 'column', gap: space.space4 }}>
             <Density value="compact">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Text variant="title">
                     {SELECTED_ROLE.name} · {SELECTED_ROLE.users} users
@@ -163,13 +164,13 @@ export function UsersAndRoles() {
 
             <FilterTabs tabs={TABS} selected="Permissions" />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
               <Text variant="title">Permissions</Text>
               <div
                 role="region"
                 aria-label={`${SELECTED_ROLE.name} permissions matrix`}
                 tabIndex={0}
-                style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+                style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
               >
                 <div style={{ minWidth: 640 }}>
                   <Density value="compact">

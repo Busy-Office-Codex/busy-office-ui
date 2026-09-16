@@ -40,6 +40,14 @@ export const lightPalette = {
   accentHover: '#1f6fcf',
   focusRing: '#0057b8',
   danger: '#b42318',
+  // Added for the token-standardization sweep (owner-directed, 2026-09-17, issue #21): a single
+  // selected-row background wash, the pale-blue tint every list-plus-detail-in-one-route screen
+  // uses for `row.id === selectedId ? '<this>' : undefined` (Billing, Companies, Delivery,
+  // Integrations, Planning, ProductionOrders, Quotations, Requisitions, Roles, Users — 10 real
+  // consumers, all the identical literal, confirmed by grep before adding this). Tailwind blue-50,
+  // matching every existing hand-written instance exactly — zero visual change in light mode for
+  // any file this migrates.
+  bgSelected: '#eff6ff',
 };
 
 // Dark values (ROADMAP item 19 / issue #19, `agreed`, project owner, 2026-09-16). Built from the
@@ -95,6 +103,13 @@ export const darkPalette = {
   accentHover: '#60a5fa',
   focusRing: '#3b82f6',
   danger: '#ef4444',
+  // Tailwind blue-950 — a dark, blue-HUED wash (not a lightness step: its luminance nearly
+  // matches `bgSubtle`'s own slate-800, ~1.0:1 against it) so a selected row reads as distinctly
+  // TINTED against the `bgSurface` a Table row actually sits on, rather than just another neutral
+  // surface. AA-verified in test/color-contrast.test.ts: textPrimary/textSecondary on this clear
+  // 14.0:1 / 9.9:1, both comfortably over the 4.5:1 body-text floor every other bg/text pair here
+  // clears.
+  bgSelected: '#172554',
 };
 
 // Each var gets `lightPalette`'s value as its `default` and `darkPalette`'s value under
@@ -125,6 +140,7 @@ export const color = stylex.defineVars({
   accentHover: { default: lightPalette.accentHover, '@media (prefers-color-scheme: dark)': darkPalette.accentHover },
   focusRing: { default: lightPalette.focusRing, '@media (prefers-color-scheme: dark)': darkPalette.focusRing },
   danger: { default: lightPalette.danger, '@media (prefers-color-scheme: dark)': darkPalette.danger },
+  bgSelected: { default: lightPalette.bgSelected, '@media (prefers-color-scheme: dark)': darkPalette.bgSelected },
 });
 
 // Explicit host opt-in (ROADMAP item 19) — mirrors `compactDensity`/`comfortableDensity`/

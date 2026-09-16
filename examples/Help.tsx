@@ -1,4 +1,8 @@
 import { Button, Card, Chip, Density, Input, Text } from '../src/index.js';
+// Theme-safe ERP composition (owner-directed, 2026-09-17, issue #21) — see ListReport.tsx's own
+// comment on this same import for the full rationale; this page's raw literals duplicated
+// color.bgCanvas/space.* values without reading them, so they stayed put under dark mode.
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * The Help center / setup-checklist screen. Mirrors `templates/erp-skeleton`'s
@@ -58,19 +62,19 @@ export function Help() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         // Matches the 24px content padding / border-box sizing shared by every other sample page
         // (see RecordDetail.tsx for the full box-sizing reasoning).
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
       }}
     >
       {/* `margin: 0`, left-aligned, no page-level `maxWidth` cap — fills whatever width AppShell
           gives it, same as ListReport.tsx's table pages (see docs/design-conventions.md's "Page
           width and responsive layout"). */}
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
           <Text variant="heading">Help</Text>
           <Text variant="caption">Search articles, finish setup, or contact support.</Text>
         </div>
@@ -81,22 +85,22 @@ export function Help() {
             alongside the task at hand rather than a grid the reader has to scroll past first.
             Flexible (not fixed) column bases wrap to full-width stacked rows on a narrow/mobile
             viewport — no `@media` query needed. */}
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div style={{ flex: '2 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', gap: space.space6, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ flex: '2 1 480px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
             <div style={{ maxWidth: 480 }}>
               <Input aria-label="Search help articles" placeholder="Search help articles…" size="search" />
             </div>
 
             <Card>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: space.space3, flexWrap: 'wrap' }}>
                 <Text variant="title">Finish setting up your workspace</Text>
                 <Text variant="caption">
                   {COMPLETED_STEPS} of {SETUP_STEPS.length} complete
                 </Text>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
                 {SETUP_STEPS.map((step) => (
-                  <div key={step.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <div key={step.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space.space3 }}>
                     <Text variant="body">{step.label}</Text>
                     {step.done ? (
                       <Chip variant="status" tone="strong">
@@ -123,11 +127,11 @@ export function Help() {
             </Card>
           </div>
 
-          <div style={{ flex: '1 1 300px', minWidth: 260, maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ flex: '1 1 300px', minWidth: 260, maxWidth: 420, display: 'flex', flexDirection: 'column', gap: space.space4 }}>
             {LINK_SECTIONS.map((section) => (
               <Card key={section.title}>
                 <Text variant="title">{section.title}</Text>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                   {section.items.map((item) => (
                     <Text key={item} variant="body">
                       {item}

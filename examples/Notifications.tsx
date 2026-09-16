@@ -7,6 +7,7 @@ import { Button, Card, Density, Text } from '../src/index.js';
 // checkbox look across this package's examples, not a fourth one invented for this file.
 import { checkboxStyles } from './checkboxStyles.js';
 import { FilterTabs } from './filterTabs.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A notifications list page: header actions, a filter-Chip-as-tabs row (see Profile.tsx for why
@@ -122,9 +123,9 @@ function NotificationRow({ item, isLast }: { item: NotificationItem; isLast: boo
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 12,
+        gap: space.space3,
         paddingBlock: 10,
-        borderBottom: isLast ? 'none' : '1px solid #e2e8f0',
+        borderBottom: isLast ? 'none' : `1px solid ${color.border}`,
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -148,15 +149,15 @@ export function Notifications() {
   return (
     <div
       style={{
-        background: '#f8fafc',
-        padding: 24,
+        background: color.bgCanvas,
+        padding: space.space6,
         boxSizing: 'border-box',
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: space.space6 }}>
         <Density value="compact">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
             <Text variant="heading">Notifications</Text>
             <div style={{ flex: 1 }} />
             <Button type="button" variant="ghost">
@@ -170,12 +171,12 @@ export function Notifications() {
 
         <FilterTabs tabs={TABS} selected="Unread" />
 
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: space.space6, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <div style={{ flex: '2 1 480px', minWidth: 320 }}>
             <Density value="compact">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space5 }}>
                 {GROUPS.map((group) => (
-                  <div key={group.label} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div key={group.label} style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
                     <Text variant="overline">{group.label}</Text>
                     <Card>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -192,13 +193,13 @@ export function Notifications() {
 
           <div style={{ flex: '1 1 280px', minWidth: 240, maxWidth: 400 }}>
             <Card>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
                 <Text variant="title">Notification channels</Text>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: space.space3 }}>
                   {CHANNELS.map((channel) => (
                     <label
                       key={channel.key}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space.space3 }}
                     >
                       <Text variant="body">{channel.label}</Text>
                       <input

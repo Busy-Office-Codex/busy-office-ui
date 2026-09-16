@@ -14,6 +14,7 @@ import {
   TableRow,
   Text,
 } from '../src/index.js';
+import { color, space } from '../src/tokens.stylex.js';
 
 /**
  * A filterable customer list, mirroring `templates/erp-skeleton`'s "09 Customers" screen: a
@@ -102,17 +103,17 @@ export function Customers() {
   return (
     <div
       style={{
-        background: '#f8fafc',
+        background: color.bgCanvas,
         fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        padding: 24,
+        padding: space.space6,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
-        gap: 20,
+        gap: space.space5,
       }}
     >
       <Density value="compact">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: space.space3, flexWrap: 'wrap' }}>
           <Text variant="heading">Customers · {TOTAL_CUSTOMERS}</Text>
           <div style={{ flex: 1 }} />
           <Button type="button" variant="secondary">
@@ -124,7 +125,7 @@ export function Customers() {
         </div>
       </Density>
 
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: space.space2, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ width: 280 }}>
           <Input aria-label="Search customers" placeholder="Search customers…" value={query} onChange={(event) => setQuery(event.target.value)} size="search" />
         </div>
@@ -155,7 +156,7 @@ export function Customers() {
       </div>
 
       <Density value="compact">
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: space.space2, flexWrap: 'wrap' }}>
           {TABLE_UTILITIES.map((label) => (
             <Button key={label} type="button" variant="ghost">
               {label}
@@ -168,7 +169,7 @@ export function Customers() {
         role="region"
         aria-label="Customers table"
         tabIndex={0}
-        style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff', overflowX: 'auto' }}
+        style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, overflowX: 'auto' }}
       >
         <div style={{ minWidth: 720 }}>
           <Density value="compact">
