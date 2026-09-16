@@ -14,9 +14,13 @@ test('renders a real demand chart, not empty scaffolding', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoPlanning(page);
 
-  const canvas = page.locator('canvas');
-  await expect(canvas).toHaveCount(1);
-  await expect(canvas).toHaveAttribute('aria-hidden', 'true');
+  // Chart.tsx's own render surface is the `chart-canvas` container it hands to ECharts, not the
+  // `<canvas>` itself — ECharts creates and appends that element imperatively, so it never
+  // carries `aria-hidden` directly; the container does (src/components/Chart.tsx).
+  const surface = page.getByTestId('chart-canvas');
+  await expect(surface).toHaveAttribute('aria-hidden', 'true');
+  const canvas = surface.locator('canvas').first();
+  await expect(canvas).toBeVisible();
   const hasColor = await canvas.evaluate((el) => {
     const canvasEl = el as HTMLCanvasElement;
     const ctx = canvasEl.getContext('2d');

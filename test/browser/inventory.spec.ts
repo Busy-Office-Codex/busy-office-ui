@@ -14,10 +14,15 @@ test('renders two real charts (bar + donut), not empty scaffolding', async ({ pa
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoInventory(page);
 
-  const canvases = page.locator('canvas');
-  await expect(canvases).toHaveCount(2);
-  for (const canvas of await canvases.all()) {
-    await expect(canvas).toHaveAttribute('aria-hidden', 'true');
+  // Chart.tsx's own render surface is the `chart-canvas` container it hands to ECharts, not the
+  // `<canvas>` itself — ECharts creates and appends that element imperatively, so it never
+  // carries `aria-hidden` directly; the container does (src/components/Chart.tsx).
+  const surfaces = page.getByTestId('chart-canvas');
+  await expect(surfaces).toHaveCount(2);
+  for (const surface of await surfaces.all()) {
+    await expect(surface).toHaveAttribute('aria-hidden', 'true');
+    const canvas = surface.locator('canvas').first();
+    await expect(canvas).toBeVisible();
     const hasColor = await canvas.evaluate((el) => {
       const canvasEl = el as HTMLCanvasElement;
       const ctx = canvasEl.getContext('2d');
