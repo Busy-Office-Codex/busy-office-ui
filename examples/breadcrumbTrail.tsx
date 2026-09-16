@@ -26,7 +26,7 @@ export function BreadcrumbTrail({ items }: { items: readonly ShellBreadcrumb[] }
           const isLast = index === items.length - 1;
           return (
             <li key={`${crumb.label}-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              {crumb.onClick ? (
+              {crumb.onClick && !isLast ? (
                 <button
                   type="button"
                   onClick={crumb.onClick}
@@ -43,6 +43,9 @@ export function BreadcrumbTrail({ items }: { items: readonly ShellBreadcrumb[] }
                   {crumb.label}
                 </button>
               ) : (
+                // Unconditional for the last entry even if it was given an onClick — matching
+                // ShellBreadcrumbTrail's own contract (src/shell/Shell.tsx): "here" is never a
+                // button, regardless of what data a host passes.
                 <span
                   aria-current={isLast ? 'page' : undefined}
                   style={{ fontSize: 12.5, color: isLast ? '#0f172a' : '#475569', fontWeight: isLast ? 600 : undefined }}

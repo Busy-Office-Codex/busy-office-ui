@@ -2,8 +2,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   // `fileParallelism: false` — found live while landing the M7 batch (Icon/Theme/Breadcrumbs/
-  // Chart→ECharts): 6 test files (component-contract, shell-navigation, app-shell-navigation,
-  // color-contrast, state-channels, sample-page-states) each independently rebuild `dist/` via
+  // Chart→ECharts): 5 test files (components, shell-navigation, app-shell-navigation,
+  // state-channels, sample-page-states) each independently rebuild `dist/` via
   // `execFileSync(..., 'build.mjs', ...)` in their own `beforeAll`. Vitest runs test FILES in
   // parallel worker threads by default, so those builds raced on the same shared `dist/` output —
   // a pre-existing latent bug that became a real, reproducible flake once this batch gave

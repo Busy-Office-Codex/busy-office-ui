@@ -381,7 +381,7 @@ function ShellBreadcrumbTrail({ items }: { items: readonly ShellBreadcrumb[] }) 
           const isLast = index === items.length - 1;
           return (
             <li key={`${crumb.label}-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              {crumb.onClick ? (
+              {crumb.onClick && !isLast ? (
                 <button
                   type="button"
                   onClick={crumb.onClick}
@@ -398,9 +398,11 @@ function ShellBreadcrumbTrail({ items }: { items: readonly ShellBreadcrumb[] }) 
                   {crumb.label}
                 </button>
               ) : (
-                // No `onClick`, whatever the position — the last entry always lands here (Shell's
-                // own contract: "here" is never a button), and an earlier entry can too, honestly,
-                // when a host genuinely has no real destination for it (see docs/Shell.md).
+                // Reached whenever there's no `onClick`, AND unconditionally for the last entry
+                // even if one was given — Shell's own contract: "here" is never a button,
+                // regardless of what data a host passes (see docs/Shell.md). An earlier entry
+                // with no `onClick` can also land here, honestly, when a host genuinely has no
+                // real destination for it.
                 <span
                   aria-current={isLast ? 'page' : undefined}
                   style={{

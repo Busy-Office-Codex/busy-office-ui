@@ -17,13 +17,16 @@ import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.
  * `<Density value={density}>`, driven by this component's own selection) — a genuine feature,
  * not a mockup.
  *
- * **Appearance** (Light/Dark/System) is NOT real, and says so: this design system has no
- * dark-mode infrastructure today — every `color.*` token in `tokens.stylex.ts` is a single
- * light-mode value, a deliberate decision from the M4 docs-site build, not an oversight. "Light"
- * is real (it's the only theme that exists) and stays selected; Dark/System render `disabled`
- * (Chip's filter variant already dims disabled options — no new styling needed) with a caption
- * explaining why, rather than a toggle that silently does nothing when pressed. A control that
- * looks interactive but has no effect is worse than one that's honestly unavailable.
+ * **Appearance** (Light/Dark/System) is NOT real, and says so — updated 2026-09-16: the package
+ * gained real dark/light/system theming (issue #19, `src/components/Theme.tsx`, every `color.*`
+ * token now carries a light/dark `prefers-color-scheme` pair), but this control was not part of
+ * that slice and is not wired to it — a separate, deliberate scope decision (Theme ships with no
+ * real named consumer yet; wiring this toggle to it is a plausible first one, not done here to
+ * avoid scope-creeping an unrelated batch). "Light" is real (it's what's currently selected) and
+ * stays selected; Dark/System render `disabled` (Chip's filter variant already dims disabled
+ * options — no new styling needed) with a caption explaining why, rather than a toggle that
+ * silently does nothing when pressed. A control that looks interactive but has no effect is worse
+ * than one that's honestly unavailable.
  *
  * The panel is rendered through a `createPortal` into `document.body`, positioned with
  * `position: 'fixed'` at coordinates computed from the trigger's own `getBoundingClientRect()` —
@@ -70,10 +73,12 @@ type Appearance = 'light' | 'dark' | 'system';
 
 const APPEARANCE_OPTIONS: { value: Appearance; label: string; disabled?: boolean; ariaLabel?: string }[] = [
   { value: 'light', label: 'Light' },
-  // Disabled, not a silent no-op segment: this design system has no dark palette or theming
-  // mechanism today (see the file header comment) — a segment that looked selectable but did
-  // nothing on click would be worse than one that's honestly unavailable. `ButtonGroup` dims
-  // `disabled` options itself (the shared 0.4-opacity convention).
+  // Disabled, not a silent no-op segment: real dark/light/system theming exists in the package
+  // now (`src/components/Theme.tsx`, issue #19), but this control isn't wired to it yet — an
+  // out-of-scope decision for that slice, not a missing capability (see the file header comment).
+  // A segment that looked selectable but did nothing on click would be worse than one that's
+  // honestly unavailable. `ButtonGroup` dims `disabled` options itself (the shared 0.4-opacity
+  // convention).
   { value: 'dark', label: 'Dark', disabled: true, ariaLabel: 'Dark — not available yet' },
   { value: 'system', label: 'System', disabled: true, ariaLabel: 'System — not available yet' },
 ];

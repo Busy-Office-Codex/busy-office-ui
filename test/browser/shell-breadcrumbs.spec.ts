@@ -26,9 +26,10 @@ test.describe('Shell.breadcrumbs prop', () => {
 
     const here = nav.getByText('SO-1042', { exact: true });
     await expect(here).toHaveAttribute('aria-current', 'page');
-    // "here" never renders as an interactive control, regardless of the data it's given (the lab
-    // harness passes it with no `onClick`, matching Shell's own type comment: the last entry is
-    // always "here").
+    // "here" never renders as an interactive control — the lab harness deliberately gives THIS
+    // crumb an `onClick` too (see preview/ShellBreadcrumbsLab.tsx), so this is a real test of
+    // Shell's own contract (the last entry is always "here", regardless of the data it's given),
+    // not just a check that an absent onClick stays a span.
     await expect(page.getByRole('button', { name: 'SO-1042', exact: true })).toHaveCount(0);
   });
 
@@ -39,6 +40,26 @@ test.describe('Shell.breadcrumbs prop', () => {
     await page.getByRole('button', { name: 'Sales orders', exact: true }).click();
 
     await expect(page.getByText('Clicks: 1', { exact: true })).toBeVisible();
+  });
+
+  test('the last crumb ignores a given onClick — "here" is never interactive, even when a host supplies one', async ({ page }) => {
+    // Found live during this batch's own review: ShellBreadcrumbTrail originally branched purely
+    // on `crumb.onClick` with no `isLast` override, so a last crumb WITH an onClick silently
+    // rendered as a real <button> carrying no `aria-current` at all — contradicting this exact
+    // documented guarantee. Fixed with an `isLast` guard; this test is the red-proof that would
+    // have caught the original bug (the lab's "SO-1042" crumb has a real onClick wired to a
+    // counter specifically so this can be exercised, not just asserted from the type).
+    await page.goto('/#shell-breadcrumbs-lab');
+    await expect(page.getByText('Last-crumb clicks: 0', { exact: true })).toBeVisible();
+
+    const here = page.getByRole('navigation', { name: 'Breadcrumb' }).getByText('SO-1042', { exact: true });
+    await expect(here).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('button', { name: 'SO-1042', exact: true })).toHaveCount(0);
+
+    // A real click on the non-interactive span does nothing — no handler is attached to it at
+    // all, unlike a merely `disabled` control.
+    await here.click();
+    await expect(page.getByText('Last-crumb clicks: 0', { exact: true })).toBeVisible();
   });
 
   test('omitting breadcrumbs renders no breadcrumb nav at all — opt-in, no route-hierarchy inference', async ({ page }) => {

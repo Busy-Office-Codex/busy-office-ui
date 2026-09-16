@@ -18,17 +18,24 @@ const routes: ShellRoute[] = [{ id: 'home', module: 'General', label: 'Home' }];
 export function ShellBreadcrumbsLab() {
   const [activeRouteId, setActiveRouteId] = useState('home');
   const [clicks, setClicks] = useState(0);
+  // The last crumb is ALSO given an onClick here, deliberately — Shell's own contract is that the
+  // last entry never becomes interactive regardless of what data a host passes, so this exercises
+  // exactly the input that would falsify that guarantee if it weren't enforced (found live: it
+  // wasn't, until this same batch's own review caught it — see ShellBreadcrumbTrail's `isLast`
+  // guard, src/shell/Shell.tsx).
+  const [lastCrumbClicks, setLastCrumbClicks] = useState(0);
 
   return (
     <Shell
       navigation={{ routes, activeRouteId, onNavigate: setActiveRouteId }}
       breadcrumbs={[
         { label: 'Sales orders', onClick: () => setClicks((count) => count + 1) },
-        { label: 'SO-1042' },
+        { label: 'SO-1042', onClick: () => setLastCrumbClicks((count) => count + 1) },
       ]}
     >
       <div style={{ padding: 24 }}>
         <p>Clicks: {clicks}</p>
+        <p>Last-crumb clicks: {lastCrumbClicks}</p>
       </div>
     </Shell>
   );
