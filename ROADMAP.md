@@ -99,7 +99,12 @@ accessibility, simplicity); the simplicity lens found and fixed one real
 cross-milestone duplication (`examples/filterTabs.tsx`, extracted from 9
 call sites across 8 files) before merge.
 
-**M7 — Chart primitive (issue #16) — in progress.** Item 34, issue #16
+**M7 — Chart primitive (issue #16), Icon (#18), real theming (#19), Shell
+breadcrumbs (#20) — in progress.** Issues #18/#19/#20 marked `agreed` by the
+project owner, 2026-09-16 (via direct instruction, recorded here rather than
+as a separate issue comment — the same precedent issue #16's own `agreed`
+citation below already set), expanding this milestone's scope beyond item 34
+alone; items 35–37 below track them. Item 34, issue #16
 (`agreed`, project owner, 2026-09-16 — was `proposed` since M6). Owner-
 directed: build the primitive M6 deferred, using a real charting library
 (Chart.js) rather than issue #16's own original hand-rolled-SVG default,
@@ -134,10 +139,36 @@ usage and tests, not just documentation. First real consumer landed:
 Dashboard.tsx's "Revenue trend" line chart (issue #16's own "19 BI
 dashboard" scenario), sharing its $486K/+6.4% figures with the existing
 REVENUE THIS MONTH stat card rather than inventing a second number for
-the same fact. The other 4 named consumers (stock-by-warehouse bar,
-cash-flow line, a Reports summary chart, BI explore's Table/Bar/Line/Pie
-toggle) remain open — landing across separate, reviewed slices, not one
-batch, per this repo's own "manageable slices" discipline.
+the same fact. Inventory.tsx's own "15 Inventory" scenario landed in the
+same wave (stock-by-warehouse bar + a mix-by-material donut, both real
+consumers reading live `stockLevels`). Corrected here (2026-09-16, this
+text previously listed the Inventory chart as still open after it had
+already landed): the 3 genuinely remaining named consumers are "17
+Finance — cash flow, 12 months" (the Finance module has no real screen at
+all yet — a NAV placeholder only, so this is a new-screen-plus-chart
+effort, not a one-chart addition), "18 Reports" (BuilderReports.tsx's own
+Preview stays structural by design — see its header comment — a real
+Chart there needs live aggregations, several not computed anywhere yet),
+"19 BI dashboard"'s other 2 charts ("by region" bar, "mix" donut —
+Dashboard.tsx already exists and already has real revenue data, so this
+one doesn't need a new route), and "20 BI explore" (a new pivot-result
+screen needing its own new route, and issue #16's own "Pie" ask — `Chart`
+today only has `'bar' | 'line' | 'donut'`, no `'pie'` variant). Each is
+its own separate, reviewed slice, per this repo's own "manageable
+slices" discipline — not a punch list to clear in one batch.
+
+Redirected (owner-directed, 2026-09-16, in progress): the rendering engine
+moves from Chart.js to ECharts — a reversal of this milestone's own earlier
+Chart.js decision above, made now rather than revisited from scratch; the
+Boundary discipline that decision already established stays the rule, not
+the specific library — `Chart`'s public `ChartProps`/`ChartSeries` shape
+stays byte-for-byte the same, so every real consumer (Dashboard, Inventory
+×2, Planning, Analytics) renders identically and ECharts itself is never
+imported or referenced outside `src/components/Chart.tsx`. `SHELL_MAX_ROUTES`
+(`src/shell/Shell.tsx`) was also raised 32→40 (owner-directed, 2026-09-16) —
+it was a bare defensive array-length sanity check, not a reasoned ceiling,
+and sat at exactly 32/32 after item 13, blocking any new route the Finance
+module or BI explore would need.
 
 After M6, or once its scope is exhausted, stop expanding the framework: new
 work starts only from a request that passes the Objective tests. M7 is the
@@ -384,15 +415,46 @@ issues.
     palette (verified route-by-route by a required milestone-closing
     review); `pnpm test:browser` 77/77 green. Issue #17.
 34. [ ] Chart primitive — `src/components/Chart.tsx`, exported from
-    `src/index.ts`. Bar/line/donut via Chart.js, tree-shaken registration,
-    `aria-hidden` canvas paired with a real visually-hidden accessible
-    `Table`, `prefers-reduced-motion` disables draw-in animation. First
-    real consumer landed: Dashboard.tsx's "Revenue trend" line chart.
-    Package gained `"sideEffects": false` (package.json) as part of this
-    work — genuinely accurate now that `Chart`'s own registration moved
-    off the module top level — unlocking real per-export tree-shaking for
-    every component, not just this one. 4 of 5 named consumers (issue #16)
-    still open. Issue #16.
+    `src/index.ts`. Bar/line/donut, `aria-hidden` canvas/render surface
+    paired with a real visually-hidden accessible `Table`,
+    `prefers-reduced-motion` disables draw-in animation. Rendering engine
+    in progress moving from Chart.js to ECharts (owner-directed,
+    2026-09-16), wrapped identically — `ChartProps`/`ChartSeries` unchanged,
+    ECharts never referenced outside this one file. Package gained
+    `"sideEffects": false` (package.json) as part of the original Chart.js
+    work — genuinely accurate now that `Chart`'s own registration moved off
+    the module top level — unlocking real per-export tree-shaking for every
+    component, not just this one. Real consumers landed: Dashboard.tsx's
+    "Revenue trend" line chart, Inventory.tsx's "stock by warehouse" bar +
+    "mix by material" donut (issue #16's own "15 Inventory" scenario).
+    Still open: Finance (no real screen yet), Reports (BuilderReports.tsx's
+    live-aggregation gap), BI dashboard's other 2 charts, BI explore (new
+    route + a `'pie'` variant `Chart` doesn't have yet). Issue #16.
+35. [ ] Icon component — `src/components/Icon.tsx`, exported from
+    `src/index.ts`. A minimal, closed glyph set (sliders/settings,
+    bell/notification, plus whatever the QR stand-in resolves to) as inline
+    SVG, sized/colored via the token system — migrates `ControlCenter.tsx`'s
+    `SlidersGlyph`, `AppShell.tsx`'s notification bell, and `Invoice.tsx`'s
+    QR stand-in to real consumers, closing the gap all three already cite in
+    their own comments. Issue #18 (`agreed`, project owner, 2026-09-16).
+36. [ ] Real dark/light/system theming — light/dark variants for
+    `src/tokens.stylex.ts`'s color tokens plus a host opt-in mechanism
+    (exact shape TBD at build time — a `data-theme` contract or a small
+    `ThemeProvider`), defaulting to `prefers-color-scheme` when unset,
+    AA-contrast-verified for dark same as items 5/12/13 already did for
+    light. Fixes a confirmed defect, not a speculative want: `src/` reads no
+    `prefers-color-scheme` anywhere today (found live during item 15's
+    docs-site review). Issue #19 (`agreed`, project owner, 2026-09-16).
+37. [ ] Shell breadcrumbs — a `breadcrumbs` prop on `Shell`
+    (`@busyoffice/design-system/shell`), an ordered `{ label, onClick? }[]`
+    rendered in the chrome above the content area, no route-hierarchy
+    inference. Two named consumers: `RecordDetail.tsx` (reached from
+    `SalesOrderList.tsx`, no visible trail back today) and
+    `Requisitions.tsx`'s own linked-document display (currently plain text,
+    "Linked: Purchase order PO-4011"). `src/shell/Shell.tsx` is ~780 lines
+    with heavy existing browser-test coverage — read `test/browser/shell-
+    *.spec.ts` fully before changing it. Issue #20 (`agreed`, project
+    owner, 2026-09-16).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).

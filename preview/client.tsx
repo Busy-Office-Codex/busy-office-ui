@@ -101,7 +101,9 @@ const routes = [
   { id: 'integrations', module: 'Administration', label: 'Integrations' },
   // M7, Slice 13 (Builder — report/dashboard builder) — a NEW NAV.Builder entry, not a
   // pre-existing M6 placeholder (see AppShell.tsx's NAV.Builder comment and BuilderReports.tsx's
-  // own header comment). This is the 32nd and final entry: SHELL_MAX_ROUTES is a hard cap.
+  // own header comment). This was the 32nd and, at the time, final entry — SHELL_MAX_ROUTES was a
+  // hard cap at exactly 32, raised to 40 (owner-directed, 2026-09-16) for the Finance module and
+  // BI explore, still-open issue #16 consumers.
   { id: 'builder-reports', module: 'Builder', label: 'Reports & dashboards' },
 ] as const satisfies readonly AppShellRoute[];
 

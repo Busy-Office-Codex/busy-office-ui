@@ -99,8 +99,9 @@ const NAV: Record<AppShellModule, string[]> = {
   Administration: ['Overview', 'Users and roles', 'Users', 'Roles', 'Companies', 'Integrations', 'Audit log'],
   // 'Reports & dashboards' added M7, Slice 13 — a NEW entry, not a pre-existing M6 placeholder:
   // neither 'Fields' nor 'Publish' fits a report/dashboard designer (see BuilderReports.tsx's own
-  // header comment). This is preview/client.tsx's 32nd and final route — SHELL_MAX_ROUTES is a
-  // hard cap.
+  // header comment). This was preview/client.tsx's 32nd and, at the time, final route —
+  // SHELL_MAX_ROUTES was a hard cap at exactly 32; raised to 40 (owner-directed, 2026-09-16) to
+  // make room for the Finance module and BI explore, still-open issue #16 consumers.
   Builder: ['Pages', 'Forms', 'Workflows', 'Fields', 'Publish', 'Reports & dashboards'],
   Settings: ['General', 'Organization', 'Numbering', 'Tax', 'Email', 'Security'],
 };
