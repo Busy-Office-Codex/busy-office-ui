@@ -504,6 +504,25 @@ export const appActions = {
     appStore.setState((state) => (state.focusRecordId === null ? state : { ...state, focusRecordId: null }));
   },
 
+  // --- Entry/nav — favorites (Slice 14) --------------------------------------------------
+
+  /** Not logged to `state.activity`: starring is a personal preference, not a business event —
+   * the same distinction that already keeps plain page views out of the audit trail. Lives in the
+   * shared store rather than Launcher.tsx's own local state for a concrete reason, not "screens
+   * might read this too": `src/shell/Shell.tsx` renders its `home` slot behind a real conditional
+   * (`{showLauncher && (home ?? <DefaultHome/>)}`, not `hidden`/`inert` like its other content), so
+   * `Launcher` genuinely unmounts every time the user navigates away from Home and remounts on
+   * return — page-local `useState` would silently lose every starred app on the next navigation. */
+  toggleFavorite(routeId: string) {
+    appStore.setState((state) => {
+      const isFavorite = state.favoriteRouteIds.includes(routeId);
+      return {
+        ...state,
+        favoriteRouteIds: isFavorite ? state.favoriteRouteIds.filter((id) => id !== routeId) : [...state.favoriteRouteIds, routeId],
+      };
+    });
+  },
+
   reset() {
     activitySeq = 0;
     appStore.reset();

@@ -343,4 +343,11 @@ export const seed: AppState = {
   ],
 
   focusRecordId: null,
+
+  // Slice 14 (Entry/nav — favorites). Empty, not pre-populated: unlike Slice 11's "recent" (a
+  // real derived view of activity every slice since Slice 1 already writes to), there is no
+  // existing fact anywhere in this store that means "the user already starred this" — inventing
+  // one would be exactly the "forced connection" the brief warned against. A first-time visitor
+  // sees the section's own honest empty state instead.
+  favoriteRouteIds: [],
 };
