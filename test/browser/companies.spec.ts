@@ -32,15 +32,37 @@ test('activating an inactive entity is a real, live mutation — not a page-loca
   await expect(page.getByRole('row', { name: /Northwind Legacy Services, LLC.*Active/ })).toBeVisible();
 });
 
-test('deactivating a company is logged to the shared audit trail Launcher and AuditLog both read', async ({ page }) => {
+test('deactivating a company confirms first (Slice 15), then is logged to the shared audit trail Launcher and AuditLog both read', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoCompanies(page);
 
   await page.getByRole('row', { name: /Northwind Distribution West/ }).click();
   await page.getByRole('button', { name: 'Deactivate' }).click();
 
+  // A real confirm step — nothing has changed yet.
+  const dialog = page.getByRole('dialog', { name: 'Deactivate Northwind Distribution West, LLC?' });
+  await expect(dialog).toBeVisible();
+  await expect(page.getByRole('row', { name: /Northwind Distribution West, LLC.*Inactive/ })).toHaveCount(0);
+
+  await dialog.getByRole('button', { name: 'Deactivate' }).click();
+  await expect(dialog).toBeHidden();
+
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
   await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Audit log\b/ }).click();
 
   await expect(page.getByText('Northwind Distribution West, LLC deactivated')).toBeVisible();
+});
+
+test('cancelling the deactivate confirmation leaves the company active', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoCompanies(page);
+
+  await page.getByRole('row', { name: /Northwind Distribution West/ }).click();
+  await page.getByRole('button', { name: 'Deactivate' }).click();
+
+  const dialog = page.getByRole('dialog', { name: 'Deactivate Northwind Distribution West, LLC?' });
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('row', { name: /Northwind Distribution West, LLC.*Active/ })).toBeVisible();
 });

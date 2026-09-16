@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { appActions, appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { ConfirmDialog } from './confirmDialog.js';
 
 /**
  * Integrations & API (ROADMAP M7's ERP reference-app initiative, Slice 12, Administration) — fills
@@ -15,7 +16,8 @@ import { useStoreState } from './data/store.js';
  * Recent activity (Slice 11) both see it live. No API-key/webhook form here — a disclosed
  * boundary, not an oversight: this reference app never calls a network, so a real secret field
  * would be theater, not a feature; the connect/disconnect lifecycle itself is the real, testable
- * part of "Integrations & API".
+ * part of "Integrations & API". Disconnect (not Connect — only the destructive direction) confirms
+ * first via `ConfirmDialog` (Slice 15, `./confirmDialog.js`).
  */
 
 const STATUS_TONE: Record<string, ChipTone> = { connected: 'strong', disconnected: 'neutral' };
@@ -26,6 +28,7 @@ export function Integrations() {
   const integrationList = Object.values(state.integrations).sort((a, b) => (a.id < b.id ? -1 : 1));
   const [selectedId, setSelectedId] = useState(integrationList[0]?.id ?? '');
   const selected = state.integrations[selectedId];
+  const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
 
   return (
     <div
@@ -96,7 +99,7 @@ export function Integrations() {
               <Density value="compact">
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                   {selected.status === 'connected' ? (
-                    <Button type="button" variant="secondary" onClick={() => appActions.disconnectIntegration(selected.id)}>
+                    <Button type="button" variant="secondary" onClick={() => setConfirmingDisconnect(true)}>
                       Disconnect
                     </Button>
                   ) : (
@@ -110,6 +113,21 @@ export function Integrations() {
           </Card>
         )}
       </div>
+
+      {selected && (
+        <ConfirmDialog
+          open={confirmingDisconnect}
+          title={`Disconnect ${selected.name}?`}
+          confirmLabel="Disconnect"
+          onConfirm={() => {
+            appActions.disconnectIntegration(selected.id);
+            setConfirmingDisconnect(false);
+          }}
+          onCancel={() => setConfirmingDisconnect(false)}
+        >
+          Automations relying on this integration will stop running.
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

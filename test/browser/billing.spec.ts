@@ -66,14 +66,41 @@ test('creating an invoice bills a real un-invoiced confirmed sales order, and th
   await expect(page.getByText('Ready to invoice')).toHaveCount(0);
 });
 
-test('cancelling an invoice is a real state transition, and both actions honestly disappear afterward', async ({ page }) => {
+test('cancelling an invoice confirms first (Slice 15), then is a real state transition, and both actions honestly disappear afterward', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoBilling(page);
 
   await page.getByRole('row', { name: /INV-3201/ }).click();
   await page.getByRole('button', { name: 'Cancel invoice' }).click();
 
+  // A real confirm step — cancellation hasn't happened yet.
+  const dialog = page.getByRole('dialog', { name: 'Cancel INV-3201?' });
+  await expect(dialog).toBeVisible();
+  await expect(page.getByRole('row', { name: /INV-3201.*Cancelled/ })).toHaveCount(0);
+
+  await dialog.getByRole('button', { name: 'Cancel invoice' }).click();
+
+  await expect(dialog).toBeHidden();
   await expect(page.getByRole('row', { name: /INV-3201.*Cancelled/ })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Cancel invoice' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Record payment/ })).toHaveCount(0);
+});
+
+test('cancelling the cancel-invoice confirmation leaves the invoice untouched', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoBilling(page);
+
+  await page.getByRole('row', { name: /INV-3201/ }).click();
+  await page.getByRole('button', { name: 'Cancel invoice' }).click();
+
+  // `exact: true` — the dialog's own dismiss button is named exactly "Cancel", which is also a
+  // substring of its danger confirm button's name here, "Cancel invoice" (unlike the Deactivate/
+  // Reject/Disconnect dialogs, whose confirm labels don't contain "Cancel").
+  const dialog = page.getByRole('dialog', { name: 'Cancel INV-3201?' });
+  await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('row', { name: /INV-3201.*Sent/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Cancel invoice' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Record payment/ })).toBeVisible();
 });

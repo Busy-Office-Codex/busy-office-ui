@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { appActions, appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { ConfirmDialog } from './confirmDialog.js';
 
 /**
  * Companies & entities (ROADMAP M7's ERP reference-app initiative, Slice 12, Administration) —
@@ -16,7 +17,8 @@ import { useStoreState } from './data/store.js';
  *
  * Deactivating a company is a real mutation logged to the shared `state.activity` — AuditLog.tsx
  * and Launcher.tsx's Recent activity (Slice 11) both pick it up live, the same cross-screen
- * connectedness every other slice in this initiative has used.
+ * connectedness every other slice in this initiative has used. Deactivate (not Activate — only
+ * the destructive direction) confirms first via `ConfirmDialog` (Slice 15, `./confirmDialog.js`).
  */
 
 const STATUS_TONE: Record<string, ChipTone> = { active: 'strong', inactive: 'neutral' };
@@ -27,6 +29,7 @@ export function Companies() {
   const companyList = Object.values(state.companies).sort((a, b) => (a.id < b.id ? -1 : 1));
   const [selectedId, setSelectedId] = useState(companyList[0]?.id ?? '');
   const selected = state.companies[selectedId];
+  const [confirmingDeactivate, setConfirmingDeactivate] = useState(false);
 
   return (
     <div
@@ -112,7 +115,7 @@ export function Companies() {
                   <Button
                     type="button"
                     variant={selected.status === 'active' ? 'secondary' : 'primary'}
-                    onClick={() => appActions.toggleCompanyStatus(selected.id)}
+                    onClick={() => (selected.status === 'active' ? setConfirmingDeactivate(true) : appActions.toggleCompanyStatus(selected.id))}
                   >
                     {selected.status === 'active' ? 'Deactivate' : 'Activate'}
                   </Button>
@@ -122,6 +125,21 @@ export function Companies() {
           </Card>
         )}
       </div>
+
+      {selected && (
+        <ConfirmDialog
+          open={confirmingDeactivate}
+          title={`Deactivate ${selected.legalName}?`}
+          confirmLabel="Deactivate"
+          onConfirm={() => {
+            appActions.toggleCompanyStatus(selected.id);
+            setConfirmingDeactivate(false);
+          }}
+          onCancel={() => setConfirmingDeactivate(false)}
+        >
+          Users assigned to this entity will no longer see it as active.
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

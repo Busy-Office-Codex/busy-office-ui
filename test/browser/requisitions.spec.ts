@@ -42,7 +42,7 @@ test('the full chain — approve, then receive goods — is two real, independen
   await expect(page.getByRole('button', { name: /Receive goods/ })).toHaveCount(0);
 });
 
-test('rejecting a pending requisition is a real transition and removes the approve action', async ({ page }) => {
+test('rejecting a pending requisition confirms first (Slice 15), then is a real transition that removes the approve action', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoRequisitions(page);
 
@@ -52,7 +52,30 @@ test('rejecting a pending requisition is a real transition and removes the appro
   await page.getByRole('row', { name: /REQ-4001/ }).click();
   await page.getByRole('button', { name: 'Reject' }).click();
 
+  // A real confirm step, not an immediate mutation — Reject hasn't actually happened yet.
+  const dialog = page.getByRole('dialog', { name: 'Reject REQ-4001?' });
+  await expect(dialog).toBeVisible();
+  await expect(page.getByRole('row', { name: /REQ-4001.*Rejected/ })).toHaveCount(0);
+
+  await dialog.getByRole('button', { name: 'Reject' }).click();
+
+  await expect(dialog).toBeHidden();
   await expect(page.getByRole('row', { name: /REQ-4001.*Rejected/ })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Approve — create purchase order' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Reject' })).toHaveCount(0);
+});
+
+test('cancelling the reject confirmation leaves the requisition untouched', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoRequisitions(page);
+
+  await page.getByRole('row', { name: /REQ-4001/ }).click();
+  await page.getByRole('button', { name: 'Reject' }).click();
+
+  const dialog = page.getByRole('dialog', { name: 'Reject REQ-4001?' });
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('row', { name: /REQ-4001.*Pending approval/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Approve — create purchase order' })).toBeVisible();
 });

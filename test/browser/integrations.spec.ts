@@ -32,15 +32,37 @@ test('connecting a disconnected integration is a real, live mutation — not a s
   await expect(page.getByRole('row', { name: /DocuSign.*Documents.*Connected/ })).toBeVisible();
 });
 
-test('disconnecting Slack is logged to the shared audit trail Launcher and AuditLog both read', async ({ page }) => {
+test('disconnecting Slack confirms first (Slice 15), then is logged to the shared audit trail Launcher and AuditLog both read', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoIntegrations(page);
 
   await page.getByRole('row', { name: /Slack notifications/ }).click();
   await page.getByRole('button', { name: 'Disconnect' }).click();
 
+  // A real confirm step — nothing has changed yet.
+  const dialog = page.getByRole('dialog', { name: 'Disconnect Slack notifications?' });
+  await expect(dialog).toBeVisible();
+  await expect(page.getByRole('row', { name: /Slack notifications.*Disconnected/ })).toHaveCount(0);
+
+  await dialog.getByRole('button', { name: 'Disconnect' }).click();
+  await expect(dialog).toBeHidden();
+
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
   await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Audit log\b/ }).click();
 
   await expect(page.getByText('Integration disconnected — Slack notifications')).toBeVisible();
+});
+
+test('cancelling the disconnect confirmation leaves Slack connected', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoIntegrations(page);
+
+  await page.getByRole('row', { name: /Slack notifications/ }).click();
+  await page.getByRole('button', { name: 'Disconnect' }).click();
+
+  const dialog = page.getByRole('dialog', { name: 'Disconnect Slack notifications?' });
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('row', { name: /Slack notifications.*Connected/ })).toBeVisible();
 });
