@@ -343,6 +343,7 @@ export const seed: AppState = {
   ],
 
   focusRecordId: null,
+  focusInvoiceId: null,
 
   // Slice 14 (Entry/nav — favorites). Empty, not pre-populated: unlike Slice 11's "recent" (a
   // real derived view of activity every slice since Slice 1 already writes to), there is no

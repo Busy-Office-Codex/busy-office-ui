@@ -21,14 +21,20 @@ import { ConfirmDialog } from './confirmDialog.js';
  * no invoice yet — real worklist-driven creation, not a hand-typed blank form) and "Cancel
  * invoice" (a real reversal for an unpaid invoice; this simple model doesn't try to model a
  * credit note against an already-paid one — see `appActions.cancelInvoice`'s own comment).
- * This screen still doesn't navigate to Invoice.tsx with a specific selected invoice's real
- * data — Invoice.tsx's own richly-styled printed-document page (letterhead, QR code, payment
- * progress bar) stays the static M6 reference it already is; making it store-connected is a
- * separate, bigger decision (the same one Delivery.tsx's Slice 7 upgrade made for a different
- * page), a deliberate scope line rather than a half-connected rewrite of that page's own visual
- * work. What Invoice.tsx's own page COULD support on its own terms — a working Print action —
- * is real now (Slice 16): `window.print()`, with a `@media print` rule hiding its action-button
- * row and sidebar so only the document itself prints.
+ *
+ * "View invoice" now sends a real selected invoice's data to Invoice.tsx (Invoice.tsx is
+ * store-connected as of this change, the same static-to-connected upgrade Delivery.tsx got in
+ * Slice 7): Shell owns navigation state centrally and this pane has no navigate callback of its
+ * own (see Analytics.tsx's own comment), so the actual move to the Invoice route stays the app
+ * strip/command palette, same as every other cross-module jump in this app — landing there,
+ * Invoice.tsx pre-selects the exact invoice clicked here. This calls `appActions.viewInvoice`, a
+ * dedicated slot, NOT `appActions.focusRecord` (Analytics.tsx's own cross-module exceptions) —
+ * found live, not assumed: Billing.tsx's own `useFocusRecord` already claims any invoice id
+ * `focusRecordId` carries, so it would immediately reconsume its own request for Invoice.tsx
+ * before Invoice.tsx (mounting for the first time) ever saw it, since every visited route here
+ * stays mounted, hidden, after its first visit. Its own working Print action (Slice 16) is
+ * `window.print()`, with a `@media print` rule hiding its action-button row and sidebar so only
+ * the document itself prints.
  *
  * "Cancel invoice" (not "Record payment" — only the destructive direction) confirms first via
  * `ConfirmDialog` (Slice 15, `./confirmDialog.js`).
@@ -220,30 +226,35 @@ export function Billing() {
                 </div>
               )}
 
-              {selected.status !== 'paid' && selected.status !== 'cancelled' && (
-                <Density value="compact">
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                    <Button type="button" variant="secondary" onClick={() => setConfirmingCancel(true)}>
-                      Cancel invoice
-                    </Button>
-                    {balanceDue > 0 && (
-                      <Button
-                        type="button"
-                        variant="primary"
-                        onClick={() =>
-                          appActions.recordPayment(selected.id, {
-                            date: new Date().toISOString().slice(0, 10),
-                            amount: balanceDue,
-                            method: 'ACH transfer',
-                          })
-                        }
-                      >
-                        Record payment — {formatCurrency(balanceDue)}
+              <Density value="compact">
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                  <Button type="button" variant="secondary" onClick={() => appActions.viewInvoice(selected.id)}>
+                    View invoice
+                  </Button>
+                  {selected.status !== 'paid' && selected.status !== 'cancelled' && (
+                    <>
+                      <Button type="button" variant="secondary" onClick={() => setConfirmingCancel(true)}>
+                        Cancel invoice
                       </Button>
-                    )}
-                  </div>
-                </Density>
-              )}
+                      {balanceDue > 0 && (
+                        <Button
+                          type="button"
+                          variant="primary"
+                          onClick={() =>
+                            appActions.recordPayment(selected.id, {
+                              date: new Date().toISOString().slice(0, 10),
+                              amount: balanceDue,
+                              method: 'ACH transfer',
+                            })
+                          }
+                        >
+                          Record payment — {formatCurrency(balanceDue)}
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </Density>
             </div>
           </Card>
         )}
