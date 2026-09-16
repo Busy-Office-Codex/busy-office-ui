@@ -33,6 +33,7 @@ import { Integrations } from '../examples/Integrations.js';
 import { AuditLog } from '../examples/AuditLog.js';
 import { Analytics } from '../examples/Analytics.js';
 import { BuilderScreens } from '../examples/BuilderScreens.js';
+import { BuilderReports } from '../examples/BuilderReports.js';
 import { PasswordReset } from '../examples/PasswordReset.js';
 import { AccountLocked } from '../examples/AccountLocked.js';
 import { SessionExpired } from '../examples/SessionExpired.js';
@@ -98,6 +99,10 @@ const routes = [
   // pre-existing NAV.Administration placeholders (M6): 'Companies' and 'Integrations'.
   { id: 'companies', module: 'Administration', label: 'Companies' },
   { id: 'integrations', module: 'Administration', label: 'Integrations' },
+  // M7, Slice 13 (Builder — report/dashboard builder) — a NEW NAV.Builder entry, not a
+  // pre-existing M6 placeholder (see AppShell.tsx's NAV.Builder comment and BuilderReports.tsx's
+  // own header comment). This is the 32nd and final entry: SHELL_MAX_ROUTES is a hard cap.
+  { id: 'builder-reports', module: 'Builder', label: 'Reports & dashboards' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -132,6 +137,7 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   roles: <Roles />,
   companies: <Companies />,
   integrations: <Integrations />,
+  'builder-reports': <BuilderReports />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */

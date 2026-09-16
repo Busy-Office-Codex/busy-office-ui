@@ -2,63 +2,78 @@ import { useEffect, useState } from 'react';
 import { Button, ButtonGroup, Card, Chip, type ChipTone, Density, Text } from '../src/index.js';
 
 /**
- * A screen/page-definition builder (ROADMAP M7's ERP reference-app initiative, Slice 6, Builder)
- * — fills NAV.Builder's own pre-existing 'Pages' placeholder (M6) alongside the Forms/Workflows
- * builders that page already sits next to.
+ * A report/dashboard-definition builder (ROADMAP M7's ERP reference-app initiative, Slice 13,
+ * Builder) — "the brief's other named Slice 6 target", per BuilderScreens.tsx's own header
+ * comment, which deliberately left it unbuilt: neither pre-existing NAV.Builder placeholder
+ * ('Fields', 'Publish') fits a report/dashboard designer. This slice resolves that disclosed gap
+ * by adding a NEW NAV.Builder entry, 'Reports & dashboards', rather than force-fitting it into a
+ * placeholder meant for something else.
  *
- * Unlike BuilderForms.tsx/BuilderWorkflow.tsx (both explicit, documented STATIC treatments —
- * ROADMAP M6 batch 4's own classification, a deliberate structural-first-pass scope, not an
- * oversight), this screen is deliberately made genuinely interactive: the brief's own named
- * Slice 6 journey is "open definition → modify → validate → preview → save → reopen", and a
- * static mockup can't demonstrate that journey at all. Add/remove a widget, see a real "Unsaved
- * changes" state, switch to a real Preview render, Save, then reopen a different definition and
- * come back — the saved layout is still there, not reverted.
+ * Same architecture as BuilderScreens.tsx (add/remove a widget, real "Unsaved changes" state, a
+ * real Preview render, Save, reopen a different definition and come back) — this is the same
+ * "open definition → modify → validate → preview → save → reopen" journey, applied to a
+ * report/dashboard layout instead of a page layout. State lives in this component only, not the
+ * shared examples/data store, for the exact reason BuilderScreens.tsx already draws that
+ * boundary: report/dashboard LAYOUT definitions are Builder/UI-configuration territory, a
+ * different bounded concern from the ERP transactional data the shared store owns.
  *
- * State lives in this component only (not the shared examples/data store): page-layout
- * definitions are Builder/UI-configuration territory, a different bounded concern from the ERP
- * transactional data (orders, stock, users…) the shared store owns — same boundary line
- * AGENTS.md already draws around the package itself, just applied one level down. Persistence is
- * real for the length of this browser session (the component never unmounts once visited — see
- * preview/client.tsx's SamplePreview, which keeps every visited route's pane alive as a hidden
- * div) — exactly what "save → reopen" needs to demonstrate honestly, without inventing a backend.
+ * The widget palette (KPI stat / Bar chart / Line chart / Donut chart / Table) mirrors the real
+ * `Chart` component's own `type` union ('bar' | 'line' | 'donut') plus the two non-chart shapes
+ * Dashboard.tsx/Inventory.tsx already compose with it — a plausible reflection of what this
+ * package's own components could render, not an invented taxonomy. Preview stays structural
+ * (a labeled box per widget), same as BuilderScreens.tsx's own Preview: rendering each widget with
+ * a REAL `Chart` against REAL store data is a bigger, separate feature (wiring five different
+ * live aggregations, several not computed anywhere yet — cash-flow, spend-by-supplier-style
+ * breakdowns), not this builder's own "can I lay out and save a definition" journey.
  *
- * Report/dashboard builder (the brief's other named Slice 6 target) was deliberately NOT built
- * here or as a second file at the time: no existing NAV.Builder placeholder fit it, and one
- * genuinely interactive builder demonstrating the full journey end-to-end was more valuable than
- * two shallow static ones. Built later as its own screen, BuilderReports.tsx (Slice 13), once a
- * dedicated NAV entry made sense on its own terms rather than forcing a second concern in here.
+ * Naming note: 'Reports & dashboards' shares the word "Reports" with NAV.Finance's own
+ * still-unbuilt 'Reports' placeholder — like 'Users' / 'Users and roles' before it (see
+ * AppShell.tsx's NAV.Administration comment), a plain `/^Reports\b/` selector would be ambiguous
+ * if Finance's placeholder is ever built too; use the same `\s+[A-Z]` (hint-anchored) selector
+ * this codebase already relies on for that case. This is also preview/client.tsx's 32nd and
+ * FINAL route: `SHELL_MAX_ROUTES` is a hard cap (`src/shell/Shell.tsx`), so the next NAV entry
+ * that needs a real route (Fields, Publish, Finance's Reports, or anything new) requires either
+ * retiring an existing route or raising the cap — a one-way, package-level change per LOOP.md,
+ * not a call this slice makes unilaterally.
  */
 
-type WidgetType = 'Table' | 'Chart' | 'Stat tile' | 'Form section';
+type WidgetType = 'KPI stat' | 'Bar chart' | 'Line chart' | 'Donut chart' | 'Table';
 
 type Widget = { id: string; type: WidgetType; label: string };
 
-type PageDefinition = { id: string; name: string; widgets: Widget[] };
+type ReportDefinition = { id: string; name: string; widgets: Widget[] };
 
 const WIDGET_TONE: Record<WidgetType, ChipTone> = {
+  'KPI stat': 'neutral',
+  'Bar chart': 'strong',
+  'Line chart': 'strong',
+  'Donut chart': 'strong',
   Table: 'accent',
-  Chart: 'strong',
-  'Stat tile': 'neutral',
-  'Form section': 'accent',
 };
 
-const PALETTE: WidgetType[] = ['Table', 'Chart', 'Stat tile', 'Form section'];
+const PALETTE: WidgetType[] = ['KPI stat', 'Bar chart', 'Line chart', 'Donut chart', 'Table'];
 
-const SEED_DEFINITIONS: Record<string, PageDefinition> = {
-  'customer-360': {
-    id: 'customer-360',
-    name: 'Customer 360',
+// Widget labels reuse facts and figures already established elsewhere (Dashboard.tsx's own
+// "Revenue trend"/"REVENUE THIS MONTH", Inventory.tsx's stock-by-warehouse bar+donut,
+// Requisitions.tsx's own worklist) — the same "the fact already exists elsewhere, name it the
+// same way" discipline every slice in this initiative has used, not a second, disconnected cast
+// of invented report names.
+const SEED_DEFINITIONS: Record<string, ReportDefinition> = {
+  'sales-performance': {
+    id: 'sales-performance',
+    name: 'Sales performance report',
     widgets: [
-      { id: 'w-1', type: 'Stat tile', label: 'Lifetime value' },
-      { id: 'w-2', type: 'Table', label: 'Open orders' },
+      { id: 'w-1', type: 'KPI stat', label: 'Revenue this month' },
+      { id: 'w-2', type: 'Line chart', label: 'Revenue trend' },
     ],
   },
-  'procurement-overview': {
-    id: 'procurement-overview',
-    name: 'Procurement overview',
+  'ops-dashboard': {
+    id: 'ops-dashboard',
+    name: 'Operations dashboard',
     widgets: [
-      { id: 'w-3', type: 'Chart', label: 'Spend by supplier' },
-      { id: 'w-4', type: 'Table', label: 'Pending approvals' },
+      { id: 'w-3', type: 'Bar chart', label: 'Stock by warehouse' },
+      { id: 'w-4', type: 'Donut chart', label: 'Stock mix by warehouse' },
+      { id: 'w-5', type: 'Table', label: 'Open requisitions' },
     ],
   },
 };
@@ -70,9 +85,9 @@ const VIEW_MODES = [
 
 let nextWidgetSeq = 1;
 
-export function BuilderScreens() {
-  const [definitions, setDefinitions] = useState<Record<string, PageDefinition>>(SEED_DEFINITIONS);
-  const [selectedId, setSelectedId] = useState('customer-360');
+export function BuilderReports() {
+  const [definitions, setDefinitions] = useState<Record<string, ReportDefinition>>(SEED_DEFINITIONS);
+  const [selectedId, setSelectedId] = useState('sales-performance');
   const selected = definitions[selectedId]!;
 
   const [draftWidgets, setDraftWidgets] = useState<Widget[]>(selected.widgets);
@@ -151,7 +166,7 @@ export function BuilderScreens() {
         <div style={{ flex: '1 1 220px', minWidth: 200, maxWidth: 280, display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <Text variant="caption" as="span">
-              PAGE DEFINITIONS
+              REPORT &amp; DASHBOARD DEFINITIONS
             </Text>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {Object.values(definitions).map((definition) => (
@@ -246,7 +261,7 @@ export function BuilderScreens() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <Text variant="title">Preview</Text>
                 {draftWidgets.length === 0 ? (
-                  <Text variant="caption">This page has no widgets to preview yet.</Text>
+                  <Text variant="caption">This report has no widgets to preview yet.</Text>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
                     {draftWidgets.map((widget) => (

@@ -97,7 +97,11 @@ const NAV: Record<AppShellModule, string[]> = {
   // (Administration + role-based config); 'Roles' gained its own in Slice 9; 'Companies' and
   // 'Integrations' gained theirs in Slice 12 — the last of this module's M6-era placeholders.
   Administration: ['Overview', 'Users and roles', 'Users', 'Roles', 'Companies', 'Integrations', 'Audit log'],
-  Builder: ['Pages', 'Forms', 'Workflows', 'Fields', 'Publish'],
+  // 'Reports & dashboards' added M7, Slice 13 — a NEW entry, not a pre-existing M6 placeholder:
+  // neither 'Fields' nor 'Publish' fits a report/dashboard designer (see BuilderReports.tsx's own
+  // header comment). This is preview/client.tsx's 32nd and final route — SHELL_MAX_ROUTES is a
+  // hard cap.
+  Builder: ['Pages', 'Forms', 'Workflows', 'Fields', 'Publish', 'Reports & dashboards'],
   Settings: ['General', 'Organization', 'Numbering', 'Tax', 'Email', 'Security'],
 };
 
