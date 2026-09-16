@@ -279,9 +279,18 @@ export function Invoice() {
                     may accrue a 1.5% monthly late fee.
                   </Text>
                 </div>
-                {/* A scannable pay-by-QR affordance — no QR-generation dependency in this
-                    package, so (matching the "no Icon component" precedent elsewhere in
-                    examples/) this is a plain hand-built stand-in, not a real generated code. */}
+                {/* A scannable pay-by-QR affordance — stays a labeled placeholder even after
+                    Icon (ROADMAP issue #18) landed a real closed glyph set elsewhere in
+                    examples/ (ControlCenter.tsx's sliders trigger, AppShell.tsx's notification
+                    bell). A QR code is a generated 2D barcode encoding this invoice's own
+                    payment data — every real one is visually distinct — not a fixed glyph a
+                    small icon set can represent; a generic "code/scan" stand-in glyph here
+                    would just be a different-looking lie about the same missing capability
+                    (no QR-generation dependency in this package). It also has exactly one
+                    caller, failing Icon's own "closed set built from what real consumers
+                    actually need" bar the same way a one-caller prop/variant fails Objective 1
+                    elsewhere in this repo. Left as a plain hand-built placeholder, honestly
+                    labeled "QR" rather than rendered as if it were real. */}
                 <div
                   aria-hidden="true"
                   style={{

@@ -213,6 +213,43 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('>$1,240.00</span>');
   });
 
+  it('renders a decorative Icon as aria-hidden with no accessible-name role', () => {
+    const markup = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'sliders' }));
+
+    expect(markup).toContain('<svg');
+    expect(markup).toContain('aria-hidden="true"');
+    expect(markup).not.toContain('role="img"');
+    expect(markup).not.toContain('<title>');
+  });
+
+  it('gives an icon-only-button Icon a real accessible name via title instead of aria-hidden', () => {
+    const markup = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'bell', title: 'Notifications' }));
+
+    expect(markup).toContain('<svg');
+    expect(markup).not.toContain('aria-hidden');
+    expect(markup).toContain('role="img"');
+    expect(markup).toContain('<title>Notifications</title>');
+  });
+
+  it('renders distinct structural glyphs per Icon name, sized and colored via props', () => {
+    const sliders = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'sliders', size: 24, color: '#0057b8' }));
+    const bell = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'bell' }));
+
+    // `sliders` is three tracks (<line>) each with a handle (<circle>) — a structural fingerprint
+    // distinguishing it from `bell`, which has no <line>/<circle> element at all.
+    expect(sliders.match(/<line /g)?.length).toBe(3);
+    expect(sliders.match(/<circle /g)?.length).toBe(3);
+    expect(sliders).toContain('width="24"');
+    expect(sliders).toContain('height="24"');
+    expect(sliders).toContain('stroke="#0057b8"');
+    expect(bell).not.toContain('<line');
+    expect(bell).not.toContain('<circle');
+    expect(bell).toContain('<path');
+    // No explicit color given — falls back to currentColor, not a hardcoded token literal.
+    expect(bell).toContain('fill="currentColor"');
+    expect(bell).toContain('width="16"');
+  });
+
   it('renders each Text variant on its default element, and `as` overrides the element', () => {
     const heading = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'heading', children: 'Orders' }));
     const caption = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'caption', children: 'Orders' }));
