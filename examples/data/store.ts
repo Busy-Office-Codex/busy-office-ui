@@ -55,7 +55,15 @@ export function createStore<State>(seed: State): Store<State> {
 
 /** Reads a `Store<State>` reactively via `selector`, re-rendering only when the selected slice's
  * object identity changes (the store's own immutable-update contract makes that a real signal,
- * not a false negative) — the same selector pattern Redux/Zustand's own hooks use. */
+ * not a false negative) — the same selector pattern Redux/Zustand's own hooks use.
+ *
+ * The third `getServerSnapshot` argument is the same function as the client snapshot, not an
+ * omission: this store's seed data is identical on server and client (no request-specific state),
+ * so there's no separate server value to compute — but React requires the argument be present at
+ * all whenever the component renders server-side, or it throws outright rather than falling back
+ * (caught live: docs-site prerenders the Launcher pattern page via Astro `client:load`, which
+ * crashed the docs-site build with "Missing getServerSnapshot" before this fix, 2026-09-17). */
 export function useStoreState<State, Selected>(store: Store<State>, selector: (state: State) => Selected): Selected {
-  return useSyncExternalStore(store.subscribe, () => selector(store.getState()));
+  const getSnapshot = () => selector(store.getState());
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }

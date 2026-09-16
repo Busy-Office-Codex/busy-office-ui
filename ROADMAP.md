@@ -170,6 +170,19 @@ it was a bare defensive array-length sanity check, not a reasoned ceiling,
 and sat at exactly 32/32 after item 13, blocking any new route the Finance
 module or BI explore would need.
 
+Further expanded (owner-directed, 2026-09-17, issue #21): a website, content
+and sample-app reorganization — items 40–48 below track it. This is not
+framework expansion (no new component, prop or export), so it doesn't need
+the Objective tests below; it's the "documentation" and "pure examples"
+half of `intent.md`'s own scope, following an audit-first process (six
+parallel read-only agents over docs-site pages/nav, `docs/*.md`, all 45
+`examples/*.tsx`, preview labs + quality gates, the generated-refs
+pipeline, and the reference repo's IA — findings and a compact old→new
+content map are in issue #21). Real click-through navigation between
+sample screens (list → detail → edit → confirmation) is explicitly OUT of
+this scope — it would be new interactive behavior in `examples/`, not a
+content reorg, and needs its own proposal.
+
 After M6, or once its scope is exhausted, stop expanding the framework: new
 work starts only from a request that passes the Objective tests. M7 is the
 one exception already in flight; after it closes, this line applies again
@@ -574,6 +587,150 @@ issues.
     traced every token substitution and the focus-order mechanism by hand.
     Disclosed: 41 of 45 `examples/*.tsx` files still have raw color/spacing
     literals.
+40. [x] Fix docs-site build/token-drift defects found by the item-21 audit.
+    Two real, independent SSR crashes were breaking `pnpm build:docs`
+    outright — confirmed pre-existing on `main` (reproduced on a clean
+    checkout before any fix) and confirmed unnoticed at real scale:
+    `gh run list -w docs -b main` shows the `docs` GitHub Actions workflow
+    red on 29 consecutive pushes to `main`, starting at `fix/shell-mobile-
+    header-overflow: retract brand...` (2026-09-15T12:08:58Z — the exact
+    commit that introduced the unguarded `window.matchMedia` call below)
+    through this batch's own start, spanning the rest of M6 batch 4, the
+    Chart pivot, the whole M7 ERP reference-app initiative (slices 1-18),
+    and the entire theme milestone. The published docs container at
+    `ghcr.io` has not rebuilt successfully since. Invisible to this repo's
+    own gate discipline the whole time because `gates.yml` never runs
+    `pnpm build:docs` — only `docs.yml` does, and nothing treats a red
+    `docs` run as a stop condition the way a red `gates` run is; fixed
+    below (gates.yml now runs it too). (a)
+    `src/shell/Shell.tsx`'s `chromeIsNarrow` state read `window.matchMedia`
+    unguarded in a `useState` lazy initializer, which runs during Astro's
+    server-side prerender (`client:load`) where `window` doesn't exist —
+    crashed `/components/shell`. (b) `examples/data/store.ts`'s
+    `useStoreState` called `useSyncExternalStore` with no third
+    `getServerSnapshot` argument, which React requires whenever a component
+    renders server-side — crashed `/patterns/launcher` (any screen reading
+    the shared store). Both fixed with the standard guard/argument, not a
+    workaround; `pnpm build:docs` now completes clean (24/24 pages) and
+    `docs-site/scripts/check-links.mjs` resolves all links on a fresh build.
+    Separately, `docs-site/src/pages/tokens.astro`'s Color section was
+    rendering a completely empty swatch grid live on the site:
+    `docs-site/src/lib/parseTokens.ts`'s regex assumed flat string-literal
+    `color.*` values, which stopped being true once item 19 changed every
+    entry to `{ default, '@media...' }` objects — `readTokens('color')` was
+    silently returning 0 entries. Fixed by reading `lightPalette`/
+    `darkPalette` directly (still flat literals) instead of trying to parse
+    `color`; the page now renders all 18 tokens' real light+dark hex pairs,
+    manually confirmed live via Chrome DevTools color-scheme emulation in
+    both light and dark before and after. `docs-site/src/layouts/Base.astro`
+    also carried a now-false comment ("the package is light-only today")
+    and hardcoded-light chrome from before the theme milestone; real
+    dark-mode component colors were rendering inside a chrome box that
+    stayed light. Fixed with a `prefers-color-scheme: dark` block using the
+    same `lightPalette`/`darkPalette` hex this file already hand-mirrors —
+    confirmed live: light mode pixel-unchanged, dark mode legible (the
+    `/components/button/` live demo's primary `Button` fill, previously the
+    exact failure mode the stale comment described in reverse). Also added
+    `pnpm build:docs` and the docs-site link check to `.github/workflows/
+    gates.yml` itself — the 29-run blind spot above existed specifically
+    because nothing treated a red `docs` run as a stop condition; it now
+    fails the same gate a red `pnpm test`/`test:browser` run already does,
+    closing the actual process gap, not just today's two instances of it.
+    A required independent fresh-context review of this whole batch (see
+    below) found and fixed two further real issues before merge: a factual
+    error here (originally said "17 tokens", corrected to the true count,
+    18); and a second, fresh instance of the exact "light-only chrome"
+    bug class this item already fixes once — `tokens.astro`'s own inline
+    `<style>` block still had light-only literals for its swatch borders
+    and value text (`#64748b` on the now-dark `#020617` canvas measured
+    ~4.24:1, under AA's 4.5:1), fixed with the same `prefers-color-scheme:
+    dark` pattern as `Base.astro`. The same review also suggested
+    simplifying (a)'s guard to an unconditional `useState(false)`, purely
+    to avoid a hydration-mismatch warning on the one server-rendered demo
+    — tried it, and the full `pnpm test:browser` run caught a real
+    regression before merge: `control-center.spec.ts`'s narrow-viewport
+    test measures zero top-bar overflow on first paint, which a wrong
+    `false` guess broke for every real (client-only) consumer. Reverted to
+    the guarded `window`-read, which is correct for every actual usage;
+    the hydration-mismatch warning stays an accepted, disclosed tradeoff
+    on that one docs-site page, not a functional bug. Accept: `pnpm build
+    && pnpm build:docs` complete with exit 0; `docs-site`'s own link-check
+    reports 0 broken links; the tokens page's rendered color section lists
+    >0 entries with real light+dark hex for both, at AA contrast in both
+    modes; `gates.yml` runs `pnpm build:docs` and the link check; `pnpm
+    test:browser` stays 224/224. Serves: intent.md "documentation" (docs
+    must not silently drift from real component behavior, same principle
+    as item 6). Needs: issue #21 (owner-directed, 2026-09-17).
+41. [x] Rewrite `examples/README.md`'s file-to-template table to cover
+    every `examples/*.tsx` file that renders a screen (helpers/data-layer
+    files stay out of scope — they were never in this table). It
+    previously documented only the ~21-file M6 batch. Found while fixing
+    this that 19 files were missing, all one undocumented lineage: ROADMAP
+    M7's own "ERP reference-app initiative" (13 numbered slices, a
+    per-module gap inventory, named cross-screen journeys like
+    "Sales-to-billing" and "create user → assign role → preview access →
+    inspect audit history"), built without a Claude Design `.dc.html`
+    template to mirror — unlike this table's other rows. Added all 19 with
+    an honest "Mirrors: None" rather than inventing a template citation,
+    plus a short note explaining the two lineages so a reader isn't left
+    assuming an omission. Accept: every file in `examples/*.tsx` that
+    renders a full sample screen has a corresponding README row. Serves:
+    intent.md "documentation". Needs: issue #21 (owner-directed,
+    2026-09-17).
+42. [ ] Start Here landing page (`docs-site/src/pages/index.astro`
+    rewrite). Accept: the page includes an install snippet, `intent.md`'s
+    boundary statement ("a UI dependency, not an ERP platform kernel"),
+    and a link to a live ERP pattern page; `docs-site`'s link check stays
+    green. Serves: intent.md "documentation". Needs: issue #21.
+43. [ ] Foundations restructure: merge tokens/density/theme content under
+    one Foundations section; add a Base Styles page for typography/
+    spacing/elevation/motion/icons (none exists today — `shadow`/`glass`/
+    motion tokens and `Icon`'s glyph set exist in source with no docs-site
+    page of their own). Accept: a new page renders real `shadow`/`glass`/
+    motion token values and `Icon`'s glyph set live from source, not
+    hand-copied. Serves: intent.md "documentation". Needs: issue #21.
+44. [ ] Components section: group the 14 docs by their existing
+    frontmatter `category` instead of one flat list; add `docs/AppShell.md`
+    (a real package export, `@busyoffice/design-system/examples/app-shell`,
+    with no doc today). Accept: docs-site's components index renders
+    grouped sections keyed by each doc's `category` field; `docs/
+    AppShell.md` exists with the same shape as `ListReport.md`/
+    `RecordDetail.md`. Serves: intent.md "documentation", Objective 1 (no
+    drift). Needs: issue #21.
+45. [ ] ERP Patterns: one URL per pattern combining prose and live demo
+    (ListReport, RecordDetail, Launcher, Dashboard), replacing today's
+    split routes (prose at `/components/{id}/`, demo at `/patterns/{id}/`,
+    no cross-link); write new `docs/Launcher.md` and `docs/Dashboard.md`
+    (demo-only today, no prose exists for either). Accept: `/patterns/
+    {listreport,recorddetail,launcher,dashboard}/` each render both prose
+    and a live demo at one URL; check-links stays green. Serves: intent.md
+    "documentation". Needs: issue #21.
+46. [ ] Examples gallery page cataloguing all 45 `examples/*.tsx` by
+    category (full-sample-screen / reusable-helper / state-page),
+    surfacing the 6 hash-only screens (`Login` + 4 error states +
+    password-reset) that are reachable only by hand-typing a URL hash, not
+    from inside the running app. Accept: every `examples/*.tsx` file with
+    a real screen appears in the gallery with its route or hash; the 6
+    hash-only screens are individually linked. Serves: intent.md
+    "documentation". Needs: issue #21.
+47. [ ] Quality & Verification page: surface the CI gate suite composition
+    (`gates.yml`/`docs.yml`), ROADMAP's own narrated 3-lens review findings
+    per milestone, and disclosed limitations (structural-first-pass
+    caveat, raw-token file count, Shell chrome re-tint gap). Accept: the
+    page names every gate in `gates.yml` and links the validation commands
+    (`pnpm build`/`lint`/`typecheck`/`test`/`test:browser`/`security`); no
+    invented score or dashboard duplicating manually maintained data —
+    confirmed by this milestone's own audit that no such system exists
+    anywhere in the org to duplicate. Serves: intent.md "documentation".
+    Needs: issue #21.
+48. [ ] Build with AI page: boundary/scope (`intent.md`/`ARCHITECTURE.md`),
+    supported subpath exports, the two-way/one-way gate from `AGENTS.md`,
+    and common mistakes (removed `Button.size`/`Table.density`, importing
+    from `src/` instead of documented subpaths, treating `ListReport`/
+    `RecordDetail` as components rather than compositions). Accept: page
+    content is sourced from `intent.md`/`ARCHITECTURE.md`/`AGENTS.md`'s
+    real text, not restated from memory; check-links stays green. Serves:
+    intent.md "documentation". Needs: issue #21.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).

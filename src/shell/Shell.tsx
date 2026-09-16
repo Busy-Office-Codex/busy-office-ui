@@ -475,7 +475,24 @@ export function Shell({ navigation, pinned = [], commands = [], breadcrumbs, bra
   // was already unreachable without knowing to scroll the header sideways. `matchMedia`, not a
   // CSS `@media` query: brand's own maxWidth is computed in JS from BOTH this and
   // `chromeExpanded` together (see below), which inline styles can't express as one rule.
-  const [chromeIsNarrow, setChromeIsNarrow] = useState(() => window.matchMedia(NARROW_CHROME_QUERY).matches);
+  // Guarded, not a bare `window.matchMedia(...)` call: docs-site prerenders this component's live
+  // demo server-side (Astro `client:load`), where `window` doesn't exist yet — the unguarded read
+  // crashed that build outright (`ReferenceError: window is not defined`, caught live while fixing
+  // the docs-site token pipeline, 2026-09-17). Not `useState(false)` unconditionally either — tried
+  // that (an independent review's suggestion, to also avoid a hydration-mismatch warning on that
+  // one server-rendered demo), but it regressed a real, passing browser test: at a narrow viewport,
+  // `control-center.spec.ts` measures the top bar has zero horizontal overflow on FIRST PAINT, and
+  // every real consumer of this component (AppShell and everything test/browser/* exercises) is
+  // client-only, never server-rendered — starting narrow-detection at a wrong `false` guess left
+  // the un-retracted brand overflowing the bar for that first paint. Reading the real value
+  // immediately when `window` exists (true for every actual production usage) keeps that correct;
+  // `false` covers only the one SSR path where `window` genuinely isn't there yet, corrected by the
+  // effect right below after hydration — an accepted, disclosed tradeoff (a harmless one-time
+  // hydration-mismatch warning on that one docs-site demo page, not a functional bug, and not the
+  // path any real host or test exercises).
+  const [chromeIsNarrow, setChromeIsNarrow] = useState(() =>
+    typeof window === 'undefined' ? false : window.matchMedia(NARROW_CHROME_QUERY).matches
+  );
   useEffect(() => {
     const mql = window.matchMedia(NARROW_CHROME_QUERY);
     const onChange = () => setChromeIsNarrow(mql.matches);

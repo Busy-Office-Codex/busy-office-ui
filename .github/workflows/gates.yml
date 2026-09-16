@@ -29,6 +29,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm security
+      - run: pnpm build:docs
+      - run: node docs-site/scripts/check-links.mjs
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:browser
       - if: failure()
