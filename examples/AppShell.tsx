@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState, type ReactNode } from 'react';
-import { Density } from '../src/index.js';
+import { Density, Icon } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
 import { color } from '../src/tokens.stylex.js';
 import { ControlCenterButton, type ControlCenterDensity } from './ControlCenter.js';
@@ -233,7 +233,10 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
             title="Notifications"
             {...stylex.props(notificationButtonStyles.button)}
           >
-            <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: 4, background: color.textDisabled }} />
+            {/* Real `Icon` (ROADMAP issue #18) — was a plain filled square stand-in; decorative
+                here since this button's own `aria-label`/`title` already carry the accessible
+                name. */}
+            <Icon name="bell" color={color.textPrimary} />
             <span aria-hidden="true" style={{ position: 'absolute', top: 4, right: 4, width: 7, height: 7, borderRadius: '50%', background: color.accent, border: `1.5px solid ${color.bgSurface}` }} />
           </button>
           <div style={{ width: 32, height: 32, borderRadius: 999, background: color.border, flexShrink: 0 }} />

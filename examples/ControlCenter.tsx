@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Button, ButtonGroup, Text } from '../src/index.js';
+import { Button, ButtonGroup, Icon, Text } from '../src/index.js';
 import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.js';
 
 /**
@@ -46,9 +46,10 @@ import { color, font, glass, radius, shadow, space } from '../src/tokens.stylex.
  * Tab is allowed to move focus back out to the rest of the page rather than wrapping, since
  * nothing behind this popover is blocked or inert).
  *
- * No Icon component exists in this package yet (`docs/Shell.md` already discloses this gap for
- * the palette trigger and dock tiles) — `SlidersGlyph` below is the same class of plain-shape
- * stand-in `examples/AppShell.tsx`'s notification bell already uses, not a new pattern.
+ * The trigger's glyph is a real `Icon` (`name="sliders"`, ROADMAP issue #18) — this file's own
+ * former hand-built `SlidersGlyph` stand-in is what that issue named as its first migration
+ * target; `docs/Shell.md` still discloses the same gap for the palette trigger and dock tiles,
+ * which stay out of this issue's scope (no named consumer there yet).
  *
  * Density and Appearance render as `ButtonGroup` (owner-directed, 2026-09-15: "pls use group
  * button" — a joined single-select pill, not a row of separately-spaced filter `Chip`s). This
@@ -149,34 +150,6 @@ const styles = stylex.create({
     },
   },
 });
-
-function SlidersGlyph() {
-  const track = { position: 'relative' as const, height: 2, borderRadius: 1, background: color.borderStrong };
-  const handle = (leftPercent: number) => ({
-    position: 'absolute' as const,
-    top: '50%',
-    left: `${leftPercent}%`,
-    transform: 'translate(-50%, -50%)',
-    width: 6,
-    height: 6,
-    borderRadius: '50%',
-    background: color.textPrimary,
-    border: `1.5px solid ${color.bgSurface}`,
-  });
-  return (
-    <div aria-hidden="true" style={{ display: 'flex', flexDirection: 'column', gap: 5, width: 16 }}>
-      <div style={track}>
-        <span style={handle(30)} />
-      </div>
-      <div style={track}>
-        <span style={handle(65)} />
-      </div>
-      <div style={track}>
-        <span style={handle(45)} />
-      </div>
-    </div>
-  );
-}
 
 function focusableWithin(panel: HTMLElement): HTMLElement[] {
   return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
@@ -335,7 +308,8 @@ export function ControlCenterButton({
         onClick={() => setOpen((value) => !value)}
         {...stylex.props(styles.trigger)}
       >
-        <SlidersGlyph />
+        {/* Decorative: the button's own `aria-label` above already carries the accessible name. */}
+        <Icon name="sliders" color={color.textPrimary} />
       </button>
       {panel && createPortal(panel, document.body)}
     </div>
