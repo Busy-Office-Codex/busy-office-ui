@@ -463,7 +463,8 @@ issues.
     in `docs/Theme.md` itself, not just this commit history):
     `examples/*.tsx`'s own sample screens use raw inline hex, never StyleX,
     so they won't visually follow dark mode even though every real `src/`
-    component does; `Button`'s danger-hover `rgba()` and `Shell`'s
+    component does (item 38 closes this for 2 of 45 files; 39 remain —
+    see item 38); `Button`'s danger-hover `rgba()` and `Shell`'s
     `glass`/`shadow` token groups are static values derived from light hex
     that won't re-tint. `Theme` itself ships with **no real named
     consumer yet** — a genuine, disclosed gap against Objective 3's Proven
@@ -497,6 +498,35 @@ issues.
     existing route registry) would close this without a new one-way change;
     not done here since it's a larger change than "a prop and a small
     render region." Issue #20 (`agreed`, project owner, 2026-09-16).
+38. [x] Theme-safe page chrome — `ListReport.tsx`, `RecordDetail.tsx`,
+    `examples/breadcrumbTrail.tsx` (mission-directed, 2026-09-16, no new
+    issue: examples/-level, two-way per LOOP.md). Every raw hex color and
+    every raw spacing number matching the `space.*` scale in these 3 files'
+    own page-level chrome now reads `color.*`/`space.*`/`radius.*` from
+    `src/tokens.stylex.ts` — the same already-established idiom 7 other
+    `examples/*.tsx` files used before this (found via evidence, not
+    assumed: `docs/design-conventions.md` claimed "no public design-token
+    API to compose from directly," which was already false in practice —
+    corrected the doc rather than leave a stale claim standing). Zero
+    light-mode visual change (every substituted token's light value equals
+    the literal it replaced, confirmed against `src/tokens.stylex.ts`'s own
+    values); 220/220 browser tests pass, including 3 new real dark-mode
+    regression tests (`test/browser/theme-contrast.spec.ts`) red-proofed
+    live. `breadcrumbTrail.tsx` was fixed as a same-day follow-up, not the
+    original scope: an independent review of the first two files found its
+    own raw-hex text colors would render the breadcrumb's "current page"
+    label near-invisible once `RecordDetail.tsx`'s background correctly
+    went dark — a real WCAG AA contrast failure the original tests didn't
+    catch (they asserted the ancestor's background, never this element's
+    own text color). Delivered the requested minimal agent-consumable
+    recipe: `docs/design-conventions.md`'s new "Theme-safe page chrome"
+    section (3 steps, one pitfall, the verification command). Disclosed,
+    not silently dropped: 39 of 45 `examples/*.tsx` files still have their
+    own raw color/spacing literals, including partial gaps in some of the
+    7 "already-idiomatic" files themselves; `Delivery.tsx` (10 occurrences/
+    6 distinct values), `BuilderScreens.tsx`/`BuilderReports.tsx` (9/4
+    each), `Inventory.tsx` (9/3), `RolePage.tsx` (8/5) are the next-highest
+    candidates for the same 3-step pass.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
