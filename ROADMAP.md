@@ -463,15 +463,15 @@ issues.
     in `docs/Theme.md` itself, not just this commit history):
     `examples/*.tsx`'s own sample screens use raw inline hex, never StyleX,
     so they won't visually follow dark mode even though every real `src/`
-    component does (item 38 closes this for 2 of 45 files; 39 remain —
+    component does (items 38/39 close this for 4 of 45 files; 41 remain —
     see item 38); `Button`'s danger-hover `rgba()` and `Shell`'s
     `glass`/`shadow` token groups are static values derived from light hex
-    that won't re-tint. `Theme` itself ships with **no real named
-    consumer yet** — a genuine, disclosed gap against Objective 3's Proven
-    Reuse test; `ControlCenter.tsx`'s disabled Dark/System `Appearance`
-    toggle is the obvious first candidate (its own comment now says so)
-    but wiring it up is a separate, later two-way slice, not part of this
-    item. Fixes a confirmed defect, not a speculative want: `src/` read no
+    that won't re-tint (still true as of item 39 — `Shell`'s own persistent
+    chrome, top bar/dock/palette, does not re-tint even under an explicit
+    `Theme` override; a real, disclosed seam a viewer who picks "Dark"
+    while their content re-tints and chrome doesn't will actually see).
+    `Theme` itself now has a real named consumer — item 39. Fixes a
+    confirmed defect, not a speculative want: `src/` read no
     `prefers-color-scheme` anywhere before this (found live during item
     15's docs-site review). Issue #19 (`agreed`, project owner,
     2026-09-16).
@@ -521,12 +521,59 @@ issues.
     own text color). Delivered the requested minimal agent-consumable
     recipe: `docs/design-conventions.md`'s new "Theme-safe page chrome"
     section (3 steps, one pitfall, the verification command). Disclosed,
-    not silently dropped: 39 of 45 `examples/*.tsx` files still have their
-    own raw color/spacing literals, including partial gaps in some of the
-    7 "already-idiomatic" files themselves; `Delivery.tsx` (10 occurrences/
-    6 distinct values), `BuilderScreens.tsx`/`BuilderReports.tsx` (9/4
-    each), `Inventory.tsx` (9/3), `RolePage.tsx` (8/5) are the next-highest
-    candidates for the same 3-step pass.
+    not silently dropped: 39 of 45 `examples/*.tsx` files still had their
+    own raw color/spacing literals at the time this item landed — items
+    39/future work continue the sweep (see item 39).
+39. [x] Theme milestone (owner-approved, 2026-09-16, 2 of 4 approved items
+    — the other 2, extending items 38/2 respectively, are folded into this
+    line since each was small): (a) extended item 38's recipe to
+    `Delivery.tsx`/`Inventory.tsx` — one deliberate exception disclosed in
+    both files and `docs/design-conventions.md`: `Delivery.tsx`'s
+    selected-row tint (`#eff6ff`) has no matching `color.*` token in either
+    palette, left as a raw literal rather than force-fit the nearest wrong
+    one. (b) Wired the real `Theme` component to `ControlCenter.tsx`'s
+    Appearance toggle — `AppShell.tsx` lifts `appearance` as controlled
+    state (mirroring `density`'s own established pattern exactly) and wraps
+    `home`/`children` in `<Theme value={appearance}>` unless `appearance`
+    is `'system'` (no wrapper at all, matching item 36's own "omitting the
+    wrapper already is system" contract). Removed the now-false "Dark and
+    system themes aren't available" disclosure and the `disabled` flags —
+    all three segments are real. **A real, severe regression was found and
+    fixed before merge, not shipped**: the first version defaulted
+    `appearance` to `'light'`, which forced every page into an explicit
+    light override from first render regardless of OS preference —
+    silently breaking item 36's own "follows the system setting with zero
+    host code" guarantee app-wide for anyone who never opens Control
+    Center. Caught by running the full gate suite on the assembled batch
+    (none of the 3 parallel builders that built this milestone's pieces
+    ran `pnpm test:browser` themselves, by design): all 8
+    `test/browser/theme-contrast.spec.ts` tests failed uniformly, including
+    tests from unrelated, already-landed work — the uniform failure
+    pattern is what made "a bad default" obvious rather than a local bug.
+    Fixed by defaulting to `'system'`; the fix then required correcting 2
+    further tests whose own assertions had baked in the buggy default
+    (`test/browser/control-center.spec.ts`, `test/browser/button-group.spec.ts`),
+    including a genuine second finding along the way: the panel's initial
+    keyboard focus always lands on "Light" (the first enabled button in DOM
+    order, per `ControlCenter.tsx`'s own `FOCUSABLE_SELECTOR`) regardless of
+    which segment is actually selected — unrelated to the appearance
+    default, but only surfaced while fixing the tests it also broke.
+    Disclosed, not fixed here: `Shell`'s own chrome (top bar/dock/palette)
+    doesn't re-tint even under this new explicit override — a viewer who
+    picks "Dark" sees dark content inside permanently-light chrome (see
+    item 36's own updated disclosure). Removing `disabled` from Appearance
+    left `ButtonGroup`'s disabled-segment contract with no real consumer in
+    `examples/` — kept exercised via a new, non-shipped
+    `preview/ButtonGroupLab.tsx` (same precedent as `DensityLab.tsx`/
+    `ShellBreadcrumbsLab.tsx`). (c) Extended
+    `test/shell-token-audit.test.ts`'s ratchet to cover `Delivery.tsx`/
+    `Inventory.tsx`. (d) A compact "Start here" entry-map section added to
+    the top of `docs/design-conventions.md` (14 lines, pure pointers, no
+    restated component content). Independent review: ship-as-is, no
+    blockers — re-ran typecheck/lint/test (159/159) independently and
+    traced every token substitution and the focus-order mechanism by hand.
+    Disclosed: 41 of 45 `examples/*.tsx` files still have raw color/spacing
+    literals.
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
