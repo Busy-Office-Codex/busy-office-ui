@@ -109,7 +109,7 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('>Dark</button>');
   });
 
-  it('renders a Chart as an aria-hidden canvas plus a real, visually-hidden accessible data table', () => {
+  it('renders a Chart as an aria-hidden render surface plus a real, visually-hidden accessible data table', () => {
     const markup = renderToStaticMarkup(
       createElement(designSystem.Chart, {
         type: 'bar',
@@ -122,11 +122,13 @@ describe('design-system rendered contracts', () => {
       }),
     );
 
-    // Chart.js itself only draws once mounted in a real browser (useEffect never runs during
-    // server rendering) — this checks the markup SSR can produce: the canvas shell and the real
-    // accessible-table fallback, not the drawn chart.
-    expect(markup).toContain('<canvas');
-    expect(markup).toContain('aria-hidden="true"');
+    // ECharts itself only draws once mounted in a real browser — it creates its own <canvas>
+    // imperatively via `init()` inside a `useEffect`, which never runs during server rendering —
+    // so this checks the markup SSR can actually produce: the aria-hidden container ECharts will
+    // later render into, and the real accessible-table fallback, not the drawn chart itself.
+    // One combined substring, not two independent ones — proves `aria-hidden` lands on the same
+    // element as the `chart-canvas` render surface, not merely somewhere in the markup.
+    expect(markup).toContain('aria-hidden="true" data-testid="chart-canvas"');
     expect(markup).toContain('<table');
     expect(markup).toContain('<caption>Stock by warehouse</caption>');
     expect(markup).toContain('>East</td>');
