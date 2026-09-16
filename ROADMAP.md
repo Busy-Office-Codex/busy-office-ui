@@ -430,31 +430,73 @@ issues.
     Still open: Finance (no real screen yet), Reports (BuilderReports.tsx's
     live-aggregation gap), BI dashboard's other 2 charts, BI explore (new
     route + a `'pie'` variant `Chart` doesn't have yet). Issue #16.
-35. [ ] Icon component — `src/components/Icon.tsx`, exported from
-    `src/index.ts`. A minimal, closed glyph set (sliders/settings,
-    bell/notification, plus whatever the QR stand-in resolves to) as inline
-    SVG, sized/colored via the token system — migrates `ControlCenter.tsx`'s
-    `SlidersGlyph`, `AppShell.tsx`'s notification bell, and `Invoice.tsx`'s
-    QR stand-in to real consumers, closing the gap all three already cite in
-    their own comments. Issue #18 (`agreed`, project owner, 2026-09-16).
-36. [ ] Real dark/light/system theming — light/dark variants for
-    `src/tokens.stylex.ts`'s color tokens plus a host opt-in mechanism
-    (exact shape TBD at build time — a `data-theme` contract or a small
-    `ThemeProvider`), defaulting to `prefers-color-scheme` when unset,
-    AA-contrast-verified for dark same as items 5/12/13 already did for
-    light. Fixes a confirmed defect, not a speculative want: `src/` reads no
-    `prefers-color-scheme` anywhere today (found live during item 15's
-    docs-site review). Issue #19 (`agreed`, project owner, 2026-09-16).
-37. [ ] Shell breadcrumbs — a `breadcrumbs` prop on `Shell`
+35. [x] Icon component — `src/components/Icon.tsx`, exported from
+    `src/index.ts`. A closed `IconName` union (`'sliders' | 'bell'`) as
+    inline SVG, `size`/`color` props reading the token system; decorative
+    (`aria-hidden`) by default, a real `<title>` + `role="img"` when given
+    one. Migrates `ControlCenter.tsx`'s `SlidersGlyph` and `AppShell.tsx`'s
+    notification bell to real consumers. `Invoice.tsx`'s QR stand-in
+    deliberately NOT migrated — found live during the build, not assumed
+    up front: a QR code is generated 2D data, not a fixed glyph, and would
+    be Icon's only caller for such a name, failing both Icon's own
+    closed-set discipline and Objective 1/3 (a variant with one caller);
+    left as a plain placeholder with an honest, updated comment instead of
+    force-fitting a 'qr' glyph name to satisfy this item's original
+    3-migration count. Issue #18 (`agreed`, project owner, 2026-09-16).
+36. [x] Real dark/light/system theming — every `color.*` token in
+    `src/tokens.stylex.ts` now carries a light default plus a
+    `@media (prefers-color-scheme: dark)` override (the same per-value
+    media-query shape `motion`'s durations already used), so a host that
+    renders nothing extra already gets correct system-following dark mode.
+    `src/components/Theme.tsx` (`value="light" | "dark"`, exported from
+    `src/index.ts`) is the explicit-override half, mirroring `Density`'s
+    own `stylex.createTheme` + wrapper shape; no `"system"` value — omitting
+    the wrapper already is system, so a third value would be an inert no-op
+    (Objective 1). AA-contrast-verified for the dark palette with the same
+    rigor items 5/12/13 applied to light (`test/color-contrast.test.ts`,
+    real WCAG relative-luminance math, not eyeballed) — a real tradeoff
+    found live: `accent`/`danger` each serve two roles (flat text color and
+    a fill with `textOnInk` on top), and no single dark-mode shade could
+    satisfy both against a near-black canvas, resolved by flipping
+    `action`/`textOnInk`'s roles (not just their values) so both checks
+    become the same formula. Disclosed gaps, not silently dropped (now also
+    in `docs/Theme.md` itself, not just this commit history):
+    `examples/*.tsx`'s own sample screens use raw inline hex, never StyleX,
+    so they won't visually follow dark mode even though every real `src/`
+    component does; `Button`'s danger-hover `rgba()` and `Shell`'s
+    `glass`/`shadow` token groups are static values derived from light hex
+    that won't re-tint. `Theme` itself ships with **no real named
+    consumer yet** — a genuine, disclosed gap against Objective 3's Proven
+    Reuse test; `ControlCenter.tsx`'s disabled Dark/System `Appearance`
+    toggle is the obvious first candidate (its own comment now says so)
+    but wiring it up is a separate, later two-way slice, not part of this
+    item. Fixes a confirmed defect, not a speculative want: `src/` read no
+    `prefers-color-scheme` anywhere before this (found live during item
+    15's docs-site review). Issue #19 (`agreed`, project owner,
+    2026-09-16).
+37. [x] Shell breadcrumbs — a `breadcrumbs` prop on `Shell`
     (`@busyoffice/design-system/shell`), an ordered `{ label, onClick? }[]`
-    rendered in the chrome above the content area, no route-hierarchy
-    inference. Two named consumers: `RecordDetail.tsx` (reached from
-    `SalesOrderList.tsx`, no visible trail back today) and
-    `Requisitions.tsx`'s own linked-document display (currently plain text,
-    "Linked: Purchase order PO-4011"). `src/shell/Shell.tsx` is ~780 lines
-    with heavy existing browser-test coverage — read `test/browser/shell-
-    *.spec.ts` fully before changing it. Issue #20 (`agreed`, project
-    owner, 2026-09-16).
+    rendered above the content area; the last entry always renders
+    non-interactive with `aria-current="page"`, regardless of whether it
+    was given an `onClick` — a real, tested guarantee (`isLast` gates the
+    interactive branch), not just documented: the first version shipped
+    this exact defect (branching purely on `onClick`, no `isLast` override)
+    and it passed 216/216 browser tests undetected until an independent
+    review's own red-proof caught it; `test/browser/shell-breadcrumbs.spec.ts`
+    now exercises a last crumb WITH an `onClick` and asserts it stays inert.
+    Two named consumers, `RecordDetail.tsx` and `Requisitions.tsx`'s own
+    linked-document display (was plain text, "Linked: Purchase order
+    PO-4011") — disclosed architecture caveat: neither actually passes data
+    through Shell's own `breadcrumbs` prop, since neither owns a `Shell`
+    instance to pass it into (both are route-agnostic content panes under
+    one shared instance, the same constraint `examples/Analytics.tsx`'s own
+    comment documents); each renders a hand-duplicated lookalike
+    (`examples/breadcrumbTrail.tsx`) instead, so the real prop's only
+    exerciser is a non-shipped lab harness (`preview/ShellBreadcrumbsLab.tsx`).
+    A fast follow-up (threading `RecordDetail`'s trail through `AppShell`'s
+    existing route registry) would close this without a new one-way change;
+    not done here since it's a larger change than "a prop and a small
+    render region." Issue #20 (`agreed`, project owner, 2026-09-16).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
