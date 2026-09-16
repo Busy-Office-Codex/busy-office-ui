@@ -6,7 +6,14 @@ import * as stylex from '@stylexjs/stylex';
  * synced project). Keep new tokens additive — components should never reach
  * for raw values.
  */
-export const color = stylex.defineVars({
+
+// Light values — unchanged from before item 19 (issue #19, `agreed`, project owner, 2026-09-16).
+// Kept as its own object, rather than inlined straight into `color` below, for two reasons: it's
+// the single source `lightColor` (the explicit force-light theme, further down) themes from, and
+// it's what `test/color-contrast.test.ts` imports to check real WCAG ratios against `darkPalette`
+// — a change to either palette without a passing numeric check fails a running assertion, not
+// just a comment.
+export const lightPalette = {
   bgCanvas: '#f8fafc',
   bgSurface: '#ffffff',
   bgSubtle: '#f1f5f9',
@@ -33,7 +40,105 @@ export const color = stylex.defineVars({
   accentHover: '#1f6fcf',
   focusRing: '#0057b8',
   danger: '#b42318',
+};
+
+// Dark values (ROADMAP item 19 / issue #19, `agreed`, project owner, 2026-09-16). Built from the
+// same cool-slate Tailwind ramp `lightPalette` already draws from (`#f8fafc` is exactly slate-50;
+// the whole light scale reads as slate-50…950 already) — walked from the other end:
+// `bgCanvas`/`bgSurface`/`bgSubtle` take slate-950/900/800 (darkest first, surfaces one step
+// LIGHTER than canvas — the standard dark-UI elevation direction, the mirror of light mode's
+// surfaces being lighter only because the canvas itself already sits near white); text takes
+// slate-50/300/400/500 (lightest first); `border`/`borderStrong` take slate-700/600 (a border
+// that needs to read as more visible than a subtle one has to sit further from a DARK ground, so
+// it moves toward lighter slate steps, the mirror of light mode moving toward darker ones).
+//
+// `action`/`textOnInk` flip roles, not just values. Light mode's `action` is the *darkest*
+// neutral ("ink"), filled with white `textOnInk` text; on a canvas that's already near-black, a
+// near-black button would vanish into it. So dark mode's `action` becomes the *lightest* neutral
+// instead (slate-100, hover slate-50, active slate-300 — the same "hover lightens further, active
+// darkens past the base" shape `action`/`actionHover`/`actionActive` already have in
+// `lightPalette`, just walked from the opposite end of the scale), and `textOnInk` flips to a
+// near-black slate-900 to read on it.
+//
+// That flip also solves `accent`/`danger`'s harder problem for free. Both tokens do two jobs at
+// once: flat TEXT color (`Card`'s selected checkmark, `Dropdown`'s selected-item color,
+// `Button`'s danger label, `Chip`'s danger outline, `Input`'s error message) AND a FILL color
+// with `textOnInk` on top (`Chip`'s accent tone, `Shell`'s active tab/dock badge, `Button`
+// danger's `:active` fill). A color light enough to read as flat text on a near-black canvas
+// needs relative luminance ≳0.22 by the WCAG formula — but by that same formula, anything that
+// light is already too light for *white* text on top of it to clear 4.5:1 (which needs luminance
+// ≲0.18): the two requirements' windows don't overlap, so no single shade could have served both
+// roles with `textOnInk` staying white. Once `textOnInk` is near-black instead, contrast against
+// it becomes (mathematically) nearly the same formula as contrast against the near-black
+// `bgSurface`/`bgCanvas` — so any `accent`/`danger` shade that clears 4.5:1 as flat text against
+// the canvas clears essentially the same ratio again as a fill with `textOnInk` on top. Verified
+// numerically in `test/color-contrast.test.ts`, not assumed: `#3b82f6` (Tailwind blue-500)
+// measures ~4.85:1 both ways against `bgSurface`/`textOnInk`, `#ef4444` (Tailwind red-500) ~4.74:1
+// both ways — both real AA passes, not eyeballed. `focusRing` follows `accent` the same way it
+// does in `lightPalette`.
+export const darkPalette = {
+  bgCanvas: '#020617',
+  bgSurface: '#0f172a',
+  bgSubtle: '#1e293b',
+  border: '#334155',
+  borderSubtle: '#1e293b', // same literal as bgSubtle, mirroring lightPalette's own convention above
+  borderStrong: '#475569',
+  textPrimary: '#f8fafc',
+  textSecondary: '#cbd5e1',
+  textTertiary: '#94a3b8',
+  textDisabled: '#64748b',
+  textOnInk: '#0f172a',
+  action: '#f1f5f9',
+  actionHover: '#f8fafc',
+  actionActive: '#cbd5e1',
+  accent: '#3b82f6',
+  accentHover: '#60a5fa',
+  focusRing: '#3b82f6',
+  danger: '#ef4444',
+};
+
+// Each var gets `lightPalette`'s value as its `default` and `darkPalette`'s value under
+// `@media (prefers-color-scheme: dark)` — the exact same per-value media-query shape `motion`'s
+// durations already use for `prefers-reduced-motion` (below). This is the "no host action
+// needed" half of item 19: every component already reads `color.*` as a StyleX var (never a raw
+// hex — that's the whole point of this token layer), so this one change gives every real
+// component real dark-mode support with zero component-file edits (confirmed by grep — see the
+// item 19 commit message for the one place that assumption doesn't reach: `examples/`'s own
+// plain inline `style={{ background: '#f8fafc' }}`-style literals, which were never StyleX and
+// were already out of this issue's scope).
+export const color = stylex.defineVars({
+  bgCanvas: { default: lightPalette.bgCanvas, '@media (prefers-color-scheme: dark)': darkPalette.bgCanvas },
+  bgSurface: { default: lightPalette.bgSurface, '@media (prefers-color-scheme: dark)': darkPalette.bgSurface },
+  bgSubtle: { default: lightPalette.bgSubtle, '@media (prefers-color-scheme: dark)': darkPalette.bgSubtle },
+  border: { default: lightPalette.border, '@media (prefers-color-scheme: dark)': darkPalette.border },
+  borderSubtle: { default: lightPalette.borderSubtle, '@media (prefers-color-scheme: dark)': darkPalette.borderSubtle },
+  borderStrong: { default: lightPalette.borderStrong, '@media (prefers-color-scheme: dark)': darkPalette.borderStrong },
+  textPrimary: { default: lightPalette.textPrimary, '@media (prefers-color-scheme: dark)': darkPalette.textPrimary },
+  textSecondary: { default: lightPalette.textSecondary, '@media (prefers-color-scheme: dark)': darkPalette.textSecondary },
+  textTertiary: { default: lightPalette.textTertiary, '@media (prefers-color-scheme: dark)': darkPalette.textTertiary },
+  textDisabled: { default: lightPalette.textDisabled, '@media (prefers-color-scheme: dark)': darkPalette.textDisabled },
+  textOnInk: { default: lightPalette.textOnInk, '@media (prefers-color-scheme: dark)': darkPalette.textOnInk },
+  action: { default: lightPalette.action, '@media (prefers-color-scheme: dark)': darkPalette.action },
+  actionHover: { default: lightPalette.actionHover, '@media (prefers-color-scheme: dark)': darkPalette.actionHover },
+  actionActive: { default: lightPalette.actionActive, '@media (prefers-color-scheme: dark)': darkPalette.actionActive },
+  accent: { default: lightPalette.accent, '@media (prefers-color-scheme: dark)': darkPalette.accent },
+  accentHover: { default: lightPalette.accentHover, '@media (prefers-color-scheme: dark)': darkPalette.accentHover },
+  focusRing: { default: lightPalette.focusRing, '@media (prefers-color-scheme: dark)': darkPalette.focusRing },
+  danger: { default: lightPalette.danger, '@media (prefers-color-scheme: dark)': darkPalette.danger },
 });
+
+// Explicit host opt-in (ROADMAP item 19) — mirrors `compactDensity`/`comfortableDensity`/
+// `spaciousDensity`'s own `createTheme` shape exactly (see the `density` group and `Density`
+// below/`src/components/Density.tsx`). `Theme` (`src/components/Theme.tsx`) is the wrapper that
+// applies one of these to force a mode regardless of `prefers-color-scheme`. `lightColor` uses
+// the same values `color`'s own `default` branch already has — not a no-op, the same reasoning
+// `comfortableDensity` documents: without a real `createTheme` object here, forcing "light" would
+// do nothing under an OS set to dark (the bare default's own media query would still switch it),
+// so a real theme is what lets a host force light *regardless* of system preference. There is no
+// third "system" value — see `Theme`'s own doc comment for why omitting the wrapper entirely is
+// that case instead.
+export const lightColor = stylex.createTheme(color, lightPalette);
+export const darkColor = stylex.createTheme(color, darkPalette);
 
 export const space = stylex.defineVars({
   space1: '4px',

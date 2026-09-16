@@ -15,14 +15,25 @@ import { describe, expect, it } from 'vitest';
 // hardcoded here or imported at runtime: `stylex.defineVars` compiles each
 // value to a `var(--...)` reference at import time, so only the source text
 // still has the literal hex strings to compare against.
+//
+// ROADMAP item 19 (real dark/light/system theming) moved the actual hex literals out of the
+// `color = stylex.defineVars({...})` call itself and into two source objects it now only
+// *references* (`lightPalette`/`darkPalette` — one `default` value and one
+// `@media (prefers-color-scheme: dark)` value per var, mirroring how `motion`'s durations already
+// used a media query per value). This audit now reads both, which only widens its coverage —
+// Shell.tsx/AppShell.tsx get checked against the new dark-mode hex values too, not just light's.
 
 const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 
 function colorTokenHexValues(): string[] {
   const tokensSource = readFileSync(path.join(repoRoot, 'src/tokens.stylex.ts'), 'utf8');
-  const colorBlock = tokensSource.match(/export const color = stylex\.defineVars\(\{([\s\S]*?)\n\}\);/);
-  if (!colorBlock) throw new Error("Could not find `export const color = stylex.defineVars({...});` in tokens.stylex.ts — has it moved or been renamed?");
-  return Array.from(new Set(Array.from(colorBlock[1].matchAll(/#[0-9a-fA-F]{3,8}/g), (match) => match[0])));
+  const paletteBlocks = tokensSource.match(/export const (?:lightPalette|darkPalette) = \{([\s\S]*?)\n\};/g);
+  if (!paletteBlocks || paletteBlocks.length < 2) {
+    throw new Error(
+      'Could not find both `export const lightPalette = {...};` and `export const darkPalette = {...};` in tokens.stylex.ts — have they moved or been renamed?',
+    );
+  }
+  return Array.from(new Set(paletteBlocks.flatMap((block) => Array.from(block.matchAll(/#[0-9a-fA-F]{3,8}/g), (match) => match[0]))));
 }
 
 // Line (`//`) and block (`/* */`) comments only — good enough for this repo's

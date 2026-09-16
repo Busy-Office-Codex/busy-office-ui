@@ -213,6 +213,25 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('>$1,240.00</span>');
   });
 
+  it('renders Theme as a wrapping element carrying a real theme class, and light/dark apply different themes', () => {
+    const lightMarkup = renderToStaticMarkup(
+      createElement(designSystem.Theme, { value: 'light', children: createElement('span', null, 'Forced light') }),
+    );
+    const darkMarkup = renderToStaticMarkup(
+      createElement(designSystem.Theme, { value: 'dark', children: createElement('span', null, 'Forced dark') }),
+    );
+
+    expect(lightMarkup).toMatch(/^<div class="[^"]+"><span>Forced light<\/span><\/div>$/);
+    expect(darkMarkup).toMatch(/^<div class="[^"]+"><span>Forced dark<\/span><\/div>$/);
+    // `lightColor`/`darkColor` are two distinct `stylex.createTheme` themes (tokens.stylex.ts) —
+    // a real override, not the same class applied twice regardless of `value`.
+    const lightClass = lightMarkup.match(/^<div class="([^"]+)"/)?.[1];
+    const darkClass = darkMarkup.match(/^<div class="([^"]+)"/)?.[1];
+    expect(lightClass).toBeTruthy();
+    expect(darkClass).toBeTruthy();
+    expect(lightClass).not.toBe(darkClass);
+  });
+
   it('renders each Text variant on its default element, and `as` overrides the element', () => {
     const heading = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'heading', children: 'Orders' }));
     const caption = renderToStaticMarkup(createElement(designSystem.Text, { variant: 'caption', children: 'Orders' }));
