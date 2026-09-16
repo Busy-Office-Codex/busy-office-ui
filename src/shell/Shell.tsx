@@ -45,7 +45,12 @@ export type ShellProps = {
   children?: ReactNode;
 };
 
-export const SHELL_MAX_ROUTES = 32;
+// Raised from 32 (owner-directed, 2026-09-16 — see examples/AppShell.tsx's own comment on why
+// 32 filled up): a bare defensive sanity cap against a malformed/unbounded host route array, not
+// a deliberately-reasoned architectural ceiling — 32 was simply how many routes existed when this
+// constant was added, not a limit anything depends on. Raised with headroom for near-term work
+// (a real Finance module screen, BI explore) rather than to the exact next number needed.
+export const SHELL_MAX_ROUTES = 40;
 export const SHELL_MAX_ROUTE_ID_LENGTH = 64;
 export const SHELL_MAX_ROUTE_LABEL_LENGTH = 80;
 

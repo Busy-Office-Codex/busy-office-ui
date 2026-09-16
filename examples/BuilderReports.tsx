@@ -30,11 +30,11 @@ import { Button, ButtonGroup, Card, Chip, type ChipTone, Density, Text } from '.
  * still-unbuilt 'Reports' placeholder — like 'Users' / 'Users and roles' before it (see
  * AppShell.tsx's NAV.Administration comment), a plain `/^Reports\b/` selector would be ambiguous
  * if Finance's placeholder is ever built too; use the same `\s+[A-Z]` (hint-anchored) selector
- * this codebase already relies on for that case. This is also preview/client.tsx's 32nd and
- * FINAL route: `SHELL_MAX_ROUTES` is a hard cap (`src/shell/Shell.tsx`), so the next NAV entry
- * that needs a real route (Fields, Publish, Finance's Reports, or anything new) requires either
- * retiring an existing route or raising the cap — a one-way, package-level change per LOOP.md,
- * not a call this slice makes unilaterally.
+ * this codebase already relies on for that case. This was also preview/client.tsx's 32nd and, at
+ * the time, final route: `SHELL_MAX_ROUTES` (`src/shell/Shell.tsx`) was a hard cap at exactly 32
+ * — raised to 40 (owner-directed, 2026-09-16) once the Finance module and BI explore (both
+ * still-open issue #16 consumers needing their own new routes) made the exact-32 ceiling a real
+ * blocker, not a hypothetical one.
  */
 
 type WidgetType = 'KPI stat' | 'Bar chart' | 'Line chart' | 'Donut chart' | 'Table';
