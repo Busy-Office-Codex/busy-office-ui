@@ -116,9 +116,18 @@ test('a focused segment shows the shared focus-visible ring', async ({ page }) =
   await trigger.focus();
   await page.keyboard.press('Enter');
 
-  const comfortable = page.getByRole('radio', { name: 'Comfortable', exact: true });
-  await page.keyboard.press('Tab'); // Light (tabindex 0) -> Comfortable (tabindex 0, next group)
-  await expect(comfortable).toBeFocused();
-  await expect(comfortable).toHaveCSS('outline-width', '2px');
-  await expect(comfortable).toHaveCSS('outline-style', 'solid');
+  // Found live fixing this test for ROADMAP item 36's Theme-wiring: opening the panel
+  // programmatically focuses "Light" (the panel's first enabled button — see
+  // ControlCenter.tsx's own FOCUSABLE_SELECTOR comment — regardless of which segment is actually
+  // selected), which now carries `tabIndex={-1}` since "System" is the selected Appearance segment
+  // by default. Real Tab-key navigation (unlike that initial scripted focus) skips every
+  // `tabindex={-1}` element, so pressing Tab from "Light" lands on the very next `tabIndex={0}`
+  // stop in DOM order — "System" itself, not Density's "Comfortable" two groups later. Before
+  // Dark/System were real (enabled) segments, they had no tab stop at all (`disabled` buttons are
+  // removed from tab order entirely), so this same keystroke used to skip straight to Comfortable.
+  const system = page.getByRole('radio', { name: 'System', exact: true });
+  await page.keyboard.press('Tab');
+  await expect(system).toBeFocused();
+  await expect(system).toHaveCSS('outline-width', '2px');
+  await expect(system).toHaveCSS('outline-style', 'solid');
 });

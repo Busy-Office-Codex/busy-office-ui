@@ -190,7 +190,13 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
   // omitting the wrapper already is "system", since every `color.*` token's own `@media
   // (prefers-color-scheme: dark)` default already follows the OS/browser setting for free), so
   // `themed()` below renders no `Theme` wrapper at all for that case rather than passing it through.
-  const [appearance, setAppearance] = useState<Appearance>('light');
+  // Defaults to `'system'`, NOT `'light'` — found live: defaulting to `'light'` would wrap every
+  // page in `<Theme value="light">` from first render, forcing an explicit light override (a real
+  // `stylex.createTheme` theme, which wins over the `@media` conditional on the bare `color` vars)
+  // for every viewer who never touches this toggle, silently defeating the "follow the OS setting
+  // automatically, zero host code needed" behavior issue #19 already shipped. `'system'` is the
+  // one starting value that changes nothing until a viewer actively opts into an override.
+  const [appearance, setAppearance] = useState<Appearance>('system');
   const themed = (node: ReactNode): ReactNode => (appearance === 'system' ? node : <Theme value={appearance}>{node}</Theme>);
   const settingsRoute = routes.find((route) => route.module === 'Settings');
 
