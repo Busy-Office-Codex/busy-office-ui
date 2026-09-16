@@ -52,6 +52,8 @@ const PAGE_LABELS = [
   // M7 Slice 12 (Administration — companies & entities, integrations & API).
   'Companies',
   'Integrations',
+  // M7 Slice 13 (Builder — report/dashboard builder).
+  'Reports & dashboards',
 ];
 
 for (const label of PAGE_LABELS) {
