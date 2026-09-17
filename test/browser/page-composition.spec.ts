@@ -78,12 +78,15 @@ test('no sample page scrolls into empty canvas below its content: scrollHeight e
   expect(await scrollHeight()).toBe(800);
 });
 
-test('Dashboard genuinely scrolls past 800px now that it has a real revenue-trend chart, not phantom empty space', async ({ page }) => {
-  // Dashboard grew taller once Chart.tsx's first real consumer (the "Revenue trend" card, ROADMAP
-  // issue #16) landed — a real content addition, not the min-height/margin/banner class of bug
-  // the test above still guards against on the two pages that haven't changed. A generous upper
-  // bound (instead of asserting one exact pixel height tied to today's specific chart size) still
+test('Dashboard genuinely scrolls past 800px now that it has 3 real charts, not phantom empty space', async ({ page }) => {
+  // Dashboard grew taller once Chart.tsx's first real consumers landed (the "Revenue trend" card,
+  // ROADMAP issue #16, then the "Revenue by region"/"Revenue mix" cards, ROADMAP item 34's "BI
+  // dashboard" slice) — real content additions, not the min-height/margin/banner class of bug the
+  // test above still guards against on the two pages that haven't changed. A generous upper bound
+  // (instead of asserting one exact pixel height tied to today's specific chart sizes) still
   // catches a genuine phantom-scroll regression without being brittle to reasonable future edits.
+  // Measured at 3 charts: 1185px — the bound below keeps real headroom above that, not just above
+  // whatever the page happened to measure the day this comment was written.
   await page.setViewportSize(VIEWPORT);
   await page.goto('/#examples');
   const scrollHeight = () => page.evaluate(() => document.scrollingElement?.scrollHeight);
@@ -94,7 +97,7 @@ test('Dashboard genuinely scrolls past 800px now that it has a real revenue-tren
 
   const height = await scrollHeight();
   expect(height).toBeGreaterThan(800);
-  expect(height).toBeLessThan(1200);
+  expect(height).toBeLessThan(1500);
 });
 
 test('the preview host resets the UA body margin', async ({ page }) => {

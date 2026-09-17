@@ -149,13 +149,30 @@ all yet — a NAV placeholder only, so this is a new-screen-plus-chart
 effort, not a one-chart addition), "18 Reports" (BuilderReports.tsx's own
 Preview stays structural by design — see its header comment — a real
 Chart there needs live aggregations, several not computed anywhere yet),
-"19 BI dashboard"'s other 2 charts ("by region" bar, "mix" donut —
-Dashboard.tsx already exists and already has real revenue data, so this
-one doesn't need a new route), and "20 BI explore" (a new pivot-result
-screen needing its own new route, and issue #16's own "Pie" ask — `Chart`
-today only has `'bar' | 'line' | 'donut'`, no `'pie'` variant). Each is
-its own separate, reviewed slice, per this repo's own "manageable
-slices" discipline — not a punch list to clear in one batch.
+and "20 BI explore" (a new pivot-result screen needing its own new
+route, and issue #16's own "Pie" ask — `Chart` today only has `'bar' |
+'line' | 'donut'`, no `'pie'` variant). Each is its own separate,
+reviewed slice, per this repo's own "manageable slices" discipline —
+not a punch list to clear in one batch.
+
+Corrected again (2026-09-17): "19 BI dashboard"'s other 2 charts landed —
+`examples/Dashboard.tsx` now renders "Revenue by region" (bar) and
+"Revenue mix" (donut) alongside the existing trend chart, both derived
+from the same $486K September total the trend chart and the REVENUE THIS
+MONTH stat card already state, not a third invented number for the same
+fact — verified by a real browser test that reads each rendered
+accessible table's own value column and sums it to 486000, not just the
+source data array (`test/browser/chart.spec.ts`). A required independent
+review first found this slice shipped the 2 new charts with zero new test
+coverage — fixed before merge, not shipped anyway: added the sum-to-$486K
+test above, a real per-chart render check for both new charts mirroring
+item 34's own Inventory precedent, a `toHaveCount(3)` guard so the
+pre-existing line-chart test's `.first()` scoping is a checked assumption
+instead of a silent positional one, and caught + fixed 3 further drifted
+records the code change left behind (`docs/Dashboard.md`,
+`docs-site/src/pages/examples.astro`'s Dashboard purpose string, and a
+scroll-height upper bound in `test/browser/page-composition.spec.ts` that
+the 2 new charts had already compressed to 15px of real headroom).
 
 Redirected (owner-directed, 2026-09-16, in progress): the rendering engine
 moves from Chart.js to ECharts — a reversal of this milestone's own earlier
@@ -431,18 +448,24 @@ issues.
     `src/index.ts`. Bar/line/donut, `aria-hidden` canvas/render surface
     paired with a real visually-hidden accessible `Table`,
     `prefers-reduced-motion` disables draw-in animation. Rendering engine
-    in progress moving from Chart.js to ECharts (owner-directed,
-    2026-09-16), wrapped identically — `ChartProps`/`ChartSeries` unchanged,
-    ECharts never referenced outside this one file. Package gained
-    `"sideEffects": false` (package.json) as part of the original Chart.js
-    work — genuinely accurate now that `Chart`'s own registration moved off
-    the module top level — unlocking real per-export tree-shaking for every
-    component, not just this one. Real consumers landed: Dashboard.tsx's
-    "Revenue trend" line chart, Inventory.tsx's "stock by warehouse" bar +
-    "mix by material" donut (issue #16's own "15 Inventory" scenario).
-    Still open: Finance (no real screen yet), Reports (BuilderReports.tsx's
-    live-aggregation gap), BI dashboard's other 2 charts, BI explore (new
-    route + a `'pie'` variant `Chart` doesn't have yet). Issue #16.
+    moved from Chart.js to ECharts (owner-directed, 2026-09-16) — this line
+    previously said "in progress"; corrected 2026-09-17, found stale during
+    the BI-dashboard slice below: `package.json` has no `chart.js`
+    dependency, `Chart.tsx`'s own imports are entirely `echarts/*`, and its
+    docstring already states the switch as done, not pending — wrapped
+    identically, `ChartProps`/`ChartSeries` unchanged, ECharts never
+    referenced outside this one file. Package gained `"sideEffects": false`
+    (package.json) as part of the original Chart.js work — genuinely
+    accurate now that `Chart`'s own registration moved off the module top
+    level — unlocking real per-export tree-shaking for every component, not
+    just this one. Real consumers landed: Dashboard.tsx's "Revenue trend"
+    line chart plus "Revenue by region" bar + "Revenue mix" donut (2026-09-17,
+    see the M7 narrative above), Inventory.tsx's "stock by warehouse" bar +
+    "mix by material" donut (issue #16's own "15 Inventory" scenario),
+    Planning.tsx's "forecast demand" bar, Analytics.tsx's "open work items"
+    bar. Still open: Finance (no real screen yet), Reports
+    (BuilderReports.tsx's live-aggregation gap), BI explore (new route + a
+    `'pie'` variant `Chart` doesn't have yet). Issue #16.
 35. [x] Icon component — `src/components/Icon.tsx`, exported from
     `src/index.ts`. A closed `IconName` union (`'sliders' | 'bell'`) as
     inline SVG, `size`/`color` props reading the token system; decorative
