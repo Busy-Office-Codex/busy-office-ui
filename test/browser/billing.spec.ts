@@ -87,8 +87,16 @@ test('the payment amount field rejects an amount over the balance due — no way
   await gotoBilling(page);
 
   await page.getByRole('row', { name: /INV-3105/ }).click();
-  await page.getByLabel('Payment amount').fill('5000'); // over the $2,700 balance due
+  const field = page.getByLabel('Payment amount');
+  await field.fill('5000'); // over the $2,700 balance due
   await expect(page.getByRole('button', { name: /Record payment/ })).toBeDisabled();
+  // The disabled state alone doesn't say WHY — assert the reason is actually surfaced (item 50's
+  // aria-invalid/aria-describedby wiring, not a silently-disabled control with no explanation).
+  await expect(field).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.getByText('Cannot exceed the balance due ($2,700.00).')).toBeVisible();
+  const describedBy = await field.getAttribute('aria-describedby');
+  expect(describedBy).toBeTruthy();
+  await expect(page.locator(`#${describedBy}`)).toHaveText('Cannot exceed the balance due ($2,700.00).');
 });
 
 // M7 Slice 10 (Billing completions) — worklist-driven invoice creation and a real cancellation,

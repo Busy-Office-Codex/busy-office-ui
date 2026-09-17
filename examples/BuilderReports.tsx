@@ -3,6 +3,7 @@ import { Button, ButtonGroup, Card, Chart, type ChartSeries, Chip, type ChipTone
 import { color, space } from '../src/tokens.stylex.js';
 import { appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { materialsStockedByWarehouse } from './data/types.js';
 
 /**
  * A report/dashboard-definition builder (ROADMAP M7's ERP reference-app initiative, Slice 13,
@@ -115,14 +116,10 @@ export function BuilderReports() {
   const state = useStoreState(appStore, (s) => s);
 
   // Same aggregation Inventory.tsx's own "stock by warehouse" bar chart computes, read live from
-  // the same shared store — a genuine live aggregation, not a snapshot copied in at build time.
-  // Counts distinct materials stocked per warehouse rather than summing `qtyOnHand` across
-  // materials that use different units (ream/spool/unit) — ROADMAP item 52/issue #22's fix, applied
-  // consistently here since this widget reused Inventory.tsx's own (buggy) figure byte-identically.
-  const byWarehouse: ChartSeries = Object.values(state.warehouses).map((warehouse) => ({
-    label: warehouse.name,
-    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).length,
-  }));
+  // the same shared store via the same shared helper (data/types.ts's materialsStockedByWarehouse)
+  // rather than a third copy — duplicating this byte-identical across files was the original bug
+  // (ROADMAP item 52/issue #22).
+  const byWarehouse: ChartSeries = materialsStockedByWarehouse(state.stockLevels, state.warehouses);
 
   // "Open" = not yet resolved — the same `pending_approval` status Requisitions.tsx's own
   // "Pending approval" Chip already names, not a new definition of "open".

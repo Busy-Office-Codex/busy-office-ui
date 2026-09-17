@@ -1,6 +1,7 @@
 import { Chart, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { materialsStockedByWarehouse } from './data/types.js';
 // Theme-safe page chrome (docs/design-conventions.md's "Theme-safe page chrome" recipe, extending
 // the ListReport.tsx/RecordDetail.tsx pass to this page): this page's own background/border
 // literals were raw hex duplicating color.* token values without reading them, so they stayed the
@@ -42,10 +43,7 @@ export function Inventory() {
   // product/warehouse pair — see appActions.receiveGoods/completeProductionOrder — so this count is
   // exactly the number of materials on hand there.) The donut below stays a physical-quantity sum
   // because it's scoped to ONE material at a time (always the same unit), which IS combinable.
-  const byWarehouse = Object.values(state.warehouses).map((warehouse) => ({
-    label: warehouse.name,
-    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).length,
-  }));
+  const byWarehouse = materialsStockedByWarehouse(state.stockLevels, state.warehouses);
 
   const rows = [...state.stockLevels].sort((a, b) => {
     const productA = state.products[a.productId]?.description ?? '';

@@ -93,6 +93,16 @@ export function Billing() {
   const balanceDue = total - paid;
   const paymentAmount = paymentAmountInput.trim() === '' ? balanceDue : Number(paymentAmountInput);
   const paymentAmountValid = Number.isFinite(paymentAmount) && paymentAmount > 0 && paymentAmount <= balanceDue;
+  // Disabling the button on an invalid amount communicates the STATE accessibly (native `disabled`),
+  // but not the REASON — this message closes that gap using the same error/aria-invalid/
+  // aria-describedby wiring Input just gained (ROADMAP item 50/issue #22), rather than leaving a
+  // silently-disabled control (found in the item 51-53 batch's own independent review).
+  const paymentAmountError =
+    paymentAmountInput.trim() === '' || paymentAmountValid
+      ? undefined
+      : paymentAmount <= 0 || !Number.isFinite(paymentAmount)
+        ? 'Enter an amount greater than $0.'
+        : `Cannot exceed the balance due (${formatCurrency(balanceDue)}).`;
 
   const uninvoicedOrders = Object.values(state.salesOrders).filter((order) => order.status === 'confirmed' && order.invoiceIds.length === 0);
 
@@ -257,9 +267,10 @@ export function Billing() {
                       </Button>
                       {balanceDue > 0 && (
                         <>
-                          <div style={{ width: 140 }}>
+                          <div style={{ width: 180 }}>
                             <Input
-                              aria-label="Payment amount"
+                              label="Payment amount"
+                              error={paymentAmountError}
                               type="number"
                               inputMode="decimal"
                               min={0.01}
@@ -283,7 +294,7 @@ export function Billing() {
                               setPaymentAmountInput('');
                             }}
                           >
-                            Record payment — {formatCurrency(paymentAmount)}
+                            {paymentAmountValid ? `Record payment — ${formatCurrency(paymentAmount)}` : 'Record payment'}
                           </Button>
                         </>
                       )}

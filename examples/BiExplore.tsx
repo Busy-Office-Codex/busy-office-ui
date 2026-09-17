@@ -3,6 +3,7 @@ import { Card, Chart, type ChartSeries, Dropdown, Table, TableBody, TableCell, T
 import { color, space } from '../src/tokens.stylex.js';
 import { appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { materialsStockedByWarehouse } from './data/types.js';
 
 /**
  * BI "Explore" — a real pivot-result screen (ROADMAP item 34's "BI explore" slice, closing issue
@@ -49,12 +50,10 @@ export function BiExplore() {
   const state = useStoreState(appStore, (s) => s);
   const [pivotBy, setPivotBy] = useState<PivotDimension>('Warehouse');
 
-  // Same fix as Inventory.tsx's own "stock by warehouse" bar chart: counts distinct materials
-  // stocked per warehouse instead of summing `qtyOnHand` across materials that use different units.
-  const byWarehouse: ChartSeries = Object.values(state.warehouses).map((warehouse) => ({
-    label: warehouse.name,
-    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).length,
-  }));
+  // Same fix as Inventory.tsx's own "stock by warehouse" bar chart, and the same shared helper
+  // (data/types.ts's materialsStockedByWarehouse) rather than a third copy of the aggregation —
+  // duplicating it byte-identical across files was the original bug (ROADMAP item 52/issue #22).
+  const byWarehouse: ChartSeries = materialsStockedByWarehouse(state.stockLevels, state.warehouses);
 
   // Byte-identical to Inventory.tsx's own "mix by material" donut chart aggregation — scoped to
   // one material at a time, so summing across warehouses here never crosses a unit boundary.

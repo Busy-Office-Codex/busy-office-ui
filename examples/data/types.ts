@@ -327,3 +327,20 @@ export function lineTotal(line: LineItem): number {
 export function documentTotal(lines: LineItem[]): number {
   return lines.reduce((sum, line) => sum + lineTotal(line), 0);
 }
+
+/**
+ * Count of distinct materials stocked per warehouse — NOT a sum of `qtyOnHand` across materials,
+ * since each Product's own `unit` field can differ (reams, spools, discrete units); summing those
+ * as one physical quantity was ROADMAP item 52/issue #22's bug. Shared by Inventory.tsx,
+ * BiExplore.tsx and BuilderReports.tsx (the 3 places that reused this exact figure — the same
+ * duplication that produced the original bug, so this stays one function, not three copies).
+ */
+export function materialsStockedByWarehouse(
+  stockLevels: StockLevel[],
+  warehouses: Record<string, Warehouse>,
+): { label: string; value: number }[] {
+  return Object.values(warehouses).map((warehouse) => ({
+    label: warehouse.name,
+    value: stockLevels.filter((level) => level.warehouseId === warehouse.id).length,
+  }));
+}
