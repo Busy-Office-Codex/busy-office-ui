@@ -5,7 +5,12 @@ import { fileURLToPath } from 'node:url';
 
 const previewDirectory = path.dirname(fileURLToPath(import.meta.url));
 const distDirectory = path.join(previewDirectory, 'dist');
-const host = '127.0.0.1';
+// Defaults to loopback-only for local `pnpm preview` (unchanged behavior); a container that
+// publishes this port needs 0.0.0.0 instead, since a socket bound to 127.0.0.1 only accepts
+// connections from inside its own network namespace, not through container port-publishing
+// (confirmed directly: reachable via `podman run --network container:<id>`, unreachable via
+// the published `-p` port from the host).
+const host = process.env.BUSYOFFICE_UI_PREVIEW_HOST ?? '127.0.0.1';
 const port = Number(process.env.BUSYOFFICE_UI_PREVIEW_PORT ?? '4174');
 // ROADMAP item 14 (2026-09-14 design review, confirmed MEDIUM finding): the UA default stylesheet
 // gives `body` an 8px margin on every side — never reset here before — which added ~16px to every
