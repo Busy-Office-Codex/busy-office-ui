@@ -73,6 +73,17 @@ const { title } = Astro.props as Props;
         flex-wrap: wrap;
         gap: 12px;
         align-items: flex-start;
+        /* Containing block for any `position: fixed` descendant — without it, a fixed element
+           ignores this box entirely and pins to the actual browser viewport, overlaying this
+           page's own header/nav instead of staying inside its demo. Real, not hypothetical: both
+           AppShell's own chrome (command bar/app strip/dock) AND Shell's own doc page (its live
+           demo mounts a real `<Shell>`) use `position: fixed` — Shell's page had this exact,
+           unnoticed escape bug before this fix too, not just AppShell's new one. `Modal`'s native
+           `<dialog>` also has `position: fixed` but is unaffected either way: `showModal()`
+           promotes it to the browser's own top layer, which ignores `contain` (and any ancestor
+           stacking context) by design — a modal is SUPPOSED to render above everything, unlike a
+           persistent shell chrome silently overlaying the page's own nav. */
+        contain: layout;
       }
       pre {
         background: #0f172a;

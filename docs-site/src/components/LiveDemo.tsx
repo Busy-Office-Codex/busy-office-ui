@@ -3,13 +3,14 @@ import * as DesignSystem from '@busyoffice/design-system';
 import { Shell } from '@busyoffice/design-system/shell';
 import { ListReport } from '@busyoffice/design-system/examples/list-report';
 import { RecordDetail } from '@busyoffice/design-system/examples/record-detail';
+import { AppShell } from '@busyoffice/design-system/examples/app-shell';
 
 // The real, built package — this is the only place docs-site imports it for demo purposes,
 // and it goes through the documented `@busyoffice/design-system` / `/shell` / `/examples/*`
-// subpaths, the same way any external host would. `ListReport`/`RecordDetail` are here because
-// their own docs (docs/ListReport.md, docs/RecordDetail.md) demo the sample-page composition,
-// not a raw package component.
-const SCOPE: Record<string, unknown> = { ...DesignSystem, Shell, ListReport, RecordDetail };
+// subpaths, the same way any external host would. `ListReport`/`RecordDetail`/`AppShell` are
+// here because their own docs (docs/ListReport.md, docs/RecordDetail.md, docs/AppShell.md) demo
+// the sample-page composition, not a raw package component.
+const SCOPE: Record<string, unknown> = { ...DesignSystem, Shell, ListReport, RecordDetail, AppShell };
 const SCOPE_KEYS = Object.keys(SCOPE);
 const SCOPE_VALUES = SCOPE_KEYS.map((key) => SCOPE[key]);
 

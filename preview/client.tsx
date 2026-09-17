@@ -42,6 +42,7 @@ import { NotFound } from '../examples/NotFound.js';
 import { DensityLab } from './DensityLab.js';
 import { ShellBreadcrumbsLab } from './ShellBreadcrumbsLab.js';
 import { ButtonGroupLab } from './ButtonGroupLab.js';
+import { AppShellFallbackLab } from './AppShellFallbackLab.js';
 import '../fonts/ibm-plex-sans.css';
 
 // ROADMAP M6 (issue #17): grows one route per landed item, not a bulk switch to AppShell's own
@@ -194,6 +195,7 @@ function App() {
   if (hash === '#density-lab') return <DensityLab />;
   if (hash === '#shell-breadcrumbs-lab') return <ShellBreadcrumbsLab />;
   if (hash === '#button-group-lab') return <ButtonGroupLab />;
+  if (hash === '#app-shell-fallback-lab') return <AppShellFallbackLab />;
   if (hash === '#login') return <Login />;
   if (hash === '#password-reset') return <PasswordReset />;
   if (hash === '#account-locked') return <AccountLocked />;

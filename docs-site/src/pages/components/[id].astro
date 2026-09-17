@@ -6,7 +6,18 @@ import { extractJsxBlock } from '../../lib/extractDemo.ts';
 import { compileJsxSample } from '../../lib/compileJsx.ts';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('docs', (entry) => entry.id !== 'design-conventions');
+  // Pattern docs whose prose+demo were previously split across two routes render at
+  // /patterns/<id>/ instead — one URL, not two. `appshell` stays out of this list deliberately:
+  // it never had a split-routing problem to fix (no prior /patterns/app-shell/ page existed), so
+  // it renders here like any other component doc — see .live-demo's `contain: layout` in
+  // Base.astro for why that's safe even though AppShell's own chrome uses `position: fixed`.
+  // Keep this list in sync with docs-site/src/pages/patterns/*.astro and index.astro's
+  // `patterns` array. Declared inside this function, not at module scope: Astro's static-path
+  // build extracts/runs `getStaticPaths` in an isolated context that doesn't reliably close over
+  // a sibling module-scope `const` (found live — a module-scope version threw "PATTERN_DOC_IDS
+  // is not defined" during `astro build`, 2026-09-17).
+  const PATTERN_DOC_IDS = ['listreport', 'recorddetail', 'launcher', 'dashboard'];
+  const entries = await getCollection('docs', (entry) => entry.id !== 'design-conventions' && !PATTERN_DOC_IDS.includes(entry.id));
   return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
 }
 

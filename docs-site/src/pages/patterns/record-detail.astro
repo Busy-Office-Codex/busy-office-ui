@@ -1,13 +1,35 @@
 ---
+import { getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { RecordDetail } from '@busyoffice/design-system/examples/record-detail';
+
+const entry = await getEntry('docs', 'recorddetail');
+const { Content } = await render(entry);
 ---
 <Base title="Record detail pattern">
   <a href="/">&larr; Home</a>
   <h1>Record detail</h1>
+  {entry.data.category && <p class="category-badge">{entry.data.category}</p>}
   <p>
-    Sales-order detail sample page. Source:
+    Source:
     <a href="https://github.com/Busy-Office-Codex/busy-office-ui/blob/main/examples/RecordDetail.tsx">examples/RecordDetail.tsx</a>
   </p>
-  <RecordDetail client:load />
+
+  <article>
+    <Content />
+  </article>
+
+  <h2>Live demo</h2>
+  <div class="live-demo">
+    <RecordDetail client:load />
+  </div>
+
+  {entry.data.tests && entry.data.tests.length > 0 && (
+    <>
+      <h2>Tests</h2>
+      <ul class="tests-list">
+        {entry.data.tests.map((test) => <li>{test}</li>)}
+      </ul>
+    </>
+  )}
 </Base>

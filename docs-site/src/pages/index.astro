@@ -2,15 +2,38 @@
 import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 
-const componentEntries = (await getCollection('docs', (entry) => entry.id !== 'design-conventions')).sort((a, b) =>
-  a.id.localeCompare(b.id),
+// Sample-page compositions (ListReport/RecordDetail/Launcher/Dashboard/AppShell) render as
+// "Patterns" below, not in this list, even though AppShell's own route still lives under
+// /components/ (see docs-site/src/pages/components/[id].astro's comment for why) — the index
+// groups by what a reader is looking for, not by URL shape.
+const PATTERN_DOC_IDS = ['listreport', 'recorddetail', 'launcher', 'dashboard', 'appshell'];
+const CATEGORY_ORDER = ['actions', 'forms', 'data-display', 'feedback', 'layout', 'typography', 'media'];
+const CATEGORY_LABELS: Record<string, string> = {
+  actions: 'Actions',
+  forms: 'Forms',
+  'data-display': 'Data display',
+  feedback: 'Feedback',
+  layout: 'Layout',
+  typography: 'Typography',
+  media: 'Media',
+};
+
+const componentEntries = (await getCollection('docs', (entry) => entry.id !== 'design-conventions' && !PATTERN_DOC_IDS.includes(entry.id))).sort(
+  (a, b) => a.id.localeCompare(b.id),
 );
+const componentsByCategory = CATEGORY_ORDER.map((category) => ({
+  category,
+  label: CATEGORY_LABELS[category] ?? category,
+  entries: componentEntries.filter((entry) => entry.data.category === category),
+})).filter((group) => group.entries.length > 0);
+const uncategorized = componentEntries.filter((entry) => !CATEGORY_ORDER.includes(entry.data.category ?? ''));
 
 const patterns = [
-  { slug: 'launcher', label: 'Launcher' },
-  { slug: 'list-report', label: 'List report' },
-  { slug: 'record-detail', label: 'Record detail' },
-  { slug: 'dashboard', label: 'Dashboard' },
+  { label: 'Launcher', href: '/patterns/launcher/' },
+  { label: 'Dashboard', href: '/patterns/dashboard/' },
+  { label: 'List report', href: '/patterns/list-report/' },
+  { label: 'Record detail', href: '/patterns/record-detail/' },
+  { label: 'App shell', href: '/components/appshell/' },
 ];
 ---
 <Base title="Busy Office UI">
@@ -18,11 +41,26 @@ const patterns = [
   <p>Docs for <code>@busyoffice/design-system</code>, generated from the package's own <code>docs/*.md</code> files, tokens and example compositions.</p>
 
   <h2>Components</h2>
-  <ul>
-    {componentEntries.map((entry) => (
-      <li><a href={`/components/${entry.id}/`}>{entry.id}</a>{entry.data.category ? ` — ${entry.data.category}` : ''}</li>
-    ))}
-  </ul>
+  {componentsByCategory.map((group) => (
+    <>
+      <h3>{group.label}</h3>
+      <ul>
+        {group.entries.map((entry) => (
+          <li><a href={`/components/${entry.id}/`}>{entry.id}</a></li>
+        ))}
+      </ul>
+    </>
+  ))}
+  {uncategorized.length > 0 && (
+    <>
+      <h3>Other</h3>
+      <ul>
+        {uncategorized.map((entry) => (
+          <li><a href={`/components/${entry.id}/`}>{entry.id}</a></li>
+        ))}
+      </ul>
+    </>
+  )}
 
   <h2>Tokens &amp; density</h2>
   <ul>
@@ -31,9 +69,10 @@ const patterns = [
   </ul>
 
   <h2>Patterns</h2>
+  <p>Composed sample-page journeys, not single components — see each page's "Not for" note.</p>
   <ul>
     {patterns.map((pattern) => (
-      <li><a href={`/patterns/${pattern.slug}/`}>{pattern.label}</a></li>
+      <li><a href={pattern.href}>{pattern.label}</a></li>
     ))}
   </ul>
 

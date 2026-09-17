@@ -1,20 +1,42 @@
 ---
+import { getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-// Dashboard.tsx has no `@busyoffice/design-system/examples/*` subpath export (only app-shell,
-// list-report and record-detail are in package.json's `exports` map today) and this task must
-// not add one — that's a one-way change to a boundary file (AGENTS.md/LOOP.md), not something a
-// docs-site batch can decide on its own. Pre-compiled by scripts/build-examples.mjs (see that
-// file) into src/generated/dashboard.js instead — raw source can't be imported directly, since
-// it calls stylex.defineVars(), which only works compiled. Flagged for owner review.
+// Pre-compiled-source exception, not a package import: Dashboard.tsx has no
+// @busyoffice/design-system/examples/* subpath export (only app-shell, list-report and
+// record-detail are in package.json's `exports` map today) and this docs batch must not add
+// one — that's a one-way change to a boundary file (AGENTS.md/LOOP.md), not something a docs-site
+// batch can decide on its own. Pre-compiled by scripts/build-examples.mjs instead — raw source
+// can't be imported directly, since it calls stylex.defineVars(), which only works compiled.
 import { Dashboard } from '../../generated/dashboard.js';
 import '../../generated/examples.css';
+
+const entry = await getEntry('docs', 'dashboard');
+const { Content } = await render(entry);
 ---
 <Base title="Dashboard pattern">
   <a href="/">&larr; Home</a>
   <h1>Dashboard</h1>
+  {entry.data.category && <p class="category-badge">{entry.data.category}</p>}
   <p>
-    KPI dashboard sample page. Source:
+    Source:
     <a href="https://github.com/Busy-Office-Codex/busy-office-ui/blob/main/examples/Dashboard.tsx">examples/Dashboard.tsx</a>
   </p>
-  <Dashboard client:load />
+
+  <article>
+    <Content />
+  </article>
+
+  <h2>Live demo</h2>
+  <div class="live-demo">
+    <Dashboard client:load />
+  </div>
+
+  {entry.data.tests && entry.data.tests.length > 0 && (
+    <>
+      <h2>Tests</h2>
+      <ul class="tests-list">
+        {entry.data.tests.map((test) => <li>{test}</li>)}
+      </ul>
+    </>
+  )}
 </Base>
