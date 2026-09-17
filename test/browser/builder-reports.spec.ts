@@ -24,6 +24,77 @@ test('opens the first definition with its real seeded widgets, Save disabled wit
   await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
 });
 
+test('Preview renders the 5 seeded widgets with real content inside their existing placeholder box (ROADMAP item 34 "Reports" slice)', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoBuilderReports(page);
+
+  // "Sales performance report": a real KPI stat and a real line chart, not placeholder text.
+  await page.getByRole('radio', { name: 'Preview' }).click();
+  await expect(page.getByText('$486K')).toBeVisible();
+  await expect(page.getByText('+6.4% vs last month')).toBeVisible();
+  await expect(page.getByTestId('chart-canvas')).toHaveCount(1);
+  const trendTable = page.getByRole('table', { name: 'Revenue trend, last 6 months' });
+  await expect(trendTable).toBeAttached();
+  // A real value, not just a real-looking table — catches a wrong aggregation the same way a
+  // structural check on table/caption presence alone would not.
+  await expect(trendTable.getByRole('cell', { name: '$486,000' })).toBeAttached();
+
+  // "Operations dashboard": 2 real charts (bar + donut) reading the SAME live `stockLevels`
+  // aggregation, and a real table with a real seeded row — each widget keeps its original
+  // bordered box, type caption and label line; this only adds real content inside it.
+  await page.getByRole('button', { name: /Operations dashboard/ }).click();
+  await expect(page.getByTestId('chart-canvas')).toHaveCount(2);
+  const barTable = page.getByRole('table', { name: 'Units on hand by warehouse' });
+  const donutTable = page.getByRole('table', { name: 'Share of total units by warehouse' });
+  await expect(barTable).toBeAttached();
+  await expect(donutTable).toBeAttached();
+  // The real per-warehouse values (from examples/data/seed.ts's stockLevels), not just "some
+  // table exists" — a wrong aggregation (e.g. summing the wrong field) would still pass a
+  // structure-only check but fails this.
+  for (const table of [barTable, donutTable]) {
+    await expect(table.getByRole('cell', { name: 'Main DC' })).toBeAttached();
+    await expect(table.getByRole('cell', { name: '370 units' })).toBeAttached();
+    await expect(table.getByRole('cell', { name: 'East Coast Hub' })).toBeAttached();
+    await expect(table.getByRole('cell', { name: '100 units' })).toBeAttached();
+    await expect(table.getByRole('cell', { name: 'West Coast Hub' })).toBeAttached();
+    await expect(table.getByRole('cell', { name: '63 units' })).toBeAttached();
+  }
+  await expect(page.getByRole('cell', { name: 'REQ-4001' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Marcus Webb' })).toBeVisible();
+
+  // A widget with no real backing fact (freshly added from the palette) still gets only the
+  // original structural placeholder — proof this isn't a blanket "always render a chart" change.
+  await page.getByRole('radio', { name: 'Design' }).click();
+  await page.getByRole('button', { name: '+ Bar chart' }).click();
+  await page.getByRole('radio', { name: 'Preview' }).click();
+  await expect(page.getByText('New bar chart')).toBeVisible();
+  await expect(page.getByTestId('chart-canvas')).toHaveCount(2); // unchanged — the new widget drew no chart
+});
+
+test('the "Open requisitions" widget reflects a real state transition, not a static snapshot', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoBuilderReports(page);
+
+  await page.getByRole('button', { name: /Operations dashboard/ }).click();
+  await page.getByRole('radio', { name: 'Preview' }).click();
+  await expect(page.getByRole('cell', { name: 'REQ-4001' })).toBeVisible();
+
+  // Approve REQ-4001 on the real Requisitions screen (the shared store's other real consumer of
+  // this same data) — the widget above reads the same live store, not a snapshot copied in at
+  // build time, so it should reflect the transition without any reload.
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Requisitions\b/ }).click();
+  await page.getByRole('row', { name: /REQ-4001/ }).click();
+  await page.getByRole('button', { name: 'Approve — create purchase order' }).click();
+
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Reports & dashboards\s+[A-Z]/ }).click();
+  await page.getByRole('button', { name: /Operations dashboard/ }).click();
+  await page.getByRole('radio', { name: 'Preview' }).click();
+  await expect(page.getByText('No requisitions pending approval.')).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'REQ-4001' })).toHaveCount(0);
+});
+
 test('the full journey — modify, validate (dirty state), preview, save, reopen — is genuinely live', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoBuilderReports(page);

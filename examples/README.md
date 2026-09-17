@@ -64,7 +64,7 @@ comment names its slice and journey — read that first, not just this table.
 | `Roles.tsx` | None — Slice 9 | Role management, filling `NAV.Administration`'s pre-existing "Roles" placeholder from M6 |
 | `Companies.tsx` | None — Slice 12 | Companies & entities: the entity-lifecycle half of `AdminOverview.tsx`'s "Manage legal entities" card |
 | `Integrations.tsx` | None — Slice 12 | Integrations & API, filling `NAV.Administration`'s pre-existing "Integrations" placeholder from M6 |
-| `BuilderReports.tsx` | None — Slice 13 | Report/dashboard-definition builder; adds a new `NAV.Builder` entry, "Reports & dashboards" |
+| `BuilderReports.tsx` | None — Slice 13 | Report/dashboard-definition builder; adds a new `NAV.Builder` entry, "Reports & dashboards"; Preview renders 5 named widgets with real `Chart`/`Table` content read live from the shared store (ROADMAP item 34) |
 | `PasswordReset.tsx` | None — Slice 8 (Entry/nav) | Two-step password-reset flow, standalone pre-shell screen at `#password-reset`; genuinely stateful (submitting moves to a real "check your email" state, "Resend" is a repeatable action), unlike the single-message screens below |
 | `AccountLocked.tsx` | None — Slice 8 | Account-locked error state, standalone pre-shell screen at `#account-locked` — a real host shows this before `Shell` ever mounts |
 | `SessionExpired.tsx` | None — Slice 8 | Session-expired error state, standalone pre-shell screen at `#session-expired` |

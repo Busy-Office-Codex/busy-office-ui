@@ -6,6 +6,8 @@ import { color, space } from '../src/tokens.stylex.js';
 // scenario: "revenue trend vs target"). Six months ending at the same $486K/+6.4% the REVENUE
 // THIS MONTH stat card above already states, so the chart and the card agree with each other
 // rather than each inventing its own number for the same fact.
+// BuilderReports.tsx's "Revenue trend" widget (ROADMAP item 34's "Reports" slice) keeps its own
+// literal copy of this exact array — a change here needs the same change made there by hand.
 const REVENUE_TREND = [
   { label: 'Apr', value: 410000 },
   { label: 'May', value: 428000 },
