@@ -13,12 +13,15 @@ import { expect, test } from '@playwright/test';
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
 
 // One entry per page reworked in this pass, by its command-palette page label (see
-// `preview/client.tsx`'s `routes`).
+// `preview/client.tsx`'s `routes`). A plain string disambiguates the same way every other test
+// in this repo does (label + whitespace + the next command's capitalized hint); `{ label, hint }`
+// pins the exact module hint instead, for a label with more than one real route behind it today
+// (`Overview`: Administration's pre-existing route plus Finance's, ROADMAP item 34).
 const PAGE_LABELS = [
   'Sales order',
   'Dashboards',
   'Profile',
-  'Overview',
+  { label: 'Overview', hint: 'Administration' },
   'General',
   'Role page',
   'Inbox',
@@ -56,7 +59,10 @@ const PAGE_LABELS = [
   'Reports & dashboards',
 ];
 
-for (const label of PAGE_LABELS) {
+for (const entry of PAGE_LABELS) {
+  const label = typeof entry === 'string' ? entry : entry.label;
+  const matcher = typeof entry === 'string' ? new RegExp(`^${label}\\s+[A-Z]`) : new RegExp(`^${label}\\s+${entry.hint}\\b`);
+
   test(`"${label}" has no horizontal overflow at a 390px mobile viewport`, async ({ page }) => {
     await page.setViewportSize(MOBILE_VIEWPORT);
     await page.goto('/#examples');
@@ -68,10 +74,11 @@ for (const label of PAGE_LABELS) {
     // Capitalized module name — so requiring whitespace then a capital right after `label` finds
     // the real command even when `label` is itself a prefix of another page's label (e.g. 'Users'
     // is a prefix of 'Users and roles', but only 'Users Administration' — not 'Users and roles
-    // Administration' — matches `\s+[A-Z]` immediately after 'Users').
+    // Administration' — matches `\s+[A-Z]` immediately after 'Users'). A label with more than one
+    // real route today (`Overview`) pins the exact hint instead of the generic `[A-Z]` class.
     const dialog = page.getByRole('dialog', { name: 'Command palette' });
     await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
-    await dialog.getByRole('button', { name: new RegExp(`^${label}\\s+[A-Z]`) }).click();
+    await dialog.getByRole('button', { name: matcher }).click();
     await expect(dialog).toBeHidden();
 
     const overflow = await page.evaluate(() => {

@@ -101,7 +101,9 @@ const NAV: Record<AppShellModule, string[]> = {
   // neither 'Fields' nor 'Publish' fits a report/dashboard designer (see BuilderReports.tsx's own
   // header comment). This was preview/client.tsx's 32nd and, at the time, final route —
   // SHELL_MAX_ROUTES was a hard cap at exactly 32; raised to 40 (owner-directed, 2026-09-16) to
-  // make room for the Finance module and BI explore, still-open issue #16 consumers.
+  // make room for the Finance module and BI explore, still-open issue #16 consumers — raised
+  // again to 64 in a later, unrelated batch (docs-site work, issue #21); 40 is this comment's own
+  // historical record, not the current cap.
   Builder: ['Pages', 'Forms', 'Workflows', 'Fields', 'Publish', 'Reports & dashboards'],
   Settings: ['General', 'Organization', 'Numbering', 'Tax', 'Email', 'Security'],
 };

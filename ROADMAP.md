@@ -498,8 +498,54 @@ issues.
     and rendered twice) for exactly those 5 named widgets; any other
     widget (added from the palette, no real backing fact) still gets only
     the original structural placeholder, verified by a real browser test.
-    Still open: Finance (no real screen yet), BI explore (new route + a
-    `'pie'` variant `Chart` doesn't have yet). Issue #16.
+
+    Corrected again (2026-09-17): "17 Finance" landed — `examples/
+    Finance.tsx` (new), the Finance module's first real screen, fills
+    `NAV.Finance`'s pre-existing "Overview" placeholder (`preview/
+    client.tsx`'s `finance-overview` route) — this is what turns the
+    dock's Finance tile from disabled to real; no `AppShell.tsx` NAV
+    change needed. One real figure: "Receivables" reads live
+    `state.invoices` (balance due = `documentTotal(lines)` minus posted
+    payments, the exact computation `Billing.tsx`'s own "Record payment"
+    action already uses and mutates) — genuinely live, verified by a real
+    browser test that records a payment on `Billing.tsx` and confirms
+    `Finance.tsx` reflects it with no reload. "Ledger"/"Payables"/"Reports"
+    stay disclosed static cards: no journal-entry, AP-bill, or
+    custom-report data model exists in this store to connect to honestly
+    (the same disclosed-static choice `AdminOverview.tsx`'s own header
+    comment already made for its module). The named "cash flow, 12
+    months" chart is disclosed sample data, not live: `Invoice.payments`
+    can hold real, live-dated records once a viewer uses `Billing.tsx`,
+    but the seed data starts every invoice unpaid — there is no seeded
+    12-month payment history to aggregate a real trend from. Closing this
+    slice widened `examples/*.tsx` to 46 files
+    (`test/shell-token-audit.test.ts`'s `TARGET_FILES`,
+    `docs/design-conventions.md`, `docs-site/src/pages/{quality,examples,
+    index}.astro` all updated); `examples/README.md` gained a new row, not
+    a count edit (it never stated the total as a number). A required
+    independent review first found this batch's own initial pass at that
+    45→46 sweep had missed `index.astro` entirely and left
+    `design-conventions.md` internally contradicting itself (one of its
+    two "45"s updated, the other not) — both fixed, and this paragraph
+    itself corrected to what the sweep actually touched rather than what
+    it was first believed to. The same review also caught the accounts-
+    receivable figure using a different "unpaid" definition than
+    `Analytics.tsx`'s own established one (`status !== 'cancelled'`,
+    which would also count `'draft'` and `'paid'`, instead of `status ===
+    'sent' || status === 'overdue'`) — fixed to match, so the two screens
+    can't disagree about the same fact; and a chart test that asserted no
+    real value at all (structure only — proven to pass against an empty
+    data series) — fixed with a real cell-value assertion, the same gap
+    the preceding Reports slice's own review had already caught once.
+    Also fixed: a real regression the fresh-context review reproduced
+    directly — the new "Overview" label collided with Administration's
+    own pre-existing one in `test/browser/mobile-responsive.spec.ts`'s
+    hand-maintained page list, breaking that file's own
+    Administration-Overview test until the matcher was made to pin an
+    exact module hint per entry instead of a bare label.
+
+    Still open: BI explore (new route + a `'pie'` variant `Chart` doesn't
+    have yet). Issue #16.
 35. [x] Icon component — `src/components/Icon.tsx`, exported from
     `src/index.ts`. A closed `IconName` union (`'sliders' | 'bell'`) as
     inline SVG, `size`/`color` props reading the token system; decorative

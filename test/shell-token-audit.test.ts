@@ -52,7 +52,7 @@ function stripComments(source: string): string {
 // reintroduce a literal a prior pass removed.
 //
 // Token-standardization sweep (owner-directed, 2026-09-17, issue #21): widened to every
-// examples/*.tsx file plus src/shell/Shell.tsx — the full 45-file surface, not a partial list.
+// examples/*.tsx file plus src/shell/Shell.tsx — the full 46-file surface, not a partial list.
 // "No exception" is this array covering every real file and this test passing, not a narrative
 // claim; a small number of genuinely off-palette literals remain by design (see
 // docs/design-conventions.md's "Theme-safe page chrome" section) but each is either not a hex
@@ -81,6 +81,7 @@ const TARGET_FILES = [
   'examples/Delivery.tsx',
   'examples/entryScreenLayout.tsx',
   'examples/filterTabs.tsx',
+  'examples/Finance.tsx',
   'examples/Help.tsx',
   'examples/Inbox.tsx',
   'examples/Integrations.tsx',
