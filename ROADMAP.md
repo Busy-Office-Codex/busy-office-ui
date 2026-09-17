@@ -342,6 +342,29 @@ live run, and this closing verification): **5.60KB minified / 1.91KB
 gzipped, 0 bytes of echarts/zrender**, consistent to within rounding each
 time.
 
+**M9 — AppShell: hash-sync its uncontrolled fallback — in progress.** Item
+54, issue #23 (`agreed`, project owner, 2026-09-17, via direct instruction
+against a 4-option comparison — "agree with #2" — recorded here rather than
+a separate issue comment, matching the M7/M8 precedent). `preview/
+client.tsx`'s `SamplePreview` never synced its active route to the URL (no
+deep-linking, no working back/forward) — traced to `activeRouteId` being a
+bare `useState` with zero `window.location` involvement. `Shell` itself
+correctly refuses to own routing (`docs/Shell.md`'s own reference example is
+plain `useState` — a component library hardcoding one router breaks for any
+host using a different one, `AGENTS.md`'s boundary rule). But
+`examples/AppShell.tsx` (the exported `./examples/app-shell` composition)
+already has an UNCONTROLLED fallback — `sampleActiveId`, used whenever
+`navigation` is omitted — that's the right seam: hash-sync that fallback by
+default, while `Shell`'s actual `navigation` contract (fully controlled)
+stays byte-for-byte unchanged, so this is additive, not breaking, for every
+host that already supplies its own `navigation`. A router-adapter interface
+and a built-in routing engine were both considered and ruled out — no
+second real consumer for an adapter yet, and an engine violates the same
+boundary rule `Shell`'s current design already respects. Serves: Objective
+2 (boundary — routing stays host-owned; only the package's own already-
+uncontrolled fallback gains a sensible default) and intent.md's navigation
+concern the original complaint raised.
+
 ## Items
 
 Format: `[x]` done · `[ ]` open · `[?]` proposed (needs an agreed issue).
@@ -1368,6 +1391,27 @@ issues.
     automation-checked number. Serves: intent.md's opening sentence directly
     ("hosts import one small, dependable UI package"). Needs: issue #22
     (`agreed`, project owner, 2026-09-17).
+54. [ ] **AppShell: hash-sync its uncontrolled fallback.** `examples/
+    AppShell.tsx`'s own already-uncontrolled `sampleActiveId` fallback (used
+    whenever `navigation` is omitted) and `preview/client.tsx`'s
+    `SamplePreview` (which always supplies its own explicit `navigation`, so
+    it needs the same behavior wired in directly) both never synced their
+    active route to `location.hash` — no deep-linking, no working back/
+    forward, the originally-reported "URL doesn't change on navigation."
+    Accept: `AppShell` with no `navigation` prop reads its initial route
+    from `location.hash` when present/valid and writes it back on
+    navigation, verified by a load-with-hash test and a navigate-then-check-
+    hash test; browser back/forward moves between previously-visited routes
+    in that mode, verified by a navigate-twice-then-back test; `Shell`'s own
+    `navigation` contract is provably unchanged (existing controlled-usage
+    tests keep passing unmodified); `preview/client.tsx`'s `SamplePreview`
+    gains the same sync via one shared hook (real second consumer, clears
+    Objective 3); no collision with the pre-existing standalone hash routes
+    (`#login`, `#density-lab`, etc. — real route ids always contain a `/`,
+    those never do). Serves: Objective 2 (boundary — routing stays host-
+    owned; only the package's own already-uncontrolled fallback gains a
+    sensible default). Needs: issue #23 (`agreed`, project owner,
+    2026-09-17).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
