@@ -116,9 +116,12 @@ export function BuilderReports() {
 
   // Same aggregation Inventory.tsx's own "stock by warehouse" bar chart computes, read live from
   // the same shared store — a genuine live aggregation, not a snapshot copied in at build time.
+  // Counts distinct materials stocked per warehouse rather than summing `qtyOnHand` across
+  // materials that use different units (ream/spool/unit) — ROADMAP item 52/issue #22's fix, applied
+  // consistently here since this widget reused Inventory.tsx's own (buggy) figure byte-identically.
   const byWarehouse: ChartSeries = Object.values(state.warehouses).map((warehouse) => ({
     label: warehouse.name,
-    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).reduce((sum, level) => sum + level.qtyOnHand, 0),
+    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).length,
   }));
 
   // "Open" = not yet resolved — the same `pending_approval` status Requisitions.tsx's own
@@ -179,15 +182,15 @@ export function BuilderReports() {
       return <Chart type="line" title="Revenue trend, last 6 months" valueLabel="$" data={REVENUE_TREND} height={140} />;
     }
     if (widget.type === 'Bar chart' && widget.label === 'Stock by warehouse') {
-      return <Chart type="bar" title="Units on hand by warehouse" valueLabel="units" data={byWarehouse} height={140} />;
+      return <Chart type="bar" title="Materials stocked by warehouse" valueLabel="materials" data={byWarehouse} height={140} />;
     }
     if (widget.type === 'Donut chart' && widget.label === 'Stock mix by warehouse') {
       // Same `byWarehouse` data as the bar widget above, deliberately — the widget's own seeded
       // label asks for a warehouse mix, not a different cut of the data the way Inventory.tsx's
       // sibling bar/donut pair (by warehouse vs. by material) does. A distinct chart `title`
-      // ("share of total", not a restatement of the bar's own title) is the one visible cue that
-      // this is a proportional view of the same totals, not a second, independent metric.
-      return <Chart type="donut" title="Share of total units by warehouse" valueLabel="units" data={byWarehouse} height={140} />;
+      // ("share of", not a restatement of the bar's own title) is the one visible cue that this is
+      // a proportional view of the same totals, not a second, independent metric.
+      return <Chart type="donut" title="Share of materials stocked by warehouse" valueLabel="materials" data={byWarehouse} height={140} />;
     }
     if (widget.type === 'Table' && widget.label === 'Open requisitions') {
       return (

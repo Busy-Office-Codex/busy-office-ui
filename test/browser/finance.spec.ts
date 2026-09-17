@@ -17,11 +17,14 @@ test('renders the module hub with a real accounts-receivable figure, not a place
 
   await expect(page.getByRole('heading', { name: 'Finance', exact: true })).toBeVisible();
 
-  // The one seeded unpaid invoice (INV-3201, status "sent", 0 payments recorded): 40 × $185 + 1 ×
-  // $2,600 = $10,000 balance due — real structure, not proof the payments subtraction itself is
-  // correct (0 payments here means "minus posted payments" is a no-op); the next test's live
-  // payment is what actually exercises that arithmetic.
-  await expect(page.getByText('$10,000 outstanding across 1 unpaid invoice, 0 overdue.')).toBeVisible();
+  // Two seeded unpaid invoices: INV-3201 (status "sent", 0 payments recorded — 40 × $185 + 1 ×
+  // $2,600 = $10,000 balance due, real structure but not proof the payments subtraction itself is
+  // correct, since 0 payments makes "minus posted payments" a no-op) and INV-3105 (status "sent",
+  // a real partial payment already posted — $4,200 total minus $1,500 paid = $2,700 balance due,
+  // ROADMAP item 52/issue #22 — this one DOES exercise the payments-subtraction arithmetic, and
+  // proves a partially-paid invoice is correctly totaled at its remaining balance, not its full
+  // original amount, under this same "unpaid" filter). $10,000 + $2,700 = $12,700 total.
+  await expect(page.getByText('$12,700 outstanding across 2 unpaid invoices, 0 overdue.')).toBeVisible();
 
   // The other 3 module areas stay disclosed static cards — no fabricated numbers for concepts
   // with no real data model in this store (this file's own header comment explains why).
@@ -33,13 +36,13 @@ test('renders the module hub with a real accounts-receivable figure, not a place
 test('the accounts-receivable figure is genuinely live, not a snapshot', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoFinance(page);
-  await expect(page.getByText('$10,000 outstanding across 1 unpaid invoice, 0 overdue.')).toBeVisible();
+  await expect(page.getByText('$12,700 outstanding across 2 unpaid invoices, 0 overdue.')).toBeVisible();
 
-  // Record a real payment on the invoice via Billing.tsx (the shared store's other real consumer
-  // of this same data) and confirm Finance reflects it with no reload. Paying the full balance
-  // due flips the invoice to `status: 'paid'` (appStore.ts's own recordPayment logic), which
-  // drops it out of Finance's own "unpaid" filter entirely — this is the assertion that actually
-  // exercises the payments-subtraction arithmetic the first test's zero-payments case cannot.
+  // Record a real payment on INV-3201 via Billing.tsx (the shared store's other real consumer of
+  // this same data) and confirm Finance reflects it with no reload. The default "Record payment"
+  // click still pays the full balance due (INV-3201's own payment-amount field defaults to it —
+  // see Billing.tsx), which flips the invoice to `status: 'paid'` (appStore.ts's own
+  // recordPayment logic) and drops it out of Finance's own "unpaid" filter entirely.
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
   await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Billing\b/ }).click();
   await page.getByRole('row', { name: /INV-3201/ }).click();
@@ -47,7 +50,10 @@ test('the accounts-receivable figure is genuinely live, not a snapshot', async (
 
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
   await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Overview\s+Finance\b/ }).click();
-  await expect(page.getByText('$0 outstanding across 0 unpaid invoices, 0 overdue.')).toBeVisible();
+  // INV-3201 is gone, but INV-3105 (the seeded partially-paid invoice, ROADMAP item 52/issue #22)
+  // stays — correctly visible under "unpaid" and correctly totaled at its own $2,700 REMAINING
+  // balance, not its $4,200 original amount and not silently dropped.
+  await expect(page.getByText('$2,700 outstanding across 1 unpaid invoice, 0 overdue.')).toBeVisible();
 });
 
 test('renders a real chart, not empty scaffolding', async ({ page }) => {

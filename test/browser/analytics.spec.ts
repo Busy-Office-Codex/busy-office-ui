@@ -35,9 +35,12 @@ test('lists exceptions with real, live-computed counts from the shared store', a
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoAnalytics(page);
 
-  // Seed state: REQ-4001 pending_approval (1), INV-3201 sent (1), REC-5001/REC-5002 open (2).
+  // Seed state: REQ-4001 pending_approval (1), INV-3201 + INV-3105 sent (2 — the second is a real
+  // partially-paid invoice, ROADMAP item 52/issue #22, still correctly counted under the same
+  // 'sent'/'overdue' "unpaid" definition Finance.tsx's own Receivables card uses), REC-5001/
+  // REC-5002 open (2).
   await expect(page.getByText('1 requisition awaiting approval')).toBeVisible();
-  await expect(page.getByText('1 invoice awaiting payment')).toBeVisible();
+  await expect(page.getByText('2 invoices awaiting payment')).toBeVisible();
   await expect(page.getByText('2 planning recommendations open')).toBeVisible();
 });
 
