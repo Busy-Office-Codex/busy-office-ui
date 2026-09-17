@@ -44,7 +44,7 @@ test('Preview renders the 5 seeded widgets with real content inside their existi
   // bordered box, type caption and label line; this only adds real content inside it.
   await page.getByRole('button', { name: /Operations dashboard/ }).click();
   await expect(page.getByTestId('chart-canvas')).toHaveCount(2);
-  const barTable = page.getByRole('table', { name: 'Materials stocked by warehouse' });
+  const barTable = page.getByRole('table', { name: 'Materials stocked by warehouse', exact: true });
   const donutTable = page.getByRole('table', { name: 'Share of materials stocked by warehouse' });
   await expect(barTable).toBeAttached();
   await expect(donutTable).toBeAttached();
