@@ -39,6 +39,71 @@ async function countAccentPixels(canvas: import('@playwright/test').Locator): Pr
   });
 }
 
+// ROADMAP item 51, issue #22 — 4 real defects, exercised through the dedicated `#chart-lab`
+// preview route (preview/ChartLab.tsx; see its own header comment for why no real `examples/`
+// consumer cleanly isolates all four). Reduced-motion is emulated the same way `gotoDashboard`
+// above does, for the same reason (a deterministic final render).
+async function gotoChartLab(page: import('@playwright/test').Page) {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#chart-lab');
+}
+
+function chartCanvasIn(page: import('@playwright/test').Page, regionName: string) {
+  return page.getByRole('region', { name: regionName }).getByTestId('chart-canvas').locator('canvas').first();
+}
+
+async function countPixelsNear(
+  canvas: import('@playwright/test').Locator,
+  target: readonly [number, number, number],
+  tolerance: number,
+): Promise<number> {
+  return canvas.evaluate(
+    (el, { target, tolerance }) => {
+      const canvasEl = el as HTMLCanvasElement;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx || canvasEl.width === 0 || canvasEl.height === 0) return 0;
+      const { data } = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      let count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const [r, g, b, a] = [data[i], data[i + 1], data[i + 2], data[i + 3]];
+        if (a === 0) continue;
+        if (Math.abs(r - target[0]) <= tolerance && Math.abs(g - target[1]) <= tolerance && Math.abs(b - target[2]) <= tolerance) count++;
+      }
+      return count;
+    },
+    { target, tolerance },
+  );
+}
+
+// Bottommost/topmost rows carrying an accent-colored (PALETTE[0], #0057b8) pixel, as a fraction of
+// canvas height — used below to prove a negative bar reaches meaningfully below a positive one,
+// without depending on the exact padded axis range ECharts computes (an implementation detail of
+// its own "nice" tick rounding, not something this fix controls or should have to predict exactly).
+async function accentRowSpanFraction(canvas: import('@playwright/test').Locator): Promise<number> {
+  return canvas.evaluate((el) => {
+    const canvasEl = el as HTMLCanvasElement;
+    const ctx = canvasEl.getContext('2d');
+    if (!ctx || canvasEl.width === 0 || canvasEl.height === 0) return 0;
+    const { data, width, height } = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+    let minRow = -1;
+    let maxRow = -1;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        const [r, g, b, a] = [data[i], data[i + 1], data[i + 2], data[i + 3]];
+        if (a === 0) continue;
+        if (b > 150 && b > r + 50 && b > g + 30) {
+          if (minRow === -1) minRow = y;
+          maxRow = y;
+          break;
+        }
+      }
+    }
+    if (minRow === -1) return 0;
+    return (maxRow - minRow) / height;
+  });
+}
+
 test('draws the actual data — the line itself, not just axes and grid scaffolding', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoDashboard(page);
@@ -190,4 +255,160 @@ test('agrees with the REVENUE THIS MONTH stat card instead of inventing its own 
   }
   expect(await sumValueColumn('Revenue by region, September 2026')).toBe(486000);
   expect(await sumValueColumn('Revenue mix by channel, September 2026')).toBe(486000);
+});
+
+test.describe('ROADMAP item 51 (issue #22) — 4 real defects', () => {
+  test('a label containing an HTML tag renders as inert text, not executable markup (tooltip XSS)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoChartLab(page);
+
+    const canvas = chartCanvasIn(page, 'xss label');
+    await expect(canvas).toBeVisible();
+
+    // 'axis' trigger fires on hovering anywhere over the plot area, not just precisely over the
+    // bar — the single category here still spans a real x range.
+    await canvas.hover();
+
+    // No fixed API to await "the tooltip finished painting"; the assertions below (polled via
+    // toPass, since the tooltip renders on a short internal delay) are the real check, this just
+    // gives it room to have painted by the time they run.
+    await page.waitForTimeout(200);
+
+    await expect(async () => {
+      // If ECharts' tooltip ever regresses to its default `renderMode: 'html'`, this exact label
+      // gets assigned as innerHTML, creating a real `<img src="x">` (which fails to load, since
+      // "x" isn't a real image URL) and firing its inline `onerror` — proof the string was parsed
+      // as markup, not proof of any particular payload's specific effect.
+      const fired = await page.evaluate(() => (window as unknown as { __chartXssFired?: boolean }).__chartXssFired);
+      expect(fired).toBeFalsy();
+      const injectedImages = await page.evaluate(() => document.querySelectorAll('img[src="x"]').length);
+      expect(injectedImages).toBe(0);
+    }).toPass({ timeout: 2000 });
+  });
+
+  test('a negative value draws below the zero axis instead of clipping at it', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoChartLab(page);
+
+    const canvas = chartCanvasIn(page, 'negative values');
+    await expect(canvas).toBeVisible();
+
+    // Data is [120, -60, 90] (preview/ChartLab.tsx). A hardcoded `min: 0` would clip the -60 bar
+    // at the zero line, leaving every drawn bar confined to a narrow band near the top of the
+    // canvas; letting ECharts auto-scale the axis (no `min` set at all) spreads the positive AND
+    // negative bars across a real vertical range instead.
+    expect(await accentRowSpanFraction(canvas)).toBeGreaterThan(0.35);
+  });
+
+  test.describe('reinit guard', () => {
+    test('does not dispose+reinit the chart when data is value-equal (new array reference, unchanged values)', async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await gotoChartLab(page);
+
+      const region = page.getByRole('region', { name: 'reinit guard' });
+      const canvas = region.getByTestId('chart-canvas').locator('canvas').first();
+      await expect(canvas).toBeVisible();
+
+      // Stamp the live canvas node — ECharts' `init()` gives no other handle on it, and a
+      // dispose()+init() cycle would create a BRAND NEW <canvas> with no such marker.
+      await canvas.evaluate((el) => {
+        (el as HTMLElement).dataset.reinitProbe = 'original';
+      });
+
+      // Each click recomputes preview/ChartLab.tsx's `reinitData` via a fresh `.map()` over the
+      // SAME `dataset` — a new array reference, identical values, the exact case examples/
+      // BiExplore.tsx hits on every unrelated re-render.
+      const forceRerender = region.getByRole('button', { name: 'Force unrelated re-render' });
+      await forceRerender.click();
+      await forceRerender.click();
+      await forceRerender.click();
+      await expect(page.getByText('Tick: 3')).toBeVisible();
+
+      await expect(canvas).toHaveAttribute('data-reinit-probe', 'original');
+    });
+
+    test('a genuine data change still redraws the chart for real', async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await gotoChartLab(page);
+
+      const region = page.getByRole('region', { name: 'reinit guard' });
+      const canvas = region.getByTestId('chart-canvas').locator('canvas').first();
+      await expect(canvas).toBeVisible();
+
+      const before = await countAccentPixels(canvas);
+      await region.getByRole('button', { name: 'Swap dataset' }).click();
+
+      // Dataset A is [40, 65, 52], dataset B is [90, 12, 70] (preview/ChartLab.tsx) — genuinely
+      // different bar heights, so the drawn accent-pixel area is expected to differ for real, not
+      // just be redrawn identically.
+      await expect(async () => {
+        const after = await countAccentPixels(canvas);
+        expect(after).not.toBe(before);
+      }).toPass({ timeout: 2000 });
+    });
+  });
+
+  test.describe('theme reactivity', () => {
+    test("light and dark `<Theme>`-wrapped charts each use that theme's own axis/gridline tokens, not fixed light-mode literals", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await gotoChartLab(page);
+
+      const lightCanvas = chartCanvasIn(page, 'light theme chrome');
+      const darkCanvas = chartCanvasIn(page, 'dark theme chrome');
+      await expect(lightCanvas).toBeVisible();
+      await expect(darkCanvas).toBeVisible();
+
+      // lightPalette.border #e2e8f0 = rgb(226,232,240); darkPalette.border #334155 = rgb(51,65,85)
+      // (tokens.stylex.ts) — gridlines/axis lines are solid 1px strokes in these exact colors, so
+      // a real theme switch shows up as which of these two colors' pixels are present, not a
+      // fuzzy shift assertion.
+      expect(await countPixelsNear(lightCanvas, [226, 232, 240], 4)).toBeGreaterThan(10);
+      expect(await countPixelsNear(darkCanvas, [51, 65, 85], 4)).toBeGreaterThan(10);
+      // And genuinely switched, not just "some dark-ish pixel happened to qualify": the OTHER
+      // theme's literal is absent from each.
+      expect(await countPixelsNear(lightCanvas, [51, 65, 85], 4)).toBe(0);
+      expect(await countPixelsNear(darkCanvas, [226, 232, 240], 4)).toBe(0);
+    });
+
+    test('a live `<Theme>` toggle on an already-mounted chart recolors it, with no remount', async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await gotoChartLab(page);
+
+      const region = page.getByRole('region', { name: 'live theme chrome' });
+      const canvas = region.getByTestId('chart-canvas').locator('canvas').first();
+      await expect(canvas).toBeVisible();
+      await expect(region.getByText('Live theme: light')).toBeVisible();
+      expect(await countPixelsNear(canvas, [226, 232, 240], 4)).toBeGreaterThan(10); // light border
+
+      // Same `<Theme>` element, same position, only its `value` prop changes (preview/
+      // ChartLab.tsx's own comment) — this is what examples/AppShell.tsx's Control Center
+      // "Appearance" control does to an already-rendered page; it does NOT remount the chart.
+      await region.getByRole('button', { name: 'Toggle live theme' }).click();
+      await expect(region.getByText('Live theme: dark')).toBeVisible();
+
+      await expect(async () => {
+        expect(await countPixelsNear(canvas, [51, 65, 85], 4)).toBeGreaterThan(10); // dark border
+      }).toPass({ timeout: 2000 });
+    });
+
+    test('an OS-level prefers-color-scheme flip recolors an already-mounted chart with no `<Theme>` wrapper', async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' });
+      await page.goto('/#chart-lab');
+
+      // No `<Theme>` wrapper on this one (preview/ChartLab.tsx) — it follows the bare
+      // `prefers-color-scheme` default the same way every other themed component in this system
+      // already does with zero host code (ROADMAP item 19).
+      const canvas = chartCanvasIn(page, 'negative values');
+      await expect(canvas).toBeVisible();
+      expect(await countPixelsNear(canvas, [226, 232, 240], 4)).toBeGreaterThan(5);
+
+      await page.emulateMedia({ colorScheme: 'dark' });
+      await expect(async () => {
+        expect(await countPixelsNear(canvas, [51, 65, 85], 4)).toBeGreaterThan(5);
+      }).toPass({ timeout: 2000 });
+    });
+  });
 });
