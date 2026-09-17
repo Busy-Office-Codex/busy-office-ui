@@ -143,19 +143,20 @@ the same fact. Inventory.tsx's own "15 Inventory" scenario landed in the
 same wave (stock-by-warehouse bar + a mix-by-material donut, both real
 consumers reading live `stockLevels`). Corrected here (2026-09-16, this
 text previously listed the Inventory chart as still open after it had
-already landed): the 3 genuinely remaining named consumers are "17
-Finance — cash flow, 12 months" (the Finance module has no real screen at
-all yet — a NAV placeholder only, so this is a new-screen-plus-chart
-effort, not a one-chart addition), "18 Reports" (BuilderReports.tsx's own
-Preview stays structural by design at the time this paragraph was
-written — its header comment has since been rewritten, see the
-2026-09-17 correction below — a real Chart there needs live
-aggregations, several not computed anywhere yet),
-and "20 BI explore" (a new pivot-result screen needing its own new
-route, and issue #16's own "Pie" ask — `Chart` today only has `'bar' |
-'line' | 'donut'`, no `'pie'` variant). Each is its own separate,
-reviewed slice, per this repo's own "manageable slices" discipline —
-not a punch list to clear in one batch.
+already landed): at the time this paragraph was written, 3 named
+consumers genuinely remained — "17 Finance — cash flow, 12 months" (the
+Finance module had no real screen at all yet — a NAV placeholder only, so
+this was a new-screen-plus-chart effort, not a one-chart addition), "18
+Reports" (BuilderReports.tsx's own Preview stayed structural by design at
+the time — a real Chart there needed live aggregations, several not
+computed anywhere yet), and "20 BI explore" (a new pivot-result screen
+needing its own new route, and issue #16's own "Pie" ask — `Chart` at the
+time had only `'bar' | 'line' | 'donut'`, no `'pie'` variant). Each got
+its own separate, reviewed slice, per this repo's own "manageable
+slices" discipline — not a punch list cleared in one batch. All 3 landed
+by 2026-09-17 (see the 3 dated corrections below, one per slice); this
+paragraph is left as the historical record of what the gap looked like
+before they did.
 
 Corrected again (2026-09-17): "19 BI dashboard"'s other 2 charts landed —
 `examples/Dashboard.tsx` now renders "Revenue by region" (bar) and
@@ -194,6 +195,21 @@ palette still gets the original structural placeholder alone (no real
 content appended), verified live by a real browser test
 (`test/browser/builder-reports.spec.ts`), since there is no real fact
 behind an arbitrary user-added widget to render instead.
+
+Corrected again (2026-09-17): "17 Finance" landed — `examples/Finance.tsx`
+(new) fills `NAV.Finance`'s "Overview" placeholder with one real figure
+(live accounts receivable) plus disclosed static cards and a disclosed
+sample-data cash-flow chart. See item 34 below for the full narrative,
+including an independent review's findings and fixes.
+
+Corrected again (2026-09-17): "20 BI explore" landed — `examples/
+BiExplore.tsx` (new) fills `NAV.BI`'s "Explore" placeholder with a real
+pivot-result screen (a `Dropdown` re-slices live `stockLevels` data by
+warehouse or material into a `Chart` plus a result `Table`). Issue #16's
+own "Pie" ask stays open, proposed but not agreed on issue #16 itself
+(Objective 1/3 — one named consumer). See item 34 below for the full
+narrative. All 3 named consumers this paragraph originally listed as
+remaining (Finance, Reports, BI explore) are now landed.
 
 Redirected (owner-directed, 2026-09-16; corrected 2026-09-17 — this line
 said "in progress" but the migration is done, found stale while touching
@@ -467,7 +483,7 @@ issues.
     17–32's page confirmed reachable via app strip and/or command
     palette (verified route-by-route by a required milestone-closing
     review); `pnpm test:browser` 77/77 green. Issue #17.
-34. [ ] Chart primitive — `src/components/Chart.tsx`, exported from
+34. [x] Chart primitive — `src/components/Chart.tsx`, exported from
     `src/index.ts`. Bar/line/donut, `aria-hidden` canvas/render surface
     paired with a real visually-hidden accessible `Table`,
     `prefers-reduced-motion` disables draw-in animation. Rendering engine
@@ -544,8 +560,43 @@ issues.
     Administration-Overview test until the matcher was made to pin an
     exact module hint per entry instead of a bare label.
 
-    Still open: BI explore (new route + a `'pie'` variant `Chart` doesn't
-    have yet). Issue #16.
+    Corrected again (2026-09-17): "20 BI explore" landed —
+    `examples/BiExplore.tsx` (new), a real pivot-result screen filling
+    `NAV.BI`'s pre-existing "Explore" placeholder (`preview/client.tsx`'s
+    `bi-explore` route). A "Pivot by" `Dropdown` re-slices the same live
+    `stockLevels` data `Inventory.tsx` already charts — by warehouse or by
+    material — into a bar `Chart` plus its own result `Table`, verified
+    live by a real browser test that switches the pivot and confirms both
+    the chart and the table recompute (and that switching away removes
+    the old pivot's own table, not just adds a new one alongside it).
+
+    This slice deliberately does NOT add issue #16's own "Pie" ask to
+    `Chart`'s public `type` union. This repo's own Objective 1 ("Refuse a
+    prop, variant or component with one caller") and Objective 3 ("A new
+    shared component needs two named consumers... raised as a `[UI
+    request]` issue") both apply, and issue #16's own text names exactly
+    one consumer for `'pie'` — "BI explore's chart toggle." Rather than
+    force-fit an invented second consumer or add the variant unilaterally
+    without one, `BiExplore.tsx` renders its pivot as `'bar'` instead (the
+    existing type already correctly serves this exact shape) and the
+    `'pie'` request was raised as its own proposal on issue #16 — commented
+    `proposed`, not `agreed`, per this repo's own two-way/one-way gate —
+    rather than either silently dropped or silently added. The same
+    "don't force a bar this batch can't honestly clear" discipline
+    `Icon`'s own non-migrated QR glyph and item 49's two disclosed
+    un-tokened ambers already established elsewhere in this codebase.
+
+    This closes item 34: all 5 of issue #16's originally named `Chart`
+    consumers (Dashboard/BI dashboard, Inventory, Reports, Finance, BI
+    explore) now have real `Chart` usage — not all of it live-data-backed:
+    Dashboard's 3 charts, BuilderReports's "Revenue trend" widget, and
+    Finance's cash-flow chart read disclosed sample-data literals (see
+    each file's own header comment and item 47's Quality page); Inventory,
+    BuilderReports's bar/donut/table widgets, Finance's Receivables figure,
+    and BI explore's pivot are genuinely live. `'pie'` itself was `Chart`'s
+    own scope, never item 34's own hard requirement, and stays tracked as
+    its own separate, disclosed, not-yet-agreed proposal rather than
+    blocking this item's closure. Issue #16.
 35. [x] Icon component — `src/components/Icon.tsx`, exported from
     `src/index.ts`. A closed `IconName` union (`'sliders' | 'bell'`) as
     inline SVG, `size`/`color` props reading the token system; decorative

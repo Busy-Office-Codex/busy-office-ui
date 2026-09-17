@@ -51,6 +51,7 @@ const FULL_SCREENS = [
     module: 'BI', screens: [
       { id: 'dashboard', label: 'Dashboards', file: 'Dashboard.tsx', purpose: 'KPI Card grid plus 3 real Charts (revenue trend, by region, mix)', href: '/patterns/dashboard/' },
       { id: 'analytics', label: 'Analytics', file: 'Analytics.tsx', purpose: 'Cross-domain exceptions dashboard; every figure is computed live from the shared store' },
+      { id: 'bi-explore', label: 'Explore', file: 'BiExplore.tsx', purpose: 'A real pivot-result screen: re-slices live stock-on-hand data by warehouse or material' },
     ],
   },
   {
@@ -106,7 +107,7 @@ const HELPERS = [
 <Base title="Examples">
   <a href="/">&larr; Home</a>
   <h1>Examples</h1>
-  <p>Every real page composition in <code>examples/*.tsx</code> (46 files), catalogued by what it is — a full sample screen, a pre-shell entry/state screen, or a reusable helper other screens are built from. These are pure UI compositions: no server calls, no real ERP data — see <a href="/conventions/">Design conventions</a> for how to read and extend them. Full sample screens run live in the standalone preview (<code>pnpm preview</code>, <code>http://127.0.0.1:4174</code>, loopback-only — not deployed here); source links below always work regardless.</p>
+  <p>Every real page composition in <code>examples/*.tsx</code> (47 files), catalogued by what it is — a full sample screen, a pre-shell entry/state screen, or a reusable helper other screens are built from. These are pure UI compositions: no server calls, no real ERP data — see <a href="/conventions/">Design conventions</a> for how to read and extend them. Full sample screens run live in the standalone preview (<code>pnpm preview</code>, <code>http://127.0.0.1:4174</code>, loopback-only — not deployed here); source links below always work regardless.</p>
 
   <h2>Full sample screens</h2>
   <p>Reachable from inside the running preview via the app strip or command palette, grouped by module.</p>
