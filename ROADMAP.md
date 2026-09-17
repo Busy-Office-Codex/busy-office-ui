@@ -100,7 +100,7 @@ cross-milestone duplication (`examples/filterTabs.tsx`, extracted from 9
 call sites across 8 files) before merge.
 
 **M7 — Chart primitive (issue #16), Icon (#18), real theming (#19), Shell
-breadcrumbs (#20) — in progress.** Issues #18/#19/#20 marked `agreed` by the
+breadcrumbs (#20) — complete.** Issues #18/#19/#20 marked `agreed` by the
 project owner, 2026-09-16 (via direct instruction, recorded here rather than
 as a separate issue comment — the same precedent issue #16's own `agreed`
 citation below already set), expanding this milestone's scope beyond item 34
@@ -239,10 +239,27 @@ sample screens (list → detail → edit → confirmation) is explicitly OUT of
 this scope — it would be new interactive behavior in `examples/`, not a
 content reorg, and needs its own proposal.
 
+**M7 complete** (2026-09-17): items 34–49 are all `[x]`; the latest `gates`
+run on `main` passed at the batch head (`5dc3bda`, [run
+35214791055](https://github.com/Busy-Office-Codex/busy-office-ui/actions/runs/35214791055)).
+Issue #16 closes out in its own final comment — all 5 originally named
+`Chart` consumers (BI dashboard, Inventory, Reports, Finance, BI explore)
+now have real `Chart` usage; the one deliberately-declined ask (a `'pie'`
+`ChartProps.type`) stays `proposed`, not `agreed`, on issue #16 itself per
+Objective 3 (one named consumer, not two). Issues #16–#21 stay open on
+GitHub — closing them is a one-way action for the owner, not the loop, so
+an open issue here records real, already-shipped work, not a pending gap.
+The one remaining open item repo-wide is item 3 (M2 holdover), blocked on
+the core session's own `accepted` acknowledgement on issue #11, not a build
+task. Release: the Chart.js→ECharts engine swap is a host-visible
+dependency change since `v0.4.0` (2026-09-14) — release-worthy under this
+file's own rule independent of the 2-week timer; recommended as a minor
+version bump in a comment on issue #16.
+
 After M6, or once its scope is exhausted, stop expanding the framework: new
-work starts only from a request that passes the Objective tests. M7 is the
-one exception already in flight; after it closes, this line applies again
-until the next request clears the same bar.
+work starts only from a request that passes the Objective tests. M7 was the
+one exception already in flight; now that it has closed, this line applies
+again until the next request clears the same bar.
 
 ## Items
 
@@ -1207,6 +1224,69 @@ issues.
     usage. Needs: issue #21 (owner-directed, 2026-09-17). Follow-up, not a
     blocker for this item: extend the ratchet to spacing, and to discover new
     `examples/*.tsx` files automatically instead of a hardcoded list.
+50. [?] **Input: accessible error state, id safety, className passthrough.**
+    Reproduced (2026-09-17 audit): `error` sets no `aria-invalid`/
+    `aria-describedby` and the error `<span>` has no `id`, so nothing can
+    point at it; `id` has no collision fallback (no `useId`); a
+    caller-supplied `className` is silently overwritten by stylex's own
+    generated class (`{...rest}` spreads before `{...stylex.props(...)}`).
+    Accept: `error` drives real `aria-invalid`/`aria-describedby` wired to an
+    `id`'d error element and composes with a caller-supplied
+    `aria-describedby` rather than overwriting it; two `Input`s with the same
+    or no explicit `id` never collide; a caller `className` is preserved
+    alongside the component's generated classes; each covered by a test
+    asserting the DOM attribute/class directly. Serves: Objective 2
+    (boundary — a presentation contract every consumer form relies on).
+    Needs: issue #22 (`proposed`, 2026-09-17).
+51. [?] **Chart: tooltip text safety, theme reactivity, negative-axis
+    correctness, unnecessary reinit.** Reproduced/source-confirmed
+    (2026-09-17 audit): the tooltip formatter interpolates consumer-supplied
+    label strings into HTML ECharts renders unescaped — a real XSS sink;
+    `Chart.tsx` never reads the theme signal, so chart chrome stays
+    light-mode-literal under dark/system theme; the value axis hardcodes
+    `min: 0`, clipping any real negative value (e.g. a cash-flow loss month);
+    the chart disposes+reinits on every new-but-value-equal `data` reference,
+    reproduced against the shipped `BiExplore.tsx` (visible flicker on
+    unrelated store writes). Accept: tooltip text renders data-derived
+    labels/values as plain text (an HTML-special-character label test proves
+    no injection); a theme-toggle test shows chart chrome follows the design
+    system's token set; a negative-value test renders correctly below the
+    zero axis; a render-identity test shows no dispose/reinit when `data` is
+    value-equal to the previous render. Serves: Objective 2 (boundary — a
+    presentation contract 7 real consumers already depend on). Needs: issue
+    #22 (`proposed`, 2026-09-17).
+52. [?] **Honest ERP units, partial-payment coverage, complete sample-data
+    disclosure.** Reproduced/source-confirmed (2026-09-17 audit): "Stock by
+    warehouse"/"Units on hand" sums quantities across incompatible units
+    (reams, spools, discrete items) as one figure in `Inventory.tsx`, then
+    duplicated byte-identical into `BiExplore.tsx`/`BuilderReports.tsx`; the
+    only payment path always pays an invoice's full balance, so a
+    partially-paid invoice can never be produced or tested through the
+    shipped UI; `quality.astro`'s "Known limitations" list omits sample-data
+    literals that sit beside the ones it does disclose. Accept: the
+    warehouse units figure either splits by unit type or is relabeled to not
+    claim one meaningful total across incompatible units; a partial-payment
+    fixture exists and a test proves it stays correctly visible/totaled under
+    the "unpaid" filter; `quality.astro` names every sample-data literal
+    actually present in the components it covers. Serves: intent.md "honest
+    ERP examples". Needs: issue #22 (`proposed`, 2026-09-17).
+53. [?] **Independent consumer proof.** Source-confirmed (2026-09-17 audit):
+    no script, CI job or test packs this workspace and installs the tarball
+    into an isolated project outside the pnpm workspace — every export path,
+    `styles.css`, and `sideEffects:false` tree-shaking are only ever
+    exercised through a workspace symlink that bypasses the real `files:
+    ["dist"]` packaging boundary; ROADMAP.md's "5.5KB Button-only" claim
+    describes Chart.js, a dependency this package no longer has since the
+    ECharts migration, and no current check re-verifies a bundle-size number
+    for what actually ships today. Accept: a CI job or script packs the
+    workspace, installs the tarball into a fixture project outside the
+    workspace, builds it, and imports `.`, `./shell`, `./styles.css` and one
+    `./examples/*` subpath successfully; a Button-only import from that
+    isolated consumer has its shipped size measured and asserted to exclude
+    ECharts, replacing the stale claim above with a current,
+    automation-checked number. Serves: intent.md's opening sentence directly
+    ("hosts import one small, dependable UI package"). Needs: issue #22
+    (`proposed`, 2026-09-17).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
