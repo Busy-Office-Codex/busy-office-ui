@@ -35,6 +35,7 @@ import { Analytics } from '../examples/Analytics.js';
 import { BuilderScreens } from '../examples/BuilderScreens.js';
 import { BuilderReports } from '../examples/BuilderReports.js';
 import { Finance } from '../examples/Finance.js';
+import { BiExplore } from '../examples/BiExplore.js';
 import { PasswordReset } from '../examples/PasswordReset.js';
 import { AccountLocked } from '../examples/AccountLocked.js';
 import { SessionExpired } from '../examples/SessionExpired.js';
@@ -116,6 +117,12 @@ const routes = [
   // AppShell.tsx NAV change needed, and this is what turns the dock's Finance tile from disabled
   // to real (examples/AppShell.tsx's PINNED entry finds this route by module alone).
   { id: 'finance-overview', module: 'Finance', label: 'Overview' },
+  // ROADMAP item 34, "BI explore" slice — the last of item 34's 4 remaining consumer slices,
+  // closing issue #16's own "20 BI explore" named consumer. Fills the pre-existing NAV.BI
+  // 'Explore' placeholder (M6) alongside 'Dashboards'/'Analytics' — no AppShell.tsx NAV change
+  // needed. Does NOT add issue #16's own "Pie" ask to Chart's public type union — see
+  // BiExplore.tsx's own header comment for why (Objective 1/3, one named consumer only).
+  { id: 'bi-explore', module: 'BI', label: 'Explore' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -152,6 +159,7 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   integrations: <Integrations />,
   'builder-reports': <BuilderReports />,
   'finance-overview': <Finance />,
+  'bi-explore': <BiExplore />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */
