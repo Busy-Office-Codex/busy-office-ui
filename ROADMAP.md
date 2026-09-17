@@ -342,7 +342,7 @@ live run, and this closing verification): **5.60KB minified / 1.91KB
 gzipped, 0 bytes of echarts/zrender**, consistent to within rounding each
 time.
 
-**M9 — AppShell: hash-sync its uncontrolled fallback — in progress.** Item
+**M9 — AppShell: hash-sync its uncontrolled fallback — complete.** Item
 54, issue #23 (`agreed`, project owner, 2026-09-17, via direct instruction
 against a 4-option comparison — "agree with #2" — recorded here rather than
 a separate issue comment, matching the M7/M8 precedent). `preview/
@@ -364,6 +364,82 @@ boundary rule `Shell`'s current design already respects. Serves: Objective
 2 (boundary — routing stays host-owned; only the package's own already-
 uncontrolled fallback gains a sensible default) and intent.md's navigation
 concern the original complaint raised.
+
+Shipped as a new `examples/useHashRoute.ts` hook (mirrors an active route id
+with `location.hash` — real deep-linking, real back/forward), used by both
+`AppShell.tsx`'s own fallback and `preview/client.tsx`'s `SamplePreview`
+(which always supplies its own explicit `navigation`, so it needed the hook
+wired in directly rather than inheriting `AppShell`'s fallback). Also
+changed, once the same session was already touching this file: the preview's
+empty-hash landing now shows `examples/Login.tsx` instead of skipping
+straight to the sample app (its "Continue" button previously had no handler
+at all — a dead click, now wired via a host-agnostic `onContinue` prop), with
+`examples/NotFound.tsx`'s pre-existing "Back to workspace" → empty-hash
+contract preserved via a `hasLeftLandingRef` distinguishing true first load
+from a later return to empty hash.
+
+Correction (found by this same session while wiring the second consumer,
+before this ever shipped): item 54's own Accept text originally claimed real
+route ids "always contain a `/`," so `SamplePreview`'s routes could never
+collide with `preview/client.tsx`'s reserved standalone hashes (`#login`
+etc.). False — `AppShell.tsx`'s own `sampleRoutes()` ids do (`module/label`
+slugs), but `SamplePreview`'s separate `routes` array uses flat dashed
+strings with no `/` at all. Checked directly: none of `SamplePreview`'s 34
+real route ids collide with any of the 11 reserved hashes today, so there
+was no live bug — but the real invariant is "these two specific,
+small, human-maintained lists don't overlap," not a structural guarantee,
+and `App()`'s own dispatch now relies on exactly that shape difference to
+tell `SamplePreview`'s internal navigation apart from `AppShellFallbackLab`'s
+(both now write real route ids into `location.hash`, so a fixed literal
+alone can no longer tell them apart) — disclosed as a fragile-but-currently-
+correct simplification in the code itself, not assumed to hold if either id
+scheme changes later.
+
+Required 3-lens review (spec-match/contrast-accessibility/simplicity, since
+this batch closes M9) found and fixed, before merge: (1) a real live-
+verified accessibility gap — falling back to the default route on a stale/
+invalid hash corrected the rendered content but left `location.hash`
+showing the invalid value, so a bookmarked/shared URL wouldn't describe what
+it actually displayed; fixed in both `AppShell.tsx`'s fallback (gated to
+uncontrolled mode only) and `SamplePreview`. (2) A real test-coverage gap —
+the Accept clause's "AppShell with no `navigation` prop" claims for reading/
+writing the hash and for back/forward were only proven for `SamplePreview`,
+never for `AppShell.tsx`'s own bare-uncontrolled fallback specifically;
+added 2 tests directly against `#app-shell-fallback-lab` to close the gap.
+Also caught during this same verification pass, before merge: the hash-
+correction fix changed real behavior an existing test depended on
+(`/#examples`, not a real route id, now gets corrected to `#purchase-orders`
+immediately, pushing an extra history entry) — the test now starts from a
+real route hash directly. And, separately, during the FIRST verification
+pass (before the review lenses ran): `useHashRoute`'s state initializer read
+`window` unconditionally, crashing docs-site's SSR build of `/components/
+appshell` (`window is not defined`) — guarded for SSR; and `SamplePreview`'s
+`visitedRouteIds` update via a reactive `useEffect` left the newly-active
+route's pane missing from the DOM for one extra render, caught by
+`test/browser/inbox-workspace-layout.spec.ts`'s own `scrollHeight`
+measurement (reproduced 3/3 in isolation, not flaky) — fixed to update
+synchronously in the same `navigate()` callback, keeping the effect only as
+a safety net for hash changes that don't go through `navigate` (deep-link,
+back/forward).
+
+**Disclosed, not fixed (both real, live-verified via a real browser,
+neither blocking):** the Login → sample-app transition doesn't move focus
+anywhere purposeful (resets to `<body>`, no announcement of the context
+change to screen-reader users) — real, but deciding where focus SHOULD land
+across the `App` → `SamplePreview` → `AppShell`/`Shell` component boundary
+is a bigger design decision than this batch's scope. Browser Back from
+inside the sample app to hash-`''` does not restore Login once
+`hasLeftLandingRef` has been set — a deliberate trade-off (otherwise
+`NotFound`'s "Back to workspace" would force re-login) that breaks the
+conventional "Back shows what was there before" expectation for this one
+specific case; two real UX expectations that cannot both hold with a single
+boolean, left as a named gap rather than silently accepted.
+
+Full gate suite green at the batch head: `pnpm typecheck`/`lint`/`test`
+(218/218), `pnpm build`/`security`/`verify:consumer` (5.60KB minified/
+1.91KB gzipped, zero echarts/zrender — same number M8 measured, unaffected
+by this milestone)/`build:docs` (27 pages)/`check-links` (27/27), `pnpm
+test:browser` (255/255, includes the 2 new tests this review added).
 
 ## Items
 
@@ -1391,7 +1467,7 @@ issues.
     automation-checked number. Serves: intent.md's opening sentence directly
     ("hosts import one small, dependable UI package"). Needs: issue #22
     (`agreed`, project owner, 2026-09-17).
-54. [ ] **AppShell: hash-sync its uncontrolled fallback.** `examples/
+54. [x] **AppShell: hash-sync its uncontrolled fallback.** `examples/
     AppShell.tsx`'s own already-uncontrolled `sampleActiveId` fallback (used
     whenever `navigation` is omitted) and `preview/client.tsx`'s
     `SamplePreview` (which always supplies its own explicit `navigation`, so
@@ -1401,14 +1477,24 @@ issues.
     Accept: `AppShell` with no `navigation` prop reads its initial route
     from `location.hash` when present/valid and writes it back on
     navigation, verified by a load-with-hash test and a navigate-then-check-
-    hash test; browser back/forward moves between previously-visited routes
-    in that mode, verified by a navigate-twice-then-back test; `Shell`'s own
-    `navigation` contract is provably unchanged (existing controlled-usage
-    tests keep passing unmodified); `preview/client.tsx`'s `SamplePreview`
-    gains the same sync via one shared hook (real second consumer, clears
+    hash test — both added directly against `#app-shell-fallback-lab`
+    (`test/browser/app-shell-fallback.spec.ts`) after the required review
+    found the original tests only proved this for `SamplePreview`, not for
+    `AppShell`'s own fallback by name; browser back/forward moves between
+    previously-visited routes in that mode, verified by a navigate-twice-
+    then-back test, same file; `Shell`'s own `navigation` contract is
+    provably unchanged (`src/shell/Shell.tsx` has zero diff; every existing
+    controlled-usage test passes its original, unmodified assertions);
+    `preview/client.tsx`'s `SamplePreview` gains the same sync via one
+    shared hook, `examples/useHashRoute.ts` (real second consumer, clears
     Objective 3); no collision with the pre-existing standalone hash routes
-    (`#login`, `#density-lab`, etc. — real route ids always contain a `/`,
-    those never do). Serves: Objective 2 (boundary — routing stays host-
+    (`#login`, `#density-lab`, etc.) — checked directly against all of
+    `SamplePreview`'s 34 real route ids and `AppShell.tsx`'s own
+    `sampleRoutes()` ids, not assumed (the Accept text originally claimed
+    "real route ids always contain a `/`," which is false for
+    `SamplePreview`'s own flat-dashed ids — corrected in the M9 section
+    above, and `App()`'s own dispatch logic accounts for the real, narrower
+    invariant instead). Serves: Objective 2 (boundary — routing stays host-
     owned; only the package's own already-uncontrolled fallback gains a
     sensible default). Needs: issue #23 (`agreed`, project owner,
     2026-09-17).
