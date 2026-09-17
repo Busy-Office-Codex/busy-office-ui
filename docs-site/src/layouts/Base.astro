@@ -20,6 +20,10 @@ const { title } = Astro.props as Props;
         <a href="/">Home</a>
         <a href="/tokens/">Tokens</a>
         <a href="/density/">Density</a>
+        <a href="/base-styles/">Base Styles</a>
+        <a href="/examples/">Examples</a>
+        <a href="/quality/">Quality</a>
+        <a href="/build-with-ai/">Build with AI</a>
         <a href="/conventions/">Conventions</a>
       </nav>
     </header>
@@ -93,6 +97,16 @@ const { title } = Astro.props as Props;
         overflow-x: auto;
       }
       .tests-list { font-size: 14px; }
+      table { border-collapse: collapse; width: 100%; margin: 16px 0 32px; }
+      th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; vertical-align: top; }
+      th { color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+      blockquote {
+        margin: 16px 0;
+        padding: 4px 16px;
+        border-left: 3px solid #cbd5e1;
+        color: #334155;
+      }
+      blockquote p { margin: 8px 0; }
       .category-badge {
         display: inline-block;
         font-size: 12px;
@@ -110,6 +124,9 @@ const { title } = Astro.props as Props;
         .site-header { border-bottom-color: #334155; }
         .live-demo { background: #0f172a; border-color: #334155; }
         .category-badge { color: #cbd5e1; background: #1e293b; }
+        th, td { border-bottom-color: #334155; }
+        th { color: #cbd5e1; }
+        blockquote { border-left-color: #475569; color: #cbd5e1; }
         /* `pre` stays on its own fixed dark palette in both modes (a conventional code-block
            look, not a case of the light-only bug above) — no override needed here. */
       }

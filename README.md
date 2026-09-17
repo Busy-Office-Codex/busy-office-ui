@@ -10,6 +10,8 @@ import { Button, Card, Text } from '@busyoffice/design-system';
 import '@busyoffice/design-system/styles.css';
 import { Shell } from '@busyoffice/design-system/shell';
 import { AppShell } from '@busyoffice/design-system/examples/app-shell'; // preview-only sample host
+import { ListReport } from '@busyoffice/design-system/examples/list-report'; // illustrative sample-page composition
+import { RecordDetail } from '@busyoffice/design-system/examples/record-detail'; // illustrative sample-page composition
 ```
 
 The existing example guide remains at [examples/README.md](examples/README.md).
