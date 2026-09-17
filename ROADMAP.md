@@ -677,11 +677,42 @@ issues.
     renders a full sample screen has a corresponding README row. Serves:
     intent.md "documentation". Needs: issue #21 (owner-directed,
     2026-09-17).
-42. [ ] Start Here landing page (`docs-site/src/pages/index.astro`
-    rewrite). Accept: the page includes an install snippet, `intent.md`'s
-    boundary statement ("a UI dependency, not an ERP platform kernel"),
-    and a link to a live ERP pattern page; `docs-site`'s link check stays
-    green. Serves: intent.md "documentation". Needs: issue #21.
+42. [x] Start Here landing page (`docs-site/src/pages/index.astro`
+    rewrite). Added, above the existing Foundations/Components/Patterns
+    sections (items 43-45 already gave those their final shape, per the
+    original plan's own sequencing): a "What this is" paragraph quoting
+    `intent.md`'s real boundary statement verbatim ("a UI dependency, not
+    an ERP platform kernel or application implementation"), an "Install"
+    section, and a "See it running" section linking `/patterns/
+    list-report/` as the first live ERP screen to look at. The install
+    snippet is deliberately not a `pnpm add` command: `package.json` says
+    `"private": true` — this package isn't on the public npm registry, so
+    a generic public-install command would be actively wrong, not just
+    incomplete. Instead: an honest one-line note that hosts inside Busy
+    Office Codex integrate it via a reviewed, pinned commit (`AGENTS.md`'s
+    own coordination process), then the real, verified import syntax from
+    `README.md`'s own "Public imports" section. Added `id="components"`/
+    `id="patterns"` anchors to their existing `<h2>` headings so the new
+    section's "jump straight to a specific component or pattern" links
+    actually resolve (`check-links.mjs` doesn't check `#fragment` links at
+    all — confirmed by reading its own `isInternal()` filter — so this was
+    verified by hand in Chrome, not by the automated check alone).
+    A required independent fresh-context review found two small, real
+    nits before merge, both fixed here: the import snippet showed only 3
+    of `README.md`'s 4 "Public imports" lines (the `AppShell` preview-only
+    line omitted) while the prose said "the documented subpaths" without
+    qualification — reworded to name the full list's real location rather
+    than implying completeness it didn't have; and a stray, unreferenced
+    `id="foundations"` anchor (added alongside the two that ARE used, but
+    never linked from anywhere) — removed, matching this repo's own "no
+    prop or export with a single caller" simplicity bar applied to markup.
+    Accept: the page includes the real import snippet (not a fabricated
+    public-registry command); `intent.md`'s boundary statement, quoted
+    accurately; a working link to a live ERP pattern page
+    (`/patterns/list-report/`); check-links stays green (24/24 pages);
+    in-page anchors manually confirmed to actually scroll to their target
+    in Chrome. Serves: intent.md "documentation". Needs: issue #21
+    (owner-directed, 2026-09-17).
 43. [x] Foundations restructure: merged tokens/density/theme under one
     "Foundations" section on the docs-site index (a "Design System"
     subsection linking Tokens/Theme/Density, plus a "Base Styles"
