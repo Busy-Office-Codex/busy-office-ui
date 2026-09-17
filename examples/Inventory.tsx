@@ -33,9 +33,18 @@ const SHORT_NAME: Record<string, string> = { 'mat-paper': 'Paper', 'mat-cable': 
 export function Inventory() {
   const state = useStoreState(appStore, (s) => s);
 
+  // `qtyOnHand` is NOT combinable across materials — mat-paper is reams, mat-cable is spools,
+  // mat-switch is discrete units (see each Product's own `unit` field, examples/data/seed.ts).
+  // Summing them into one physical "units on hand" total per warehouse (the bug this fix closes,
+  // ROADMAP item 52/issue #22) silently added reams to spools to units as if they were the same
+  // thing. This counts distinct materials stocked per warehouse instead — a real, honestly-labeled
+  // figure, not an invented unit-conversion. (`state.stockLevels` never has more than one row per
+  // product/warehouse pair — see appActions.receiveGoods/completeProductionOrder — so this count is
+  // exactly the number of materials on hand there.) The donut below stays a physical-quantity sum
+  // because it's scoped to ONE material at a time (always the same unit), which IS combinable.
   const byWarehouse = Object.values(state.warehouses).map((warehouse) => ({
     label: warehouse.name,
-    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).reduce((sum, level) => sum + level.qtyOnHand, 0),
+    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).length,
   }));
 
   const rows = [...state.stockLevels].sort((a, b) => {
@@ -63,7 +72,11 @@ export function Inventory() {
             <div style={{ border: `1px solid ${color.border}`, borderRadius: 10, background: color.bgSurface, padding: space.space6, boxSizing: 'border-box', height: '100%' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
                 <Text variant="title">Stock by warehouse</Text>
-                <Chart type="bar" title="Units on hand by warehouse" valueLabel="units" data={byWarehouse} />
+                <Chart type="bar" title="Materials stocked by warehouse" valueLabel="materials" data={byWarehouse} />
+                <Text variant="caption">
+                  Count of distinct materials on hand — on-hand quantities use a different unit per material (see the table below), so they
+                  aren't combined into one physical total.
+                </Text>
               </div>
             </div>
           </div>

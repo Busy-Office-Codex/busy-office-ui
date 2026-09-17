@@ -17,17 +17,18 @@ test('pivots by warehouse by default, with real seeded values', async ({ page })
 
   await expect(page.getByRole('heading', { name: 'Explore', exact: true })).toBeVisible();
 
-  // Same real stockLevels aggregation test/browser/inventory.spec.ts and
-  // test/browser/builder-reports.spec.ts already verify for the same seed data.
+  // ROADMAP item 52/issue #22: the warehouse pivot counts distinct materials stocked rather than
+  // summing `qtyOnHand` across materials that use different units (ream/spool/unit) — the same
+  // fix test/browser/inventory.spec.ts and test/browser/builder-reports.spec.ts's own charts get.
+  // Row-scoped regex (not a bare cell-text match) because more than one warehouse can share the
+  // same material count (East Coast Hub and West Coast Hub both stock 2).
   // `exact: true` — Playwright's default substring match would otherwise also match the result
   // table below, whose own accessible name ("...warehouse, table") starts with this same string.
-  const chartTable = page.getByRole('table', { name: 'Units on hand by warehouse', exact: true });
-  await expect(chartTable.getByRole('cell', { name: 'Main DC' })).toBeAttached();
-  await expect(chartTable.getByRole('cell', { name: '370 units' })).toBeAttached();
+  const chartTable = page.getByRole('table', { name: 'Materials stocked by warehouse', exact: true });
+  await expect(chartTable.getByRole('row', { name: /Main DC.*3 materials/ })).toBeAttached();
 
-  const resultTable = page.getByRole('table', { name: 'Units on hand by warehouse, table' });
-  await expect(resultTable.getByRole('cell', { name: 'East Coast Hub' })).toBeVisible();
-  await expect(resultTable.getByRole('cell', { name: '100 units' })).toBeVisible();
+  const resultTable = page.getByRole('table', { name: 'Materials stocked by warehouse, table' });
+  await expect(resultTable.getByRole('row', { name: /East Coast Hub.*2 materials/ })).toBeVisible();
 });
 
 test('re-pivoting by material recomputes both the chart and the result table', async ({ page }) => {
@@ -52,25 +53,39 @@ test('re-pivoting by material recomputes both the chart and the result table', a
   await expect(resultTable.getByRole('cell', { name: '15 units' })).toBeVisible();
 
   // Switching away entirely — proof this replaced the warehouse pivot rather than appending to it.
-  await expect(page.getByRole('table', { name: 'Units on hand by warehouse' })).toHaveCount(0);
+  await expect(page.getByRole('table', { name: 'Materials stocked by warehouse' })).toHaveCount(0);
 });
 
-test('both pivots total the same real stock figure — proof they re-slice one dataset, not two', async ({ page }) => {
+test('the warehouse pivot counts materials rather than summing incompatible physical quantities (ROADMAP item 52/issue #22)', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoBiExplore(page);
 
-  // 370 + 100 + 63 (warehouse) and 495 + 23 + 15 (material) both sum to the same 533 real units
-  // on hand — a cross-pivot invariant a value-level regression in either aggregation would break,
-  // even one that happened to keep the OTHER pivot's numbers looking plausible on its own.
-  const sumColumn = async (tableName: string) => {
-    const cells = await page.getByRole('table', { name: tableName, exact: true }).getByRole('cell').allTextContents();
-    return cells.filter((text) => text.endsWith(' units')).reduce((sum, text) => sum + Number(text.replace(' units', '')), 0);
+  // Regression check for the mixed-unit bug this fix closes: `stockLevels.qtyOnHand` uses a
+  // different unit per material (ream/spool/unit — see examples/data/seed.ts's own Product.unit
+  // field), so summing it ACROSS materials within one warehouse used to produce a meaningless
+  // cross-unit total (it happened to read "370"/"100"/"63" before this fix, and even proved a
+  // false "both pivots total the same real figure" invariant against the by-material pivot's own,
+  // genuinely combinable, 533-unit total — that coincidence is exactly what made the bug easy to
+  // miss). The warehouse pivot now counts distinct materials instead: 3 (Main DC) + 2 (East Coast
+  // Hub) + 2 (West Coast Hub) = 7, the same as `stockLevels`' own 7 seeded rows — a count of stock
+  // lines, not a sum of incompatible physical quantities, and independently checkable against the
+  // material pivot's own SKU list below.
+  const sumMaterialsColumn = async () => {
+    const cells = await page.getByRole('table', { name: 'Materials stocked by warehouse', exact: true }).getByRole('cell').allTextContents();
+    return cells.filter((text) => text.endsWith(' materials')).reduce((sum, text) => sum + Number(text.replace(' materials', '')), 0);
   };
-  expect(await sumColumn('Units on hand by warehouse')).toBe(533);
+  expect(await sumMaterialsColumn()).toBe(7);
 
+  // The by-material pivot, unaffected by this fix (it never crosses a unit boundary — each row is
+  // scoped to ONE material's own unit, summed only across warehouses), still reports the real
+  // 533-unit total: Paper 495 + Cable 23 + Switches 15.
   await page.getByRole('button', { name: /^Pivot by · Warehouse/ }).click();
   await page.getByRole('option', { name: 'Material', exact: true }).click();
-  expect(await sumColumn('Units on hand by material')).toBe(533);
+  const sumUnitsColumn = async () => {
+    const cells = await page.getByRole('table', { name: 'Units on hand by material', exact: true }).getByRole('cell').allTextContents();
+    return cells.filter((text) => text.endsWith(' units')).reduce((sum, text) => sum + Number(text.replace(' units', '')), 0);
+  };
+  expect(await sumUnitsColumn()).toBe(533);
 });
 
 test('renders exactly one real chart, not empty scaffolding', async ({ page }) => {

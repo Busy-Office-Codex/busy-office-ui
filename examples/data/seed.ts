@@ -175,6 +175,29 @@ export const seed: AppState = {
       ],
       payments: [],
     },
+    // Seeded already-partially-paid (ROADMAP item 52, issue #22): the shipped Billing.tsx UI
+    // previously had no way to ever produce a partially-paid invoice (its one payment action
+    // always recorded the full remaining balance), so the "unpaid"/Receivables status filter's
+    // correctness for a genuine partial balance was completely unexercised. This invoice's
+    // `payments` holds a real, non-empty payment LESS than `documentTotal(lines)` ($4,200), and
+    // `status` stays `'sent'` — this simple model has no separate "partially paid" status; the
+    // live balance-due computation (documentTotal minus posted payments, the exact arithmetic
+    // Billing.tsx/Finance.tsx already use) is what makes the partial state real. Deliberately not
+    // linked to a salesOrder/delivery (unlike INV-3201) — no existing confirmed, uninvoiced sales
+    // order needed a second document for this fixture, and inventing one would be a bigger change
+    // than this scenario needs. `INV-3105`, not `INV-3202+`: sorts BEFORE `INV-3201` in every
+    // screen's own descending-by-id default sort (Billing.tsx/Invoice.tsx), so it doesn't silently
+    // become the new default-selected invoice and change what those screens show with no
+    // interaction.
+    'INV-3105': {
+      id: 'INV-3105',
+      customerId: DELTA,
+      status: 'sent',
+      issueDate: '2026-09-08',
+      dueDate: '2026-10-08',
+      lines: [{ productId: 'prod-support', description: 'Annual support & maintenance renewal', qty: 1, unitPrice: 4200 }],
+      payments: [{ id: 'pay-seed-3105-1', date: '2026-09-10', amount: 1500, method: 'Wire transfer' }],
+    },
   },
 
   // Slice 2 (Procurement → stock). Anchored on FRESH record numbers (REQ-4xxx/PO-4xxx/GR-4xxx),
@@ -336,10 +359,12 @@ export const seed: AppState = {
     { id: 'act-4', at: '2026-09-03', recordType: 'delivery', recordId: 'DL-3101', message: 'Delivery DL-3101 shipped via FreightLine Express' },
     { id: 'act-5', at: '2026-09-05', recordType: 'delivery', recordId: 'DL-3101', message: 'Delivery DL-3101 confirmed delivered' },
     { id: 'act-6', at: '2026-09-05', recordType: 'invoice', recordId: 'INV-3201', message: 'Invoice INV-3201 issued and sent to Northwind Traders' },
-    { id: 'act-7', at: '2026-09-12', recordType: 'requisition', recordId: 'REQ-4001', message: 'Requisition REQ-4001 submitted for approval' },
-    { id: 'act-8', at: '2026-09-14', recordType: 'user', recordId: 'usr-5', message: 'Elena Cho invited (Finance)' },
-    { id: 'act-9', at: '2026-09-15', recordType: 'user', recordId: 'usr-4', message: 'Renee Castillo assigned role Warehouse' },
-    { id: 'act-10', at: '2026-09-15', recordType: 'integration', recordId: 'int-slack', message: 'Integration connected — Slack notifications' },
+    { id: 'act-7', at: '2026-09-08', recordType: 'invoice', recordId: 'INV-3105', message: 'Invoice INV-3105 issued and sent to Delta Manufacturing' },
+    { id: 'act-8', at: '2026-09-10', recordType: 'invoice', recordId: 'INV-3105', message: 'Payment of $1,500 recorded on INV-3105' },
+    { id: 'act-9', at: '2026-09-12', recordType: 'requisition', recordId: 'REQ-4001', message: 'Requisition REQ-4001 submitted for approval' },
+    { id: 'act-10', at: '2026-09-14', recordType: 'user', recordId: 'usr-5', message: 'Elena Cho invited (Finance)' },
+    { id: 'act-11', at: '2026-09-15', recordType: 'user', recordId: 'usr-4', message: 'Renee Castillo assigned role Warehouse' },
+    { id: 'act-12', at: '2026-09-15', recordType: 'integration', recordId: 'int-slack', message: 'Integration connected — Slack notifications' },
   ],
 
   focusRecordId: null,
