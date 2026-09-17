@@ -851,14 +851,48 @@ issues.
     examples/docs-site-level per AGENTS.md's Gate — `SHELL_MAX_ROUTES` is
     strictly permissive and matches the item 34 precedent already on
     `main`, not separately owner-directed by name).
-46. [ ] Examples gallery page cataloguing all 45 `examples/*.tsx` by
-    category (full-sample-screen / reusable-helper / state-page),
-    surfacing the 6 hash-only screens (`Login` + 4 error states +
-    password-reset) that are reachable only by hand-typing a URL hash, not
-    from inside the running app. Accept: every `examples/*.tsx` file with
-    a real screen appears in the gallery with its route or hash; the 6
-    hash-only screens are individually linked. Serves: intent.md
-    "documentation". Needs: issue #21.
+46. [x] Examples gallery page (`docs-site/src/pages/examples.astro`, new
+    — none existed before this) cataloguing all 45 `examples/*.tsx` by
+    category: 33 full sample screens (32 from `preview/client.tsx`'s own
+    `routes` array, the one authoritative registry, plus `Launcher` —
+    reached via the dock's launcher tile, not a NAV id — grouped by
+    module), 6 entry/state screens, 6 reusable helpers. Data is hand-
+    maintained (matching `examples/README.md`'s own established
+    convention for this exact kind of content — a real buildable-page
+    catalog, not something derivable from a content collection the way
+    `docs/*.md` is), cross-checked against `preview/client.tsx`'s route
+    table directly, not recalled from memory. Verified: built output has
+    exactly 56 `<tr>` (45 data rows + 11 table headers across 8 module
+    groups + Home + entry-screens + helpers), confirmed by counting the
+    built HTML, not assumed from the source data array's own length.
+    Surfaces the 6 hash-only screens prominently (a dedicated "Entry &
+    state screens" section, not buried in the full list) — `Login` +
+    `PasswordReset` + 4 error states, each with its real `#hash` and a
+    real GitHub source link; confirmed by grep that nothing in `examples/`
+    or `preview/` links to any of these 6 hashes from inside the running
+    app (the gap this item exists to surface, not just describe).
+    Source links resolve to real GitHub URLs for every file except
+    `AppShell.tsx`, which links to its own live demo at
+    `/components/appshell/` instead (built in an earlier batch) — a
+    working page, not a broken choice.
+    A required independent fresh-context review exhaustively cross-checked
+    every hand-transcribed datum (all 45 files, all 32 route id/label/
+    module triples, all 6 hashes, every helper's real consumer list, and
+    the "nothing links to these 6 hashes" claim) against the real source
+    and found zero wrong modules, zero wrong hashes, zero fabricated
+    consumers, zero omissions — a clean result, not a lucky one, given
+    this batch's real risk was transcription error, not logic. It did
+    flag one real, cheap gap: `Dashboard` was the only screen linking its
+    own live demo page even though `ListReport`/`RecordDetail`/`Launcher`
+    already have one too (built in earlier batches) — fixed here, all 4
+    now link their real `/patterns/{id}/` page alongside their source.
+    Accept: every `examples/*.tsx` file with a real screen appears in the
+    gallery with its route id or hash (verified: 45/45 present, counted
+    in the built HTML); the 6 hash-only screens are individually linked
+    with their real hash and source; check-links stays green (25/25
+    pages, up from 24); legible in both themes, manually confirmed.
+    Serves: intent.md "documentation". Needs: issue #21 (owner-directed,
+    2026-09-17).
 47. [ ] Quality & Verification page: surface the CI gate suite composition
     (`gates.yml`/`docs.yml`), ROADMAP's own narrated 3-lens review findings
     per milestone, and disclosed limitations (structural-first-pass

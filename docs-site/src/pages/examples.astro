@@ -1,0 +1,181 @@
+---
+import Base from '../layouts/Base.astro';
+
+const REPO = 'https://github.com/Busy-Office-Codex/busy-office-ui/blob/main/examples';
+
+// Hand-maintained, matching examples/README.md's own established convention for this content
+// (a real buildable-page catalog, not something derivable from a content collection the way
+// docs/*.md is) — kept in sync with preview/client.tsx's `routes` array, the one authoritative
+// route registry, and examples/AppShell.tsx's NAV map for module names.
+const FULL_SCREENS = [
+  {
+    module: 'General', screens: [
+      { id: 'role-page', label: 'Role page', file: 'RolePage.tsx', purpose: 'KPI tiles, a work-queue Table, shortcuts, and a team/delegation panel' },
+      { id: 'inbox', label: 'Inbox', file: 'Inbox.tsx', purpose: 'Two-pane thread list + detail with a real Dropdown filter and reply composer' },
+      { id: 'approvals', label: 'Approvals', file: 'Approvals.tsx', purpose: 'Cross-module approval queue: category tabs, a selectable list, and an Approve/Reject/Request-changes detail pane' },
+      { id: 'notifications', label: 'Notifications', file: 'Notifications.tsx', purpose: 'Grouped notification list (Today/Yesterday) with inline actions, plus a channel-preferences panel' },
+      { id: 'profile', label: 'Profile', file: 'Profile.tsx', purpose: 'Avatar/name header, a filter-Chip-as-tabs row, an 8-field settings form' },
+      { id: 'help', label: 'Help', file: 'Help.tsx', purpose: 'Setup checklist, a guided-tour Card, docs/shortcuts/support link lists' },
+    ],
+  },
+  {
+    module: 'Sales', screens: [
+      { id: 'customers', label: 'Customers', file: 'Customers.tsx', purpose: 'Search plus 4 Dropdown filters and a Table, no row selection' },
+      { id: 'sales-order-list', label: 'Sales orders', file: 'SalesOrderList.tsx', purpose: 'Status tabs, search plus 3 Dropdown filters, a sales-order Table' },
+      { id: 'sales-order-detail', label: 'Sales order', file: 'RecordDetail.tsx', purpose: 'Header/Chip status, summary Card tiles, a Modal reject-confirm flow', href: '/patterns/record-detail/' },
+      { id: 'delivery', label: 'Delivery', file: 'Delivery.tsx', purpose: 'A view-toggle row (List live), status tabs, a Table, and a tracking-timeline detail panel' },
+      { id: 'invoice', label: 'Invoice', file: 'Invoice.tsx', purpose: 'Two-column invoice document plus a payment-status/activity sidebar' },
+      { id: 'quotations', label: 'Quotations', file: 'Quotations.tsx', purpose: 'Sales quotations list + detail, the first hop of the Sales-to-billing journey' },
+      { id: 'billing', label: 'Billing', file: 'Billing.tsx', purpose: 'Billing worklist + detail; its "View invoice" action hands off to Invoice via the shared store' },
+    ],
+  },
+  {
+    module: 'Purchase', screens: [
+      { id: 'purchase-orders', label: 'Purchase orders', file: 'ListReport.tsx', purpose: 'Stat tiles, 4 Dropdown filters, a Table with row-selection', href: '/patterns/list-report/' },
+      { id: 'requisitions', label: 'Requisitions', file: 'Requisitions.tsx', purpose: 'List + detail with a linked-purchase-order breadcrumb chain' },
+      { id: 'inventory', label: 'Inventory', file: 'Inventory.tsx', purpose: 'A stock-by-warehouse bar chart and a mix-by-material donut chart, plus a Table' },
+    ],
+  },
+  {
+    module: 'Production', screens: [
+      { id: 'planning', label: 'Planning', file: 'Planning.tsx', purpose: 'Demand, material availability and recommendations shown together in one screen' },
+      { id: 'production-orders', label: 'Production orders', file: 'ProductionOrders.tsx', purpose: 'Planned orders → production orders → a simple schedule' },
+    ],
+  },
+  {
+    module: 'BI', screens: [
+      { id: 'dashboard', label: 'Dashboards', file: 'Dashboard.tsx', purpose: 'KPI Card grid plus a real revenue-trend line Chart', href: '/patterns/dashboard/' },
+      { id: 'analytics', label: 'Analytics', file: 'Analytics.tsx', purpose: 'Cross-domain exceptions dashboard; every figure is computed live from the shared store' },
+    ],
+  },
+  {
+    module: 'Administration', screens: [
+      { id: 'admin-overview', label: 'Overview', file: 'AdminOverview.tsx', purpose: 'A 9-card admin-area grid plus a recent-activity panel' },
+      { id: 'users-and-roles', label: 'Users and roles', file: 'UsersAndRoles.tsx', purpose: 'A role list plus a 6×6 permissions-matrix Table' },
+      { id: 'users', label: 'Users', file: 'Users.tsx', purpose: 'Users + role assignment + access preview + audit history in one screen' },
+      { id: 'roles', label: 'Roles', file: 'Roles.tsx', purpose: 'Role management: create/edit/clone' },
+      { id: 'companies', label: 'Companies', file: 'Companies.tsx', purpose: "Companies & entities: the entity-lifecycle half of Overview's \"Manage legal entities\" card" },
+      { id: 'integrations', label: 'Integrations', file: 'Integrations.tsx', purpose: 'Integrations & API' },
+      { id: 'audit-log', label: 'Audit log', file: 'AuditLog.tsx', purpose: 'A cross-domain audit trail, reading the same shared activity log every other screen appends to' },
+    ],
+  },
+  {
+    module: 'Builder', screens: [
+      { id: 'builder-forms', label: 'Forms', file: 'BuilderForms.tsx', purpose: 'Static 3-pane form editor: field/layout/block palette, a preview, a properties panel' },
+      { id: 'builder-workflow', label: 'Workflows', file: 'BuilderWorkflow.tsx', purpose: 'A static vertical step-flow with an approval-step config panel' },
+      { id: 'builder-screens', label: 'Pages', file: 'BuilderScreens.tsx', purpose: 'A screen/page-definition builder' },
+      { id: 'builder-reports', label: 'Reports & dashboards', file: 'BuilderReports.tsx', purpose: 'A report/dashboard-definition builder' },
+    ],
+  },
+  {
+    module: 'Settings', screens: [
+      { id: 'settings', label: 'General', file: 'Settings.tsx', purpose: 'Company fields, 4 Dropdown value pickers, Modules toggle rows' },
+    ],
+  },
+];
+
+const LAUNCHER = { file: 'Launcher.tsx', href: '/patterns/launcher/', purpose: "The Home/launcher screen: a role-picked \"For you\" row, Favorites, Recent activity, and an \"All apps\" grid. Reached via the floating dock's launcher tile, not a NAV route." };
+
+// Reachable only by hand-typing a URL hash — nothing inside the running preview links to any of
+// these (confirmed: no <a href="#..."> or window.location.hash= targeting them anywhere in
+// examples/ or preview/ outside their own mutual PasswordReset<->Login links). Surfaced here
+// deliberately, per this item's own goal.
+const ENTRY_SCREENS = [
+  { hash: '#login', file: 'Login.tsx', purpose: 'Two-column sign-in: workspace switcher, email/password, "Continue with SSO", a remember-device row' },
+  { hash: '#password-reset', file: 'PasswordReset.tsx', purpose: 'A real two-step password-reset flow — genuinely stateful, unlike the other state pages below' },
+  { hash: '#account-locked', file: 'AccountLocked.tsx', purpose: 'Account-locked error state' },
+  { hash: '#session-expired', file: 'SessionExpired.tsx', purpose: 'Session-expired error state' },
+  { hash: '#access-denied', file: 'AccessDenied.tsx', purpose: "Permission-denied error state — the honest landing spot for a module a viewer's role doesn't grant" },
+  { hash: '#404', file: 'NotFound.tsx', purpose: '404 error state' },
+];
+
+const HELPERS = [
+  { file: 'AppShell.tsx', purpose: 'The sample host composition wrapping the real Shell — command bar, app strip, dock, launcher', href: '/components/appshell/', consumers: 'the standalone preview; every screen above renders inside it' },
+  { file: 'breadcrumbTrail.tsx', purpose: 'A hand-duplicated breadcrumb-trail lookalike for panes that don’t own a Shell instance to pass the real breadcrumbs prop into', consumers: 'RecordDetail.tsx, Requisitions.tsx' },
+  { file: 'filterTabs.tsx', purpose: 'The shared filter-Chip-as-tabs pattern, extracted after being duplicated 9× across 8 files', consumers: 'Approvals, BuilderForms, Notifications, SalesOrderList, Profile, RolePage, UsersAndRoles' },
+  { file: 'confirmDialog.tsx', purpose: 'A shared ConfirmDialog modal wrapper for destructive/confirm actions', consumers: 'Companies, Billing, Integrations, Requisitions' },
+  { file: 'entryScreenLayout.tsx', purpose: 'The shared EntryScreen layout wrapper for the pre-shell error/state pages', consumers: 'AccessDenied, AccountLocked, NotFound, SessionExpired (not PasswordReset)' },
+  { file: 'ControlCenter.tsx', purpose: "A Density/Appearance toggle popover mounted in AppShell's account slot", consumers: 'AppShell.tsx' },
+];
+---
+<Base title="Examples">
+  <a href="/">&larr; Home</a>
+  <h1>Examples</h1>
+  <p>Every real page composition in <code>examples/*.tsx</code> (45 files), catalogued by what it is — a full sample screen, a pre-shell entry/state screen, or a reusable helper other screens are built from. These are pure UI compositions: no server calls, no real ERP data — see <a href="/conventions/">Design conventions</a> for how to read and extend them. Full sample screens run live in the standalone preview (<code>pnpm preview</code>, <code>http://127.0.0.1:4174</code>, loopback-only — not deployed here); source links below always work regardless.</p>
+
+  <h2>Full sample screens</h2>
+  <p>Reachable from inside the running preview via the app strip or command palette, grouped by module.</p>
+  {FULL_SCREENS.map((group) => (
+    <>
+      <h3>{group.module}</h3>
+      <table>
+        <thead><tr><th>Screen</th><th>Demonstrates</th><th>Route / source</th></tr></thead>
+        <tbody>
+          {group.screens.map((screen) => (
+            <tr>
+              <td>{screen.label}</td>
+              <td>{screen.purpose}</td>
+              <td>
+                <code>{screen.id}</code>
+                {screen.href && <> · <a href={screen.href}>live demo</a></>}
+                {' · '}<a href={`${REPO}/${screen.file}`}>{screen.file}</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
+  ))}
+  <h3>Home</h3>
+  <table>
+    <thead><tr><th>Screen</th><th>Demonstrates</th><th>Route / source</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Launcher</td>
+        <td>{LAUNCHER.purpose}</td>
+        <td>dock launcher tile · <a href={LAUNCHER.href}>live demo</a> · <a href={`${REPO}/${LAUNCHER.file}`}>{LAUNCHER.file}</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Entry &amp; state screens</h2>
+  <p>Reachable <strong>only</strong> by hand-typing a URL hash in the standalone preview — nothing inside the running app links to any of these today (a real host would trigger them from an actual sign-out, 403, or expired-session event).</p>
+  <table>
+    <thead><tr><th>Screen</th><th>Demonstrates</th><th>Hash / source</th></tr></thead>
+    <tbody>
+      {ENTRY_SCREENS.map((screen) => (
+        <tr>
+          <td>{screen.file.replace('.tsx', '')}</td>
+          <td>{screen.purpose}</td>
+          <td><code>{screen.hash}</code> · <a href={`${REPO}/${screen.file}`}>{screen.file}</a></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <h2>Reusable helpers</h2>
+  <p>Not independently routed — small compositions other screens above are built from.</p>
+  <table>
+    <thead><tr><th>File</th><th>Purpose</th><th>Real consumers</th></tr></thead>
+    <tbody>
+      {HELPERS.map((helper) => (
+        <tr>
+          <td>{helper.href ? <a href={helper.href}>{helper.file}</a> : <a href={`${REPO}/${helper.file}`}>{helper.file}</a>}</td>
+          <td>{helper.purpose}</td>
+          <td>{helper.consumers}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <style>
+    table { border-collapse: collapse; width: 100%; margin: 16px 0 32px; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; vertical-align: top; }
+    th { color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    @media (prefers-color-scheme: dark) {
+      th, td { border-bottom-color: #334155; }
+      th { color: #cbd5e1; }
+    }
+  </style>
+</Base>
