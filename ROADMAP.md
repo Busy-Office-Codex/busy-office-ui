@@ -261,6 +261,24 @@ work starts only from a request that passes the Objective tests. M7 was the
 one exception already in flight; now that it has closed, this line applies
 again until the next request clears the same bar.
 
+**M8 — Core correctness: Input a11y/id-safety, Chart tooltip/theme/negative-
+axis, honest ERP units + partial-payment coverage, independent consumer
+proof — in progress.** Items 50–53, issue #22 (`agreed`, project owner,
+2026-09-17, via direct instruction — "set goal to complete all, let's
+start," recorded here rather than a separate issue comment, matching the
+M7/issue-#16 precedent for owner-directed agreements). All four items
+agreed together as one milestone; building starts as a single batch (the
+batch cap is 4, so this milestone closes in one batch if all four items
+clear verify/review). These are fixes/hardening to existing shared
+contracts (`Input`, `Chart`) and existing examples, not new components —
+Objective 3's "two named consumers" bar doesn't apply; each item's own Serves
+line below names Objective 2 (boundary) or the `intent.md` clause it serves
+instead. Grounded in a 4-agent source audit run 2026-09-17 (see items 50–53
+for the reproduced/source-confirmed findings); `resolved` findings from that
+audit (Input/docs drift-free, Chart's accessible-table fallback, `Finance`/
+`BiExplore` unit-clean totals, `package.json`'s exports map) are not items
+here — they were checked and found fine.
+
 ## Items
 
 Format: `[x]` done · `[ ]` open · `[?]` proposed (needs an agreed issue).
@@ -1224,7 +1242,7 @@ issues.
     usage. Needs: issue #21 (owner-directed, 2026-09-17). Follow-up, not a
     blocker for this item: extend the ratchet to spacing, and to discover new
     `examples/*.tsx` files automatically instead of a hardcoded list.
-50. [?] **Input: accessible error state, id safety, className passthrough.**
+50. [ ] **Input: accessible error state, id safety, className passthrough.**
     Reproduced (2026-09-17 audit): `error` sets no `aria-invalid`/
     `aria-describedby` and the error `<span>` has no `id`, so nothing can
     point at it; `id` has no collision fallback (no `useId`); a
@@ -1237,8 +1255,8 @@ issues.
     alongside the component's generated classes; each covered by a test
     asserting the DOM attribute/class directly. Serves: Objective 2
     (boundary — a presentation contract every consumer form relies on).
-    Needs: issue #22 (`proposed`, 2026-09-17).
-51. [?] **Chart: tooltip text safety, theme reactivity, negative-axis
+    Needs: issue #22 (`agreed`, project owner, 2026-09-17).
+51. [ ] **Chart: tooltip text safety, theme reactivity, negative-axis
     correctness, unnecessary reinit.** Reproduced/source-confirmed
     (2026-09-17 audit): the tooltip formatter interpolates consumer-supplied
     label strings into HTML ECharts renders unescaped — a real XSS sink;
@@ -1255,7 +1273,7 @@ issues.
     value-equal to the previous render. Serves: Objective 2 (boundary — a
     presentation contract 7 real consumers already depend on). Needs: issue
     #22 (`proposed`, 2026-09-17).
-52. [?] **Honest ERP units, partial-payment coverage, complete sample-data
+52. [ ] **Honest ERP units, partial-payment coverage, complete sample-data
     disclosure.** Reproduced/source-confirmed (2026-09-17 audit): "Stock by
     warehouse"/"Units on hand" sums quantities across incompatible units
     (reams, spools, discrete items) as one figure in `Inventory.tsx`, then
@@ -1269,8 +1287,8 @@ issues.
     fixture exists and a test proves it stays correctly visible/totaled under
     the "unpaid" filter; `quality.astro` names every sample-data literal
     actually present in the components it covers. Serves: intent.md "honest
-    ERP examples". Needs: issue #22 (`proposed`, 2026-09-17).
-53. [?] **Independent consumer proof.** Source-confirmed (2026-09-17 audit):
+    ERP examples". Needs: issue #22 (`agreed`, project owner, 2026-09-17).
+53. [ ] **Independent consumer proof.** Source-confirmed (2026-09-17 audit):
     no script, CI job or test packs this workspace and installs the tarball
     into an isolated project outside the pnpm workspace — every export path,
     `styles.css`, and `sideEffects:false` tree-shaking are only ever
@@ -1286,7 +1304,7 @@ issues.
     ECharts, replacing the stale claim above with a current,
     automation-checked number. Serves: intent.md's opening sentence directly
     ("hosts import one small, dependable UI package"). Needs: issue #22
-    (`proposed`, 2026-09-17).
+    (`agreed`, project owner, 2026-09-17).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
