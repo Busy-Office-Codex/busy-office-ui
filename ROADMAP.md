@@ -1289,7 +1289,7 @@ issues.
     zero axis; a render-identity test shows no dispose/reinit when `data` is
     value-equal to the previous render. Serves: Objective 2 (boundary — a
     presentation contract 7 real consumers already depend on). Needs: issue
-    #22 (`proposed`, 2026-09-17).
+    #22 (`agreed`, project owner, 2026-09-17).
 52. [ ] **Honest ERP units, partial-payment coverage, complete sample-data
     disclosure.** Reproduced/source-confirmed (2026-09-17 audit): "Stock by
     warehouse"/"Units on hand" sums quantities across incompatible units
