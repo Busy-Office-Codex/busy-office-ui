@@ -39,6 +39,17 @@ const patterns = [
 <Base title="Busy Office UI">
   <h1>Busy Office UI</h1>
   <p>Docs for <code>@busyoffice/design-system</code>, generated from the package's own <code>docs/*.md</code> files, tokens and example compositions.</p>
+  <p><strong>What this is:</strong> a portable, reusable visual component package and reference page compositions for Busy Office applications — <strong>a UI dependency, not an ERP platform kernel or application implementation</strong>. Consumers own business behavior, data, navigation registration, permissions, and runtime integration; this repository owns components, styling compilation, fonts, documentation, and pure examples (<code>intent.md</code>).</p>
+
+  <h2>Install</h2>
+  <p><code>@busyoffice/design-system</code> is a private package (<code>package.json</code>: <code>"private": true</code>) — not on the public npm registry. Hosts inside Busy Office Codex integrate it via a reviewed, pinned commit (see <code>AGENTS.md</code>'s repository-coordination process), then import from the documented subpaths (the main ones below — the full list, including the preview-only <code>/examples/*</code> sample hosts, is in <code>README.md</code>'s "Public imports"):</p>
+  <pre><code>{`import { Button, Card, Text } from '@busyoffice/design-system';
+import '@busyoffice/design-system/styles.css';
+import { Shell } from '@busyoffice/design-system/shell';`}</code></pre>
+  <p>Real component prop types remain authoritative — see <a href="/conventions/">Design conventions</a> for the full setup and styling idiom.</p>
+
+  <h2>See it running</h2>
+  <p>Every pattern below is a real, hydrated instance of the actual built package, not a screenshot — start with <a href="/patterns/list-report/">List report</a> (a filterable purchase-orders page) to see a complete ERP screen composed only from these components, or jump straight to a specific <a href="#components">component</a> or <a href="#patterns">pattern</a> below.</p>
 
   <h2>Foundations</h2>
   <h3>Design System</h3>
@@ -51,7 +62,7 @@ const patterns = [
   <h3>Base Styles</h3>
   <p><a href="/base-styles/">Elevation, radius, glass, motion and the icon set</a> — the visual primitives every component is built from.</p>
 
-  <h2>Components</h2>
+  <h2 id="components">Components</h2>
   {componentsByCategory.map((group) => (
     <>
       <h3>{group.label}</h3>
@@ -73,7 +84,7 @@ const patterns = [
     </>
   )}
 
-  <h2>Patterns</h2>
+  <h2 id="patterns">Patterns</h2>
   <p>Composed sample-page journeys, not single components — see each page's "Not for" note.</p>
   <ul>
     {patterns.map((pattern) => (
