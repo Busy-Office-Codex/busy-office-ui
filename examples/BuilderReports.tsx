@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Button, ButtonGroup, Card, Chip, type ChipTone, Density, Text } from '../src/index.js';
+import { Button, ButtonGroup, Card, Chart, type ChartSeries, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { color, space } from '../src/tokens.stylex.js';
+import { appStore } from './data/appStore.js';
+import { useStoreState } from './data/store.js';
 
 /**
  * A report/dashboard-definition builder (ROADMAP M7's ERP reference-app initiative, Slice 13,
@@ -21,11 +23,22 @@ import { color, space } from '../src/tokens.stylex.js';
  * The widget palette (KPI stat / Bar chart / Line chart / Donut chart / Table) mirrors the real
  * `Chart` component's own `type` union ('bar' | 'line' | 'donut') plus the two non-chart shapes
  * Dashboard.tsx/Inventory.tsx already compose with it — a plausible reflection of what this
- * package's own components could render, not an invented taxonomy. Preview stays structural
- * (a labeled box per widget), same as BuilderScreens.tsx's own Preview: rendering each widget with
- * a REAL `Chart` against REAL store data is a bigger, separate feature (wiring five different
- * live aggregations, several not computed anywhere yet — cash-flow, spend-by-supplier-style
- * breakdowns), not this builder's own "can I lay out and save a definition" journey.
+ * package's own components could render, not an invented taxonomy.
+ *
+ * Preview renders a REAL `Chart`/`Table` against REAL data (ROADMAP item 34's "Reports" slice,
+ * 2026-09-17) for the 5 widgets `SEED_DEFINITIONS` already names — each backed by the exact same
+ * fact another real screen already states, not a sixth invented aggregation: "Revenue this
+ * month"/"Revenue trend" mirror Dashboard.tsx's own $486K/6-month-trend figures (kept as a
+ * literal, deliberately not a cross-screen import between two otherwise-independent example
+ * compositions — same "duplicate the literal, disclose the sync obligation" convention
+ * `Chart.tsx`'s own `PALETTE` already uses against `tokens.stylex.ts`); "Stock by warehouse"/
+ * "Stock mix by warehouse" read live `stockLevels` from the shared store, the same aggregation
+ * Inventory.tsx's own "stock by warehouse" bar chart computes; "Open requisitions" reads live
+ * `pending_approval` requisitions from the same store Requisitions.tsx owns. A widget added from
+ * the palette during this session (an invented "New bar chart" with no real backing fact) still
+ * renders the original structural placeholder — there is nothing real to compute for a label
+ * nobody defined, and inventing one would be exactly the "second number for the same fact"
+ * problem this initiative's other slices have deliberately avoided throughout.
  *
  * Naming note: 'Reports & dashboards' shares the word "Reports" with NAV.Finance's own
  * still-unbuilt 'Reports' placeholder — like 'Users' / 'Users and roles' before it (see
@@ -84,9 +97,36 @@ const VIEW_MODES = [
   { value: 'Preview', label: 'Preview' },
 ] as const;
 
+// Dashboard.tsx's own REVENUE_TREND/REVENUE_THIS_MONTH, literally, not a cross-screen import —
+// see this file's own header comment for why. Kept in sync by hand, the same disclosed-duplicate
+// convention Chart.tsx's own PALETTE already uses for tokens.stylex.ts's real hex values.
+const REVENUE_TREND: ChartSeries = [
+  { label: 'Apr', value: 410000 },
+  { label: 'May', value: 428000 },
+  { label: 'Jun', value: 441000 },
+  { label: 'Jul', value: 452000 },
+  { label: 'Aug', value: 457000 },
+  { label: 'Sep', value: 486000 },
+];
+
 let nextWidgetSeq = 1;
 
 export function BuilderReports() {
+  const state = useStoreState(appStore, (s) => s);
+
+  // Same aggregation Inventory.tsx's own "stock by warehouse" bar chart computes, read live from
+  // the same shared store — a genuine live aggregation, not a snapshot copied in at build time.
+  const byWarehouse: ChartSeries = Object.values(state.warehouses).map((warehouse) => ({
+    label: warehouse.name,
+    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).reduce((sum, level) => sum + level.qtyOnHand, 0),
+  }));
+
+  // "Open" = not yet resolved — the same `pending_approval` status Requisitions.tsx's own
+  // "Pending approval" Chip already names, not a new definition of "open".
+  const openRequisitions = Object.values(state.requisitions)
+    .filter((requisition) => requisition.status === 'pending_approval')
+    .sort((a, b) => (a.id < b.id ? 1 : -1));
+
   const [definitions, setDefinitions] = useState<Record<string, ReportDefinition>>(SEED_DEFINITIONS);
   const [selectedId, setSelectedId] = useState('sales-performance');
   const selected = definitions[selectedId]!;
@@ -121,6 +161,67 @@ export function BuilderReports() {
     setDefinitions((prev) => ({ ...prev, [selectedId]: { ...prev[selectedId]!, widgets: draftWidgets } }));
     setJustSaved(true);
   };
+
+  // Real render for the 5 widgets `SEED_DEFINITIONS` names (matched on type + label, not type
+  // alone — an arbitrary "New bar chart" added from the palette has the same `type` as "Stock by
+  // warehouse" but no real fact behind it, so it falls through to `null` and keeps the structural
+  // placeholder below). Returns null, never a fabricated chart, for anything unmatched.
+  function renderRealWidget(widget: Widget) {
+    if (widget.type === 'KPI stat' && widget.label === 'Revenue this month') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: space.space1 }}>
+          <Text variant="display">$486K</Text>
+          <Text variant="caption">+6.4% vs last month</Text>
+        </div>
+      );
+    }
+    if (widget.type === 'Line chart' && widget.label === 'Revenue trend') {
+      return <Chart type="line" title="Revenue trend, last 6 months" valueLabel="$" data={REVENUE_TREND} height={140} />;
+    }
+    if (widget.type === 'Bar chart' && widget.label === 'Stock by warehouse') {
+      return <Chart type="bar" title="Units on hand by warehouse" valueLabel="units" data={byWarehouse} height={140} />;
+    }
+    if (widget.type === 'Donut chart' && widget.label === 'Stock mix by warehouse') {
+      // Same `byWarehouse` data as the bar widget above, deliberately — the widget's own seeded
+      // label asks for a warehouse mix, not a different cut of the data the way Inventory.tsx's
+      // sibling bar/donut pair (by warehouse vs. by material) does. A distinct chart `title`
+      // ("share of total", not a restatement of the bar's own title) is the one visible cue that
+      // this is a proportional view of the same totals, not a second, independent metric.
+      return <Chart type="donut" title="Share of total units by warehouse" valueLabel="units" data={byWarehouse} height={140} />;
+    }
+    if (widget.type === 'Table' && widget.label === 'Open requisitions') {
+      return (
+        // aria-label, not a <caption> — this table is genuinely visible (unlike Chart's own
+        // visually-hidden accessible table), and a <caption> would duplicate the widget's own
+        // label text already shown above it.
+        <Table aria-label="Open requisitions">
+          <TableHead>
+            <TableRow>
+              <TableHeaderCell>Requisition #</TableHeaderCell>
+              <TableHeaderCell>Requested by</TableHeaderCell>
+              <TableHeaderCell>Department</TableHeaderCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {openRequisitions.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3}>No requisitions pending approval.</TableCell>
+              </TableRow>
+            ) : (
+              openRequisitions.map((requisition) => (
+                <TableRow key={requisition.id}>
+                  <TableCell>{requisition.id}</TableCell>
+                  <TableCell>{requisition.requestedBy}</TableCell>
+                  <TableCell>{requisition.department}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      );
+    }
+    return null;
+  }
 
   return (
     <div
@@ -264,25 +365,32 @@ export function BuilderReports() {
                 {draftWidgets.length === 0 ? (
                   <Text variant="caption">This report has no widgets to preview yet.</Text>
                 ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: space.space3 }}>
-                    {draftWidgets.map((widget) => (
-                      <div
-                        key={widget.id}
-                        style={{
-                          border: `1px solid ${color.border}`,
-                          borderRadius: 10,
-                          padding: space.space4,
-                          background: color.bgSurface,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 6,
-                          minHeight: 96,
-                        }}
-                      >
-                        <Text variant="caption">{widget.type.toUpperCase()}</Text>
-                        <Text variant="body">{widget.label}</Text>
-                      </div>
-                    ))}
+                  // minmax 260px, not the original 200px — found live: a real Chart's own legend
+                  // (the donut's, specifically) needs more room than the plain structural box this
+                  // grid was sized for before this slice added real chart rendering.
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: space.space3 }}>
+                    {draftWidgets.map((widget) => {
+                      const real = renderRealWidget(widget);
+                      return (
+                        <div
+                          key={widget.id}
+                          style={{
+                            border: `1px solid ${color.border}`,
+                            borderRadius: 10,
+                            padding: space.space4,
+                            background: color.bgSurface,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 6,
+                            minHeight: 96,
+                          }}
+                        >
+                          <Text variant="caption">{widget.type.toUpperCase()}</Text>
+                          <Text variant="body">{widget.label}</Text>
+                          {real}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

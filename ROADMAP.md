@@ -147,8 +147,10 @@ already landed): the 3 genuinely remaining named consumers are "17
 Finance — cash flow, 12 months" (the Finance module has no real screen at
 all yet — a NAV placeholder only, so this is a new-screen-plus-chart
 effort, not a one-chart addition), "18 Reports" (BuilderReports.tsx's own
-Preview stays structural by design — see its header comment — a real
-Chart there needs live aggregations, several not computed anywhere yet),
+Preview stays structural by design at the time this paragraph was
+written — its header comment has since been rewritten, see the
+2026-09-17 correction below — a real Chart there needs live
+aggregations, several not computed anywhere yet),
 and "20 BI explore" (a new pivot-result screen needing its own new
 route, and issue #16's own "Pie" ask — `Chart` today only has `'bar' |
 'line' | 'donut'`, no `'pie'` variant). Each is its own separate,
@@ -174,9 +176,30 @@ records the code change left behind (`docs/Dashboard.md`,
 scroll-height upper bound in `test/browser/page-composition.spec.ts` that
 the 2 new charts had already compressed to 15px of real headroom).
 
-Redirected (owner-directed, 2026-09-16, in progress): the rendering engine
-moves from Chart.js to ECharts — a reversal of this milestone's own earlier
-Chart.js decision above, made now rather than revisited from scratch; the
+Corrected again (2026-09-17): "18 Reports" landed — `examples/
+BuilderReports.tsx`'s Preview tab renders 5 real widgets for its 2 seed
+definitions, each now showing real content inside the same bordered
+placeholder box every widget already had (the box, its type caption and
+its label line all stay — this adds content, it doesn't replace
+anything). Only 2 of those 5 are genuinely new aggregations, not 5: a KPI
+stat + line chart mirroring Dashboard.tsx's own $486K/6-month-trend facts
+(a disclosed literal duplicate, not a cross-screen import — see the
+file's own header comment, not itself an aggregation), a bar + donut both
+reading the SAME single live `stockLevels` aggregation Inventory.tsx's
+own bar chart already computes (one real aggregation, rendered twice, not
+two), and a real `Table` of `pending_approval` requisitions read live
+from the shared store (a filter, not an aggregation). Matched on widget
+type AND label, not type alone — a freshly-added "New bar chart" from the
+palette still gets the original structural placeholder alone (no real
+content appended), verified live by a real browser test
+(`test/browser/builder-reports.spec.ts`), since there is no real fact
+behind an arbitrary user-added widget to render instead.
+
+Redirected (owner-directed, 2026-09-16; corrected 2026-09-17 — this line
+said "in progress" but the migration is done, found stale while touching
+this item during the BI-dashboard slice above): the rendering engine
+moved from Chart.js to ECharts — a reversal of this milestone's own earlier
+Chart.js decision above, made then rather than revisited from scratch; the
 Boundary discipline that decision already established stays the rule, not
 the specific library — `Chart`'s public `ChartProps`/`ChartSeries` shape
 stays byte-for-byte the same, so every real consumer (Dashboard, Inventory
@@ -450,7 +473,7 @@ issues.
     `prefers-reduced-motion` disables draw-in animation. Rendering engine
     moved from Chart.js to ECharts (owner-directed, 2026-09-16) — this line
     previously said "in progress"; corrected 2026-09-17, found stale during
-    the BI-dashboard slice below: `package.json` has no `chart.js`
+    the BI-dashboard slice above: `package.json` has no `chart.js`
     dependency, `Chart.tsx`'s own imports are entirely `echarts/*`, and its
     docstring already states the switch as done, not pending — wrapped
     identically, `ChartProps`/`ChartSeries` unchanged, ECharts never
@@ -463,8 +486,19 @@ issues.
     see the M7 narrative above), Inventory.tsx's "stock by warehouse" bar +
     "mix by material" donut (issue #16's own "15 Inventory" scenario),
     Planning.tsx's "forecast demand" bar, Analytics.tsx's "open work items"
-    bar. Still open: Finance (no real screen yet), Reports
-    (BuilderReports.tsx's live-aggregation gap), BI explore (new route + a
+    bar, and BuilderReports.tsx's Preview tab (2026-09-17, item 34's
+    "Reports" slice) — 5 real widgets, each now showing real content
+    inside its existing placeholder box rather than replacing it (a KPI
+    stat + line chart mirroring Dashboard.tsx's own $486K/trend facts as a
+    disclosed literal duplicate, not an aggregation; a bar + donut both
+    reading the SAME single live `stockLevels` aggregation Inventory.tsx's
+    own bar chart computes; and a real `Table` of `pending_approval`
+    requisitions read live from the shared store, a filter, not an
+    aggregation — only 1 genuinely new aggregation total, computed once
+    and rendered twice) for exactly those 5 named widgets; any other
+    widget (added from the palette, no real backing fact) still gets only
+    the original structural placeholder, verified by a real browser test.
+    Still open: Finance (no real screen yet), BI explore (new route + a
     `'pie'` variant `Chart` doesn't have yet). Issue #16.
 35. [x] Icon component — `src/components/Icon.tsx`, exported from
     `src/index.ts`. A closed `IconName` union (`'sliders' | 'bell'`) as
