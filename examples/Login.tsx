@@ -11,7 +11,19 @@ import { color, space } from '../src/tokens.stylex.js';
  * the standalone `templates/login` template (ROADMAP M6, issue #17) — one
  * login example, not two.
  */
-export function Login() {
+export type LoginProps = {
+  /**
+   * Called when "Continue" is pressed with no validation error (this sample never validates
+   * credentials — there's nothing real to check). Host-agnostic on purpose: this file doesn't
+   * know what happens after sign-in (a real host redirects into its own app), so a host wires
+   * whatever navigation it wants here. `preview/client.tsx` uses this to enter the sample ERP
+   * app (ROADMAP item 54/issue #23 — the preview previously had no way to reach it from Login
+   * at all, since this button had no handler).
+   */
+  onContinue?: () => void;
+};
+
+export function Login({ onContinue }: LoginProps = {}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberDevice, setRememberDevice] = useState(true);
@@ -108,7 +120,7 @@ export function Login() {
               </label>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: space.space2 }}>
-                <Button variant="primary" style={{ width: '100%' }}>
+                <Button type="button" variant="primary" style={{ width: '100%' }} onClick={onContinue}>
                   Continue
                 </Button>
                 <Button variant="secondary" style={{ width: '100%' }}>
