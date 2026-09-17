@@ -10,7 +10,7 @@ const fontSizes = font.filter((entry) => entry.name.startsWith('size'));
 <Base title="Tokens">
   <a href="/">&larr; Home</a>
   <h1>Tokens</h1>
-  <p>Read live from <code>src/tokens.stylex.ts</code> at build time — not a hand-copied table.</p>
+  <p>Read live from <code>src/tokens.stylex.ts</code> at build time — not a hand-copied table. Color, spacing and type scale below; for elevation/radius/glass/motion/icons, see <a href="/base-styles/">Base Styles</a>; for light/dark/system theming, see <a href="/components/theme/">Theme</a>; for compact/comfortable/spacious sizing, see <a href="/density/">Density</a>.</p>
 
   <h2>Color</h2>
   <p>Each token's light value (the default) and dark value (applied under <code>prefers-color-scheme: dark</code>, or an explicit <code>Theme</code> override) — see <code>test/color-contrast.test.ts</code> for the verified AA contrast ratios behind these pairs.</p>
