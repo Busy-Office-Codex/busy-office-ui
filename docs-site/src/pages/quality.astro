@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+
+const REPO = 'https://github.com/Busy-Office-Codex/busy-office-ui';
+
+// This repo has no scoring/assessment/conformance system anywhere — confirmed by a repo-wide
+// grep, a GitHub-org-wide search, and this exact question being the reason issue #21 (the
+// website/content/sample-app reorganization this page is part of) exists at all: the brief that
+// started that workstream assumed a "scoring work" to reuse, and none was ever found. This page
+// deliberately doesn't invent one. What it surfaces instead is real and already exists: the CI
+// gate suite (below) and ROADMAP.md's own narrated review findings per milestone (linked, not
+// duplicated — this page never restates a finding ROADMAP.md already owns).
+const GATES = [
+  { step: 'pnpm build', checks: 'The package builds: TS declarations, browser ESM, compiled StyleX CSS' },
+  { step: 'pnpm lint', checks: 'ESLint across src, examples, preview, test' },
+  { step: 'pnpm typecheck', checks: 'TypeScript, no emit, across 4 separate project configs (src/examples/preview/test)' },
+  { step: 'pnpm test', checks: 'Unit + component tests (Vitest) — rendered-markup contracts, docs-contract enforcement, navigation-model validation, the theme-safety token-audit ratchet, real WCAG contrast math' },
+  { step: 'pnpm security', checks: 'pnpm audit --prod --audit-level high' },
+  { step: 'pnpm build:docs', checks: "docs-site builds against the real, just-built package — added by this workstream (issue #21) after finding docs-site's own build had been red on main for 29 consecutive pushes with nothing acting on it (this workflow didn't exist yet)" },
+  { step: 'node docs-site/scripts/check-links.mjs', checks: 'Every internal link in the built docs-site resolves, case-exact (fragment/#anchor links are not checked)' },
+  { step: 'pnpm test:browser', checks: 'Playwright, real browser — a dedicated spec file for most sample screens, the rest covered by cross-cutting suites (accessibility/contrast, focus/keyboard, layout/responsiveness, navigation, dark-mode)' },
+];
+---
+<Base title="Quality & Verification">
+  <a href="/">&larr; Home</a>
+  <h1>Quality &amp; Verification</h1>
+  <p>What actually verifies a change here, and what it doesn't — not a score. There is no scoring, assessment or conformance-record system anywhere in this project or its sibling repositories; a repo-wide and GitHub-org-wide search turned up nothing to reuse or link to. What exists instead: a CI gate suite that runs on every push to <code>main</code>, and a narrated, per-milestone review record already kept in <a href={`${REPO}/blob/main/ROADMAP.md`}><code>ROADMAP.md</code></a> — this page points at both rather than duplicating either.</p>
+
+  <h2>The gate suite</h2>
+  <p>Every one of these runs on every push to <code>main</code> (<a href={`${REPO}/blob/main/.github/workflows/gates.yml`}><code>.github/workflows/gates.yml</code></a>) — a red run is fixed before any other work, per <a href={`${REPO}/blob/main/AGENTS.md`}><code>AGENTS.md</code></a>. Run the same commands locally, in this order, before handing off a change:</p>
+  <table>
+    <thead><tr><th>Command</th><th>What it checks</th></tr></thead>
+    <tbody>
+      {GATES.map((gate) => (
+        <tr>
+          <td><code>{gate.step}</code></td>
+          <td>{gate.checks}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p>The full local sequence, including the two setup/fresh-checkout steps not listed above (<code>pnpm install --frozen-lockfile</code>, the Playwright browser install) plus <code>pnpm build:preview</code> — required by <a href={`${REPO}/blob/main/AGENTS.md`}><code>AGENTS.md</code></a>'s own handoff list even though it isn't a `gates.yml` step — is <a href={`${REPO}/blob/main/README.md#local-checks`}>README.md's "Local checks"</a>.</p>
+  <p>See it actually running: <a href={`${REPO}/actions/workflows/gates.yml`}>live run history</a>. A separate workflow, <a href={`${REPO}/blob/main/.github/workflows/docs.yml`}><code>docs.yml</code></a>, rebuilds and publishes this documentation site as a container image on every push to <code>main</code> touching <code>docs/</code>, <code>docs-site/</code>, <code>src/</code> or <code>examples/</code> — it duplicates the build+check-links steps deliberately (a publish job, not a merge gate) — see its own <a href={`${REPO}/actions/workflows/docs.yml`}>run history</a>.</p>
+
+  <h2>Review process</h2>
+  <p>Every batch of changes gets an acceptance-to-test mapping and an independent, fresh-context reviewer before merge (never the same session that wrote the change) — required by <a href={`${REPO}/blob/main/AGENTS.md`}><code>AGENTS.md</code></a>/<a href={`${REPO}/blob/main/LOOP.md`}><code>LOOP.md</code></a>. A milestone-closing batch gets three parallel review lenses instead of one (spec-match, contrast/accessibility, simplicity) — a clause fails if any lens fails it. The actual findings from every review — what was checked, what was found, what was fixed before merge — are narrated in <a href={`${REPO}/blob/main/ROADMAP.md`}><code>ROADMAP.md</code></a> itself, item by item, not restated here: read the source, not a summary of it.</p>
+
+  <h2>Known limitations</h2>
+  <p>Disclosed, not silently dropped — each traces to its own <code>ROADMAP.md</code> item for the full context:</p>
+  <ul>
+    <li><strong>Structural-first-pass, not pixel-verified.</strong> Every M6 sample screen (items 17–33) matches the ERP skeleton reference's own labels and composition, but wasn't independently pixel-measured or contrast-audited screen-by-screen the way item 12's own fidelity pass did — that remains open.</li>
+    <li><strong>Shell's own chrome doesn't re-tint.</strong> The command bar, dock and palette (item 36, item 39) stay their original theme even under an explicit <code>Theme</code> override — a viewer who picks "Dark" sees dark page content inside permanently-light chrome.</li>
+    <li><strong>Two colors have no token, by design.</strong> <code>Launcher.tsx</code>'s favorited-star amber and <code>entryScreenLayout.tsx</code>'s local "warn" amber (item 49) — two different shades for two different one-off purposes, not a proven shared concept worth a token yet. Every other raw color literal in <code>examples/</code> is gone, mechanically enforced by <a href={`${REPO}/blob/main/test/shell-token-audit.test.ts`}><code>test/shell-token-audit.test.ts</code></a>'s ratchet across all 45 files. Spacing has no equivalent ratchet yet.</li>
+    <li><strong>Route-to-route navigation between sample screens is out of scope, not the in-page handoffs.</strong> Several M7 screens already hand off to each other live — <code>Billing.tsx</code>'s "View invoice" action opens the shared-store record on <code>Invoice.tsx</code>, <code>Analytics.tsx</code>'s exceptions focus a record on the target screen, <code>Requisitions.tsx</code> carries a linked-purchase-order breadcrumb — see <code>examples/README.md</code>'s own "named journeys" section. What's genuinely out of scope is real <em>route</em>-to-route navigation (list → detail → edit → confirmation as separate URLs): ROADMAP.md's own words, "explicitly OUT of this scope — it would be new interactive behavior in <code>examples/</code>, not a content reorg, and needs its own proposal."</li>
+    <li><strong><code>Chart</code> has open consumers.</strong> Item 34: Finance has no real screen yet to chart, <code>BuilderReports.tsx</code>'s Preview stays structural pending live aggregations, BI dashboard's other 2 charts and BI explore (plus a <code>'pie'</code> variant <code>Chart</code> doesn't have yet) remain unbuilt.</li>
+    <li><strong>Docs-site is v1 scope</strong> (item 15): no search, no versioning, no build-time check beyond the link checker.</li>
+  </ul>
+</Base>

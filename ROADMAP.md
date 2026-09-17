@@ -893,24 +893,102 @@ issues.
     pages, up from 24); legible in both themes, manually confirmed.
     Serves: intent.md "documentation". Needs: issue #21 (owner-directed,
     2026-09-17).
-47. [ ] Quality & Verification page: surface the CI gate suite composition
-    (`gates.yml`/`docs.yml`), ROADMAP's own narrated 3-lens review findings
-    per milestone, and disclosed limitations (structural-first-pass
-    caveat, raw-token file count, Shell chrome re-tint gap). Accept: the
-    page names every gate in `gates.yml` and links the validation commands
-    (`pnpm build`/`lint`/`typecheck`/`test`/`test:browser`/`security`); no
-    invented score or dashboard duplicating manually maintained data —
-    confirmed by this milestone's own audit that no such system exists
-    anywhere in the org to duplicate. Serves: intent.md "documentation".
-    Needs: issue #21.
-48. [ ] Build with AI page: boundary/scope (`intent.md`/`ARCHITECTURE.md`),
-    supported subpath exports, the two-way/one-way gate from `AGENTS.md`,
-    and common mistakes (removed `Button.size`/`Table.density`, importing
-    from `src/` instead of documented subpaths, treating `ListReport`/
-    `RecordDetail` as components rather than compositions). Accept: page
-    content is sourced from `intent.md`/`ARCHITECTURE.md`/`AGENTS.md`'s
-    real text, not restated from memory; check-links stays green. Serves:
-    intent.md "documentation". Needs: issue #21.
+47. [x] **Quality & Verification page.** `docs-site/src/pages/quality.astro`
+    (new): names every real check step in `gates.yml` (build, lint,
+    typecheck, test, security, build:docs, check-links, test:browser, in
+    the file's own order — setup-only steps `pnpm install --frozen-lockfile`
+    and the Playwright browser install correctly excluded from "what it
+    checks", but disclosed separately since `AGENTS.md`'s own handoff list
+    names `pnpm install --frozen-lockfile`/`pnpm build:preview` too, neither
+    of which is a `gates.yml` step); links `README.md`'s "Local checks" for
+    the full local sequence and `gates.yml`/`docs.yml`'s live GitHub Actions
+    run history; describes the review process (fresh-context reviewer,
+    3-lens on a milestone-closing batch) and points at `ROADMAP.md` itself
+    for the actual per-milestone findings rather than restating them; lists
+    6 disclosed known limitations (structural-first-pass, Shell chrome
+    re-tint, the 2 un-tokened ambers, sample-screen route-to-route
+    navigation being out of scope, `Chart`'s open consumers, docs-site's v1
+    scope), each citing its real `ROADMAP.md` item. No score, grade or
+    dashboard anywhere on the page — confirmed by this milestone's own
+    earlier audit that no such system exists anywhere in the org to
+    duplicate.
+48. [x] **Build with AI page.** `docs-site/src/pages/build-with-ai.astro`
+    (new): boundary/scope quoted verbatim from `intent.md`/`ARCHITECTURE.md`;
+    supported subpath exports (all 6 real `package.json` `exports` entries,
+    not the 4 `README.md`'s own "Public imports" block had drifted to —
+    fixed at the source, see below); the two-way/one-way gate, correctly
+    sourced from `LOOP.md` step 5 (this item's own text above says
+    "from `AGENTS.md`" — confirmed wrong: `AGENTS.md` has zero occurrences
+    of "two-way"/"one-way", `LOOP.md` is the real and only source; the page
+    cites `LOOP.md` correctly and this ROADMAP line is left as the disclosed
+    inaccuracy, not silently corrected past tense); 3 common mistakes
+    (removed `Button.size`/`Table.density`, importing from `src/`, and
+    `ListReport`/`RecordDetail` — corrected below to "treating as
+    configurable components" after review, since they *are* real exports).
+    Every quoted passage verified character-exact against its real source
+    file by an independent reviewer (intent.md, ARCHITECTURE.md, AGENTS.md,
+    LOOP.md, README.md, examples/README.md — all 7 blockquotes, 1.0000
+    match ratio each).
+
+    A 3-lens independent review (spec-match, factual-accuracy,
+    build-and-integration — run as 3 parallel fresh-context agents, since
+    this batch completes the full issue #21 plan even though M7 itself
+    stays open on item 34's unrelated Chart work) found one real blocker,
+    independently in all 3 lenses: `build-with-ai.astro`'s original
+    "Supported subpath exports" section quoted `README.md`'s "Public
+    imports" block as "the only imports a consumer should write", and a
+    "Common mistakes" bullet said `ListReport`/`RecordDetail` are "not a
+    package export a host imports and configures" — both false.
+    `package.json`'s real `exports` map has 6 entries; `README.md`'s block
+    only ever showed 4, missing `./examples/list-report` and
+    `./examples/record-detail` — exports this very docs site imports
+    (`docs-site/src/pages/patterns/list-report.astro`,
+    `.../record-detail.astro`, `LiveDemo.tsx`). Root-caused, not just
+    reworded on the new page: `README.md`'s "Public imports" block itself
+    was stale — fixed to list all 6 real subpaths (two-way, docs wording).
+    `build-with-ai.astro`'s bullet now says `ListReport`/`RecordDetail`
+    *are* real subpath exports a host can import, just illustrative
+    sample-page compositions, not a component with a prop API.
+
+    7 further minor findings, all fixed: the M6 structural-first-pass
+    citation pointed at item 17 (just the Login screen) instead of the
+    milestone header (items 17–33); `pnpm test:browser`'s description
+    claimed "one spec file per sample screen" when only ~18 of 45 screens
+    have a dedicated spec (rest covered by cross-cutting suites) — reworded
+    to not overclaim; the "no coherent click-through journey" limitation
+    misattributed a "flat gallery" characterization to `examples/README.md`,
+    which actually documents real in-page journeys (`Billing.tsx` →
+    `Invoice.tsx` via the shared store, `Analytics.tsx`'s `focusRecord`,
+    `Requisitions.tsx`'s linked-PO breadcrumb) — rewritten to cite this
+    scope's own real boundary instead (route-to-route *navigation*, not
+    general connectedness); "with nothing catching it" softened (the `docs`
+    workflow genuinely ran red on 29 pushes — it wasn't uncaught, just
+    unactioned, since nothing gated on it); `docs.yml`'s trigger description
+    gained its `main`-branch filter; check-links' description gained its
+    real fragment-link limitation; the `AGENTS.md` "Before nontrivial work"
+    quote was extended to its real full-paragraph sentence boundary instead
+    of an unmarked mid-paragraph cut. A separate, non-content finding from
+    the same review — both new pages' tables and `build-with-ai.astro`'s 5
+    blockquotes rendered with zero CSS (no rule in `Base.astro` covered
+    `table`/`blockquote`, unlike `examples.astro`'s own scoped table style)
+    — fixed with global light/dark-aware rules in `Base.astro`, and a
+    related nav-consistency gap the review flagged (`/quality/`/
+    `/build-with-ai/` getting nav slots while `/examples/`/`/base-styles/`
+    didn't) closed by adding those two as well, rather than leaving a new
+    inconsistency in place of the old one.
+
+    Re-verified after fixes: `pnpm build:docs` (27 pages), `check-links.mjs`
+    (27/27 resolved), `pnpm lint`/`typecheck`/`test` (202/202) all clean;
+    both pages visually confirmed correct in light and dark
+    (`prefers-color-scheme` emulation) after the CSS fix, including the new
+    table/blockquote styling and the 8-item nav. `pnpm test:browser`
+    (225/225) unaffected — this batch touches only `docs-site/` and
+    `README.md`, nothing under `src/`/`examples/`/`preview/`/`test/`.
+    Accept (47): the page names every gate in `gates.yml` and links the
+    validation commands; no invented score or dashboard — met. Accept (48):
+    page content sourced from real file text, not memory (verified
+    character-exact by independent review); check-links stays green — met.
+    Serves: intent.md "documentation". Needs: issue #21.
 49. [x] **Token-standardization sweep — close the "no exception" gap items 38/39
     disclosed.** Owner-directed, 2026-09-17, issue #21: extend the Theme-safe
     page chrome recipe from the 7 files items 38/39 already covered to the

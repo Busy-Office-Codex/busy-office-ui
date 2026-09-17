@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+
+const REPO = 'https://github.com/Busy-Office-Codex/busy-office-ui';
+---
+<Base title="Build with AI">
+  <a href="/">&larr; Home</a>
+  <h1>Build with AI</h1>
+  <p>For an agent or contributor about to make a change in this repository. Every quote below is the real text of <a href={`${REPO}/blob/main/intent.md`}><code>intent.md</code></a>, <a href={`${REPO}/blob/main/ARCHITECTURE.md`}><code>ARCHITECTURE.md</code></a>, <a href={`${REPO}/blob/main/AGENTS.md`}><code>AGENTS.md</code></a>, <a href={`${REPO}/blob/main/LOOP.md`}><code>LOOP.md</code></a>, <a href={`${REPO}/blob/main/README.md`}><code>README.md</code></a> and <a href={`${REPO}/blob/main/examples/README.md`}><code>examples/README.md</code></a> — read those files directly for anything not reproduced here.</p>
+
+  <h2>Boundary and scope</h2>
+  <p><code>intent.md</code>:</p>
+  <blockquote>
+    <p>Provide a portable, reusable visual component package and reference page compositions for Busy Office applications. The package is a UI dependency, not an ERP platform kernel or application implementation.</p>
+    <p>Consumers own business behavior, data, navigation registration, permissions, and runtime integration. This repository owns components, styling compilation, fonts, documentation, and pure examples.</p>
+  </blockquote>
+  <p><code>ARCHITECTURE.md</code>:</p>
+  <blockquote>
+    <p><code>src/</code> exposes the versioned <code>@busyoffice/design-system</code> component API and the reusable application shell at the <code>./shell</code> subpath (<code>src/shell/</code>). <code>examples/</code> contains pure React compositions that demonstrate use of those exports. <code>build.mjs</code> bundles browser ESM and compiles StyleX CSS into <code>dist/</code>.</p>
+    <p>The package has no dependency on Busy Office ERP business applications, the platform runtime, or a host database. React remains a peer dependency so each host controls its React runtime.</p>
+  </blockquote>
+
+  <h2>Supported subpath exports</h2>
+  <p>From <a href={`${REPO}/blob/main/README.md`}><code>README.md</code></a>'s "Public imports" — the only imports a consumer should write (matches <code>package.json</code>'s real <code>exports</code> map, 6 entries: <code>.</code>, <code>./styles.css</code>, <code>./shell</code>, <code>./examples/app-shell</code>, <code>./examples/list-report</code>, <code>./examples/record-detail</code>):</p>
+  <pre><code>{`import { Button, Card, Text } from '@busyoffice/design-system';
+import '@busyoffice/design-system/styles.css';
+import { Shell } from '@busyoffice/design-system/shell';
+import { AppShell } from '@busyoffice/design-system/examples/app-shell'; // preview-only sample host
+import { ListReport } from '@busyoffice/design-system/examples/list-report'; // illustrative sample-page composition
+import { RecordDetail } from '@busyoffice/design-system/examples/record-detail'; // illustrative sample-page composition`}</code></pre>
+  <p><code>AGENTS.md</code> is explicit that this surface doesn't move casually:</p>
+  <blockquote>
+    <p>Keep the package's public export map stable unless a reviewed versioned package release changes it. Consumers import only the documented package and example subpaths; UI examples are illustrative compositions only and must not connect to ERP services or encode application-specific behavior here.</p>
+  </blockquote>
+
+  <h2>The two-way / one-way gate</h2>
+  <p>Defined in <code>LOOP.md</code> (step 5, "Gate") for "the rules one unattended tick obeys in this repository" — <code>AGENTS.md</code> only points unattended or repeated runs at it, so it isn't written as a rule for every writer. In practice it's the same distinction this repository's interactive sessions apply anyway, since it's the concrete form of <code>AGENTS.md</code>'s own boundary ("Keep the package's public export map stable...", quoted above):</p>
+  <blockquote>
+    <p><strong>Two-way</strong> (internal implementation, tests, docs wording, examples, additive ARIA attributes): decide, note the reason in the merge commit message, continue.</p>
+    <p><strong>One-way</strong> (removing or renaming public props, types or exports, new exports, package version, dependencies, behaviour an ERP host relies on, tags, releases, publishing, editing <code>intent.md</code>, the ROADMAP Objective or the Milestone section, closing issues): comment the proposal on a <code>[UI request]</code> issue as <code>proposed</code> and leave the item out of the batch. Never mark your own proposal <code>agreed</code>.</p>
+  </blockquote>
+  <p>In practice: removing or renaming a public prop/type/export, adding a new export, a version bump, or a new dependency needs an agreed issue first. Adding a new prop to an existing export isn't in LOOP.md's one-way list itself, but <code>AGENTS.md</code> (quoted below) requires it to pass the ROADMAP Objective tests before it lands — the same practical effect. A bug fix, a test, a docs rewrite, or a new example composition doesn't need any of that.</p>
+
+  <h2>Common mistakes</h2>
+  <ul>
+    <li><strong>Using a removed override.</strong> <code>Button.size</code> and <code>Table.density</code> no longer exist on the public <code>.d.ts</code> (<a href={`${REPO}/blob/main/ROADMAP.md`}>ROADMAP M5</a>): every real call site migrated to wrapping the region in <code>{'<Density value="compact">'}</code> instead. <code>Input</code>'s compact size is <code>size="search"</code>, not <code>size="compact"</code> — its fixed 36px height never tracked a density tier the way <code>Density</code>'s <code>rowHeight</code> does, so it was renamed rather than folded in.</li>
+    <li><strong>Importing from <code>src/</code>.</strong> Only the subpaths in "Supported subpath exports" above are documented and stable. <code>src/</code> is this repository's own implementation, not a consumer-facing path — a host importing from it is coupled to internals that can change on any two-way decision, with no release boundary protecting it.</li>
+    <li><strong>Treating <code>ListReport</code> / <code>RecordDetail</code> as configurable components.</strong> They are real subpath exports (<code>@busyoffice/design-system/examples/list-report</code>, <code>/examples/record-detail</code>) — a host really can import them — but they're illustrative sample-page compositions under <code>examples/</code>, not a component with a prop API a host configures. <code>examples/README.md</code>: "meant to demonstrate how to structure a page ... not to be wired into a real feature as-is." See <a href="/patterns/list-report/">List report</a> and <a href="/patterns/record-detail/">Record detail</a> for what they actually render.</li>
+  </ul>
+
+  <h2>Before nontrivial work</h2>
+  <p><code>AGENTS.md</code>:</p>
+  <blockquote>
+    <p>Before nontrivial work read intent.md, ARCHITECTURE.md, ROADMAP.md and relevant UI specifications. Map acceptance to tests before implementation and keep a separate reviewer (one per batch of changes is enough); do not expand the UI/framework boundary. Keep the framework lean: prefer the smallest change, deletion over addition, and no prop or export with a single caller. New components and props must pass the ROADMAP.md Objective tests. Unattended or repeated runs follow <a href={`${REPO}/blob/main/LOOP.md`}>LOOP.md</a>.</p>
+  </blockquote>
+  <p>For the coordination protocol with the ERP/core side, the repository map, and cross-repository work: read <code>AGENTS.md</code> and <code>LOOP.md</code> directly — both change independently of this page and are the actual source of authority, not this summary.</p>
+</Base>
