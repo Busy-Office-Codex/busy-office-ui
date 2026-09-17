@@ -15,8 +15,27 @@ const REVENUE_TREND = [
   { label: 'Sep', value: 486000 },
 ];
 
+// The other 2 charts issue #16's "19 BI dashboard" scenario asked for (ROADMAP item 34: "'by
+// region' bar, 'mix' donut"). Both break down the same $486K September total the trend chart and
+// the REVENUE THIS MONTH stat card already state, the same "share a real figure, don't invent a
+// second number for the same fact" choice this file made for the trend chart above.
+const REVENUE_BY_REGION = [
+  { label: 'North America', value: 210000 },
+  { label: 'EMEA', value: 145000 },
+  { label: 'APAC', value: 91000 },
+  { label: 'LATAM', value: 40000 },
+];
+
+const REVENUE_MIX = [
+  { label: 'Direct sales', value: 260000 },
+  { label: 'Partner / reseller', value: 130000 },
+  { label: 'Online', value: 70000 },
+  { label: 'Renewals', value: 26000 },
+];
+
 /**
- * A KPI dashboard home page: greeting, a grid of stat cards, and a revenue trend chart. Mirrors
+ * A KPI dashboard home page: greeting, a grid of stat cards, and 3 real charts (revenue trend,
+ * revenue by region, revenue mix). Mirrors
  * the "dashboard" Claude Design template.
  */
 export function Dashboard() {
@@ -94,6 +113,27 @@ export function Dashboard() {
             <Chart type="line" title="Revenue trend, last 6 months" valueLabel="$" data={REVENUE_TREND} />
           </div>
         </Card>
+
+        {/* A CSS grid of equal-weight cards, not docs/design-conventions.md's flex "main pane plus
+            side panel" recipe — that recipe is for an asymmetric multi-pane layout (unequal
+            flex-grow, a primary vs. secondary column); these two charts carry equal weight, so
+            this instead matches the KPI stat-card grid above (`repeat(auto-fit, minmax(...))`),
+            the established pattern on this same page for a row of same-weight cards. */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: space.space4 }}>
+          <Card>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <Text variant="title">Revenue by region</Text>
+              <Chart type="bar" title="Revenue by region, September 2026" valueLabel="$" data={REVENUE_BY_REGION} />
+            </div>
+          </Card>
+
+          <Card>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
+              <Text variant="title">Revenue mix</Text>
+              <Chart type="donut" title="Revenue mix by channel, September 2026" valueLabel="$" data={REVENUE_MIX} />
+            </div>
+          </Card>
+        </div>
 
         <div>
           <Button variant="secondary">View full report</Button>

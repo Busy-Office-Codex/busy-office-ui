@@ -16,6 +16,7 @@ Unlike `ListReport`/`RecordDetail`, this page has no `state` prop — it is alwa
 - **Greeting**: a static heading plus a one-line summary ("Here's what needs your attention today.").
 - **KPI cards**: a 4-column grid (Open orders, Pending approvals, Overdue invoices, Revenue this month), each a real `Card` with `selected`/`onClick` — clicking one sets local `selected` state (`Card`'s accent border ring), demonstrating the selectable-tile pattern without wiring it to anything else on the page. "Overdue invoices" and "Revenue this month" pair their headline figure with a status `Chip`/caption for extra context.
 - **Revenue trend**: a real `Chart` (`type="line"`), the package's first real `Chart` consumer (issue #16's "19 · BI dashboard" scenario) — its 6-month trend ends at the same `$486K`/`+6.4%` the "Revenue this month" KPI card above states, so the chart and the card agree with each other rather than each inventing its own number for the same fact. See `docs/Chart.md` for the component's own accessibility contract (a paired visually-hidden `Table`, `prefers-reduced-motion` handling).
+- **Revenue by region** / **Revenue mix**: two more real `Chart`s side by side (`type="bar"`, `type="donut"` — ROADMAP item 34's "BI dashboard" slice), each breaking the same September total down a different way; both value columns sum to the same `$486,000` the trend chart and KPI card already state, not a third invented number.
 - **Footer**: a single secondary `Button` ("View full report") — illustrative, not wired to a route.
 
 ```jsx

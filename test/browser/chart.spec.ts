@@ -47,7 +47,13 @@ test('draws the actual data — the line itself, not just axes and grid scaffold
   // `<canvas>` — that element is created and appended by ECharts itself, imperatively, so it
   // never carries `aria-hidden` directly; the container does, and an aria-hidden ancestor already
   // removes every descendant (this canvas included) from the accessibility tree.
-  const surface = page.getByTestId('chart-canvas');
+  // Dashboard now renders 3 charts (ROADMAP item 34's "BI dashboard" slice) — the count guard
+  // makes `.first()` a checked assumption, not a silent positional one: if Dashboard.tsx's DOM
+  // order ever changed, `.first()` alone would silently re-target a different chart and this test
+  // would keep passing (any of the 3 canvases has well over 200 accent pixels) while no longer
+  // testing the line this test is titled after.
+  await expect(page.getByTestId('chart-canvas')).toHaveCount(3);
+  const surface = page.getByTestId('chart-canvas').first();
   await expect(surface).toHaveAttribute('aria-hidden', 'true');
 
   const canvas = surface.locator('canvas').first();
@@ -59,6 +65,41 @@ test('draws the actual data — the line itself, not just axes and grid scaffold
   expect(await countAccentPixels(canvas)).toBeGreaterThan(200);
 });
 
+test('renders the two "BI dashboard" charts (bar + donut, ROADMAP item 34), not empty scaffolding', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoDashboard(page);
+
+  // Indices 1 and 2, not 0 — the Revenue trend line chart (index 0) already has its own,
+  // stricter (>200 blue pixels) test above; this one covers the two charts this slice added.
+  // Same generic color-presence check test/browser/inventory.spec.ts already established for its
+  // own multi-chart page, applied here rather than re-inventing a different pattern.
+  const surfaces = page.getByTestId('chart-canvas');
+  await expect(surfaces).toHaveCount(3);
+  for (const surface of (await surfaces.all()).slice(1)) {
+    await expect(surface).toHaveAttribute('aria-hidden', 'true');
+    const canvas = surface.locator('canvas').first();
+    await expect(canvas).toBeVisible();
+    const hasColor = await canvas.evaluate((el) => {
+      const canvasEl = el as HTMLCanvasElement;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx || canvasEl.width === 0) return false;
+      const { data } = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] === 0) continue; // fully transparent
+        if (data[i] > 0 || data[i + 1] > 0 || data[i + 2] > 0) return true; // any real drawn pixel
+      }
+      return false;
+    });
+    expect(hasColor).toBe(true);
+  }
+
+  // Each chart pairs its render surface with its own real, visually-hidden accessible table
+  // (Chart.tsx) — same property test/browser/chart.spec.ts's own "not the accessible content"
+  // test already checks for the trend chart; here for the two new ones.
+  await expect(page.getByRole('table', { name: 'Revenue by region, September 2026' })).toBeAttached();
+  await expect(page.getByRole('table', { name: 'Revenue mix by channel, September 2026' })).toBeAttached();
+});
+
 test('without a reduced-motion preference, the chart still finishes drawing the real data (just animated in)', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   // Deliberately no emulateMedia call here — this is the default-preference path every user
@@ -67,6 +108,8 @@ test('without a reduced-motion preference, the chart still finishes drawing the 
   await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
   await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Dashboards\b/ }).click();
 
+  // Same positional dependency as the test above: `.first()` here resolves the Revenue trend
+  // line chart's canvas because it's the first of Dashboard's now-3 charts in DOM order.
   const canvas = page.getByTestId('chart-canvas').locator('canvas').first();
   await expect(canvas).toBeVisible();
   // ECharts' default draw-in animation is ~1s; wait past it rather than asserting mid-animation.
@@ -104,6 +147,8 @@ test('resizes the chart when its container changes size, instead of staying pinn
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoDashboard(page);
 
+  // Same positional dependency noted above: `.first()` resolves the Revenue trend line chart,
+  // the first of Dashboard's now-3 charts in DOM order.
   const canvas = page.getByTestId('chart-canvas').locator('canvas').first();
   await expect(canvas).toBeVisible();
   const initialBox = await canvas.boundingBox();
@@ -132,4 +177,17 @@ test('agrees with the REVENUE THIS MONTH stat card instead of inventing its own 
   await expect(page.getByText('$486K')).toBeVisible();
   await expect(page.getByText('+6.4% vs last month')).toBeVisible();
   await expect(page.getByRole('cell', { name: '$486,000' })).toBeAttached();
+
+  // The two "BI dashboard" charts (ROADMAP item 34) make the same claim from two more angles —
+  // their own hidden tables' value columns really do sum to the same $486,000, not just a
+  // comment asserting it. Reads each table's own rendered cell text, not the source data array,
+  // so this fails if Chart.tsx's real render ever drifts from what was supplied.
+  async function sumValueColumn(tableName: string): Promise<number> {
+    const table = page.getByRole('table', { name: tableName });
+    const cells = await table.getByRole('cell').allTextContents();
+    const values = cells.filter((text) => text.startsWith('$'));
+    return values.reduce((total, text) => total + Number(text.replace(/[$,]/g, '')), 0);
+  }
+  expect(await sumValueColumn('Revenue by region, September 2026')).toBe(486000);
+  expect(await sumValueColumn('Revenue mix by channel, September 2026')).toBe(486000);
 });
