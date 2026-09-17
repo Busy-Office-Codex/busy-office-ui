@@ -59,6 +59,105 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('Tax ID must be 9 digits.');
   });
 
+  it('wires an Input error to the field via a real aria-invalid and aria-describedby → error-id relationship', () => {
+    const markup = renderToStaticMarkup(
+      createElement(designSystem.Input, {
+        id: 'tax-id',
+        label: 'Tax ID',
+        error: 'Tax ID must be 9 digits.',
+        'aria-describedby': 'tax-id-hint',
+      }),
+    );
+
+    const inputTag = markup.match(/<input\b[^>]*>/)?.[0];
+    const errorSpan = markup.match(/<span id="([^"]+)"[^>]*>Tax ID must be 9 digits\.<\/span>/);
+    expect(inputTag).toBeTruthy();
+    expect(errorSpan).toBeTruthy();
+
+    const errorId = errorSpan?.[1];
+    expect(errorId).toBeTruthy();
+    expect(inputTag).toContain('aria-invalid="true"');
+
+    const describedBy = inputTag?.match(/aria-describedby="([^"]+)"/)?.[1];
+    expect(describedBy).toBeTruthy();
+    const describedByIds = describedBy?.split(' ') ?? [];
+    // Composes the caller's own aria-describedby (a separate description) with the generated
+    // error id — neither clobbers the other.
+    expect(describedByIds).toContain('tax-id-hint');
+    expect(describedByIds).toContain(errorId);
+  });
+
+  it('never produces duplicate ids across two Input instances, whether they share an explicit id or have none at all', () => {
+    // Two `Input`s rendered together in one tree — the realistic collision scenario (one form,
+    // two fields, or two copies of the same form) `React.useId()` must actually disambiguate;
+    // two independent `renderToStaticMarkup` calls each start their own id sequence from
+    // scratch and would not exercise that.
+    const noIdMarkup = renderToStaticMarkup(
+      createElement(
+        'div',
+        null,
+        createElement(designSystem.Input, { label: 'Vendor name', error: 'Required.' }),
+        createElement(designSystem.Input, { label: 'Vendor name', error: 'Required.' }),
+      ),
+    );
+    const noIdInputTags = [...noIdMarkup.matchAll(/<input\b[^>]*>/g)].map((m) => m[0]);
+    const noIdErrorIds = [...noIdMarkup.matchAll(/<span id="([^"]+)"/g)].map((m) => m[1]);
+    expect(noIdInputTags).toHaveLength(2);
+    expect(noIdErrorIds).toHaveLength(2);
+    const noIdInputIds = noIdInputTags.map((tag) => tag.match(/\sid="([^"]+)"/)?.[1]);
+    expect(noIdInputIds[0]).toBeTruthy();
+    expect(noIdInputIds[1]).toBeTruthy();
+    expect(noIdInputIds[0]).not.toBe(noIdInputIds[1]);
+    expect(noIdErrorIds[0]).toBeTruthy();
+    expect(noIdErrorIds[1]).toBeTruthy();
+    expect(noIdErrorIds[0]).not.toBe(noIdErrorIds[1]);
+    // Each input's own aria-describedby must reference its own error id, not the other instance's.
+    expect(noIdInputTags[0]).toContain(`aria-describedby="${noIdErrorIds[0]}"`);
+    expect(noIdInputTags[1]).toContain(`aria-describedby="${noIdErrorIds[1]}"`);
+
+    // Same explicit `id` on both instances (a caller collision, e.g. two copies of one form):
+    // the generated error-message id must still stay unique per instance, so each input's
+    // aria-describedby resolves to its own error text rather than the other instance's.
+    const dupIdMarkup = renderToStaticMarkup(
+      createElement(
+        'div',
+        null,
+        createElement(designSystem.Input, { id: 'dup', label: 'Vendor name', error: 'Required A.' }),
+        createElement(designSystem.Input, { id: 'dup', label: 'Vendor name', error: 'Required B.' }),
+      ),
+    );
+    const dupInputTags = [...dupIdMarkup.matchAll(/<input\b[^>]*>/g)].map((m) => m[0]);
+    const dupErrorIds = [...dupIdMarkup.matchAll(/<span id="([^"]+)"/g)].map((m) => m[1]);
+    expect(dupInputTags).toHaveLength(2);
+    expect(dupErrorIds).toHaveLength(2);
+    expect(dupErrorIds[0]).toBeTruthy();
+    expect(dupErrorIds[1]).toBeTruthy();
+    expect(dupErrorIds[0]).not.toBe(dupErrorIds[1]);
+    expect(dupInputTags[0]).toContain(`aria-describedby="${dupErrorIds[0]}"`);
+    expect(dupInputTags[1]).toContain(`aria-describedby="${dupErrorIds[1]}"`);
+  });
+
+  it('preserves a caller-supplied Input className alongside the generated density/size styling class', () => {
+    const plainMarkup = renderToStaticMarkup(createElement(designSystem.Input, { label: 'Vendor name' }));
+    const customMarkup = renderToStaticMarkup(
+      createElement(designSystem.Input, { label: 'Vendor name', className: 'custom-field' }),
+    );
+
+    const plainClass = plainMarkup.match(/<input[^>]*\sclass="([^"]+)"/)?.[1];
+    const customClass = customMarkup.match(/<input[^>]*\sclass="([^"]+)"/)?.[1];
+    expect(plainClass).toBeTruthy();
+    expect(customClass).toBeTruthy();
+
+    const customClassTokens = customClass?.split(' ') ?? [];
+    // The caller's own class survives as a distinct token …
+    expect(customClassTokens).toContain('custom-field');
+    // … alongside the same generated styling classes the component renders without it (size/
+    // density styling must not regress), not instead of them.
+    expect(customClassTokens.filter((token) => token !== 'custom-field').sort()).toEqual(
+      plainClass?.split(' ').sort(),
+    );
+  });
+
   it('keeps filter chips interactive while status chips render as static tags', () => {
     const filterMarkup = renderToStaticMarkup(
       createElement(designSystem.Chip, {

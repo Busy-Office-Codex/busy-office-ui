@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import type { InputHTMLAttributes } from 'react';
+import { useId, type InputHTMLAttributes } from 'react';
 import { color, density, font, radius, space } from '../tokens.stylex.js';
 import { Text } from './Text.js';
 
@@ -105,18 +105,50 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   size?: InputSize;
 };
 
-export function Input({ label, error, id, disabled, size = 'default', ...rest }: InputProps) {
+export function Input({
+  label,
+  error,
+  id,
+  disabled,
+  size = 'default',
+  className,
+  'aria-invalid': ariaInvalidProp,
+  'aria-describedby': ariaDescribedByProp,
+  ...rest
+}: InputProps) {
+  // Stable per-instance id, independent of any caller-supplied `id` — used to generate the
+  // error message's id so it never collides across instances, even when two `Input`s are given
+  // the same (or no) explicit `id` (ROADMAP item 50, issue #22). `React.useId()` (React 18+)
+  // is safe across SSR/hydration, unlike a module-level counter.
+  const baseId = useId();
+  const inputId = id ?? baseId;
+  const errorId = `${baseId}-error`;
+  // Force `aria-invalid="true"` while `error` is set (screen readers must learn the field is
+  // invalid); otherwise defer to whatever the caller passed natively.
+  const ariaInvalid = error ? true : ariaInvalidProp;
+  // Compose the caller's own `aria-describedby` (a separate description) with the error
+  // message's id, rather than letting either clobber the other — the standard ARIA pattern is
+  // a space-separated id list.
+  const ariaDescribedBy =
+    [ariaDescribedByProp, error ? errorId : undefined].filter(Boolean).join(' ') || undefined;
+  const fieldStyles = stylex.props(
+    styles.field,
+    Boolean(error) && styles.fieldError,
+    disabled && styles.fieldDisabled,
+    size === 'search' && styles.fieldSearch,
+  );
+  // stylex's generated className must not silently win over a caller-supplied `className` (or
+  // vice versa) — compose both so a caller's own class always survives.
+  const mergedClassName = [fieldStyles.className, className].filter(Boolean).join(' ') || undefined;
   const field = (
     <input
-      id={id}
+      id={inputId}
       disabled={disabled}
+      aria-invalid={ariaInvalid}
+      aria-describedby={ariaDescribedBy}
       {...rest}
-      {...stylex.props(
-        styles.field,
-        Boolean(error) && styles.fieldError,
-        disabled && styles.fieldDisabled,
-        size === 'search' && styles.fieldSearch,
-      )}
+      {...fieldStyles}
+      className={mergedClassName}
     />
   );
   return (
@@ -127,7 +159,11 @@ export function Input({ label, error, id, disabled, size = 'default', ...rest }:
         </Text>
       )}
       {field}
-      {error && <span {...stylex.props(styles.errorText)}>{error}</span>}
+      {error && (
+        <span id={errorId} {...stylex.props(styles.errorText)}>
+          {error}
+        </span>
+      )}
     </label>
   );
 }
