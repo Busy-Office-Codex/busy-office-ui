@@ -28,6 +28,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm verify:consumer
       - run: pnpm security
       - run: pnpm build:docs
       - run: node docs-site/scripts/check-links.mjs

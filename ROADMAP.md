@@ -226,6 +226,23 @@ it was a bare defensive array-length sanity check, not a reasoned ceiling,
 and sat at exactly 32/32 after item 13, blocking any new route the Finance
 module or BI explore would need.
 
+Corrected again (2026-09-17, ROADMAP item 53/issue #22): the "5.5KB
+minified/1.9KB gzipped... zero chart.js code" figure above predates the
+Chart.js→ECharts swap just above and was never re-verified afterward — it
+was also only ever checked by grepping this workspace's own `dist/`,
+reached through the pnpm workspace symlink, not the packaged `"files":
+["dist"]`/`exports` boundary a real external installer depends on. A new
+`pnpm verify:consumer` script (`scripts/verify-consumer.mjs`) now builds
+this package, packs it with `pnpm pack`, installs that tarball with `npm
+install` into a fresh fixture outside the pnpm workspace, bundles a
+Button-only import from that isolated install with esbuild, and asserts
+the result contains no `echarts`/`zrender` code — wired into `.github/
+workflows/gates.yml` so it runs on every push to `main`, not a one-time
+manual grep. Current, automation-checked number, same order of magnitude
+as the stale figure but now verified against ECharts rather than assumed
+unchanged since Chart.js: a Button-only import ships **5.57KB minified /
+1.90KB gzipped, 0 bytes of echarts/zrender**.
+
 Further expanded (owner-directed, 2026-09-17, issue #21): a website, content
 and sample-app reorganization — items 40–48 below track it. This is not
 framework expansion (no new component, prop or export), so it doesn't need
