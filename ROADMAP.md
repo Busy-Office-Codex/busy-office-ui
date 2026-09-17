@@ -689,22 +689,84 @@ issues.
     page of their own). Accept: a new page renders real `shadow`/`glass`/
     motion token values and `Icon`'s glyph set live from source, not
     hand-copied. Serves: intent.md "documentation". Needs: issue #21.
-44. [ ] Components section: group the 14 docs by their existing
-    frontmatter `category` instead of one flat list; add `docs/AppShell.md`
-    (a real package export, `@busyoffice/design-system/examples/app-shell`,
-    with no doc today). Accept: docs-site's components index renders
-    grouped sections keyed by each doc's `category` field; `docs/
-    AppShell.md` exists with the same shape as `ListReport.md`/
-    `RecordDetail.md`. Serves: intent.md "documentation", Objective 1 (no
-    drift). Needs: issue #21.
-45. [ ] ERP Patterns: one URL per pattern combining prose and live demo
-    (ListReport, RecordDetail, Launcher, Dashboard), replacing today's
+44. [x] Components section: group the 14 docs by their existing
+    frontmatter `category` (actions/forms/data-display/feedback/layout/
+    typography/media) instead of one flat alphabetical list — `index.astro`
+    now renders one `<h3>` per category, in a fixed reading order. Added
+    `docs/AppShell.md` (a real package export, `@busyoffice/design-system/
+    examples/app-shell`, with no doc at all before this). A real,
+    pre-existing latent bug was found and fixed while building its live
+    demo, not shipped as a workaround — see item 45's own note, the same
+    batch closed both.
+    Accept: docs-site's components index renders grouped sections keyed by
+    each doc's `category` field (verified: `pnpm build:docs` output groups
+    Actions/Forms/Data display/Feedback/Layout/Typography/Media, manually
+    confirmed live in Chrome); `docs/AppShell.md` exists with the same
+    shape as `ListReport.md`/`RecordDetail.md` and renders at
+    `/components/appshell/` with a real, working live demo. Serves:
+    intent.md "documentation", Objective 1 (no drift). Needs: issue #21
+    (owner-directed, 2026-09-17).
+45. [x] ERP Patterns: one URL per pattern combining prose and live demo
+    (ListReport, RecordDetail, Launcher, Dashboard), replacing the prior
     split routes (prose at `/components/{id}/`, demo at `/patterns/{id}/`,
-    no cross-link); write new `docs/Launcher.md` and `docs/Dashboard.md`
-    (demo-only today, no prose exists for either). Accept: `/patterns/
-    {listreport,recorddetail,launcher,dashboard}/` each render both prose
-    and a live demo at one URL; check-links stays green. Serves: intent.md
-    "documentation". Needs: issue #21.
+    no cross-link); wrote new `docs/Launcher.md` and `docs/Dashboard.md`
+    (demo-only before this, no prose existed for either).
+    Found and fixed while building `docs/AppShell.md`'s live demo (item
+    44): `AppShell`'s own documented no-`navigation`-prop fallback,
+    `sampleRoutes()`, unconditionally maps its full 9-module `NAV` table —
+    52 real routes today — past `SHELL_MAX_ROUTES` (40, raised from 32 only
+    the day before, item 34). A real, pre-existing latent bug, not
+    introduced by this batch: invisible until now because the one real
+    caller, `preview/client.tsx`, always supplies its own explicit
+    `navigation` and never exercises this fallback path at all. Fixed by
+    raising `SHELL_MAX_ROUTES` to 64 (same bare-defensive-cap reasoning as
+    the 32->40 raise — not a reasoned ceiling, headroom past what's real
+    today; strictly permissive, no one-way concern — every registry valid
+    at 40 stays valid at 64, only 41-64 flip from rejected to accepted),
+    updating the two tests that hardcoded the old bound/message, and
+    adding a real regression test that locks the property, not the value:
+    `preview/AppShellFallbackLab.tsx` (same non-shipped-harness precedent
+    as `DensityLab`/`ButtonGroupLab`/`ShellBreadcrumbsLab`) mounts the
+    exact bare `<AppShell />` that broke, and `test/browser/
+    app-shell-fallback.spec.ts` asserts it renders real navigation, not
+    the invalid-registry fallback — so the next `NAV` entry that pushes
+    the real count past `SHELL_MAX_ROUTES` fails a running test, not a
+    live page.
+    Also found: embedding a live `AppShell` demo inside a normal content
+    page is unsafe by default — its own chrome (`Shell.tsx`'s command bar/
+    app strip/dock) uses `position: fixed`, which escapes a plain
+    `.live-demo` box and overlays the whole page (its header/nav included)
+    instead of staying inside its own demo. This was already true, unnoticed,
+    for `docs/Shell.md`'s own existing live demo (also a real `<Shell>`) —
+    not a new risk this batch introduced, a pre-existing one this batch's
+    fix happens to also close. Fixed with `contain: layout` on `.live-demo`
+    in `Base.astro`, confirmed live in Chrome DevTools in both themes
+    (correctly boxed, zero visual change for every other component's demo).
+    `Modal`'s native `<dialog>` also uses `position: fixed` but needs no
+    fix: `showModal()` promotes it to the browser's own top layer, which
+    ignores `contain` by design — a modal is supposed to render above
+    everything, unlike a persistent shell chrome silently overlaying a
+    page's own nav.
+    An independent fresh-context review (required before merge) verified
+    the "52 real routes"/"unreachable fallback" claims by direct
+    recomputation and grep, and found three real issues before merge, all
+    fixed here: `docs/AppShell.md` had claimed omitting `children` renders
+    "an empty content area," contradicted by the component's own code
+    (`children ?? <Launcher .../>`) — corrected; `docs/Shell.md` still
+    named the bound "32 routes" (stale since item 34's own 32->40 raise,
+    never updated) — corrected to 64; and the `.live-demo` comment's "none
+    uses `position: fixed`" claim was itself false (`Modal`, `Shell.md`'s
+    own demo) — corrected as above, and the missing regression test (this
+    item's own paragraph above) was added.
+    Accept: `/patterns/{list-report,record-detail,launcher,dashboard}/`
+    each render both prose and a live demo at one URL; check-links stays
+    green; `pnpm build && pnpm lint && pnpm typecheck && pnpm test &&
+    pnpm test:browser` all pass (`pnpm test` 203/203, `pnpm test:browser`
+    225/225 — zero regression, +1 each for the new fallback regression
+    test). Serves: intent.md "documentation". Needs: issue #21 (two-way,
+    examples/docs-site-level per AGENTS.md's Gate — `SHELL_MAX_ROUTES` is
+    strictly permissive and matches the item 34 precedent already on
+    `main`, not separately owner-directed by name).
 46. [ ] Examples gallery page cataloguing all 45 `examples/*.tsx` by
     category (full-sample-screen / reusable-helper / state-page),
     surfacing the 6 hash-only screens (`Login` + 4 error states +

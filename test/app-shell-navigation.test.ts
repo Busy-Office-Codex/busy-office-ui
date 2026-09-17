@@ -42,7 +42,7 @@ describe('AppShell preview navigation model', () => {
   });
 
   it('rejects a registry larger than the retained-preview bound', async () => {
-    const routes = Array.from({ length: 41 }, (_, index) => ({ id: `route-${index}`, module: 'Purchase' as const, label: `Screen ${index}` }));
-    expect(validateAppShellNavigation({ routes, activeRouteId: 'route-0' })).toContain('Route registry exceeds 40 entries.');
+    const routes = Array.from({ length: 65 }, (_, index) => ({ id: `route-${index}`, module: 'Purchase' as const, label: `Screen ${index}` }));
+    expect(validateAppShellNavigation({ routes, activeRouteId: 'route-0' })).toContain('Route registry exceeds 64 entries.');
   });
 });

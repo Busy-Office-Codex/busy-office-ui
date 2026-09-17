@@ -1,13 +1,35 @@
 ---
+import { getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { ListReport } from '@busyoffice/design-system/examples/list-report';
+
+const entry = await getEntry('docs', 'listreport');
+const { Content } = await render(entry);
 ---
 <Base title="List report pattern">
   <a href="/">&larr; Home</a>
   <h1>List report</h1>
+  {entry.data.category && <p class="category-badge">{entry.data.category}</p>}
   <p>
-    Purchase-orders list sample page. Source:
+    Source:
     <a href="https://github.com/Busy-Office-Codex/busy-office-ui/blob/main/examples/ListReport.tsx">examples/ListReport.tsx</a>
   </p>
-  <ListReport client:load />
+
+  <article>
+    <Content />
+  </article>
+
+  <h2>Live demo</h2>
+  <div class="live-demo">
+    <ListReport client:load />
+  </div>
+
+  {entry.data.tests && entry.data.tests.length > 0 && (
+    <>
+      <h2>Tests</h2>
+      <ul class="tests-list">
+        {entry.data.tests.map((test) => <li>{test}</li>)}
+      </ul>
+    </>
+  )}
 </Base>

@@ -13,7 +13,7 @@ beforeAll(async () => {
 describe('Shell navigation contract', () => {
   it('exports the shell and its bounds from the shell subpath', () => {
     expect(typeof shell.Shell).toBe('function');
-    expect(shell.SHELL_MAX_ROUTES).toBe(40);
+    expect(shell.SHELL_MAX_ROUTES).toBe(64);
   });
 
   it('accepts host-defined module names', () => {
@@ -41,7 +41,7 @@ describe('Shell navigation contract', () => {
   });
 
   it('rejects a registry larger than the bound', () => {
-    const routes = Array.from({ length: 41 }, (_, index) => ({ id: `route-${index}`, module: 'Purchase', label: `Screen ${index}` }));
-    expect(shell.validateShellNavigation({ routes, activeRouteId: 'route-0' })).toContain('Route registry exceeds 40 entries.');
+    const routes = Array.from({ length: 65 }, (_, index) => ({ id: `route-${index}`, module: 'Purchase', label: `Screen ${index}` }));
+    expect(shell.validateShellNavigation({ routes, activeRouteId: 'route-0' })).toContain('Route registry exceeds 64 entries.');
   });
 });

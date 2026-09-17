@@ -57,12 +57,23 @@ export type ShellProps = {
   children?: ReactNode;
 };
 
-// Raised from 32 (owner-directed, 2026-09-16 — see examples/AppShell.tsx's own comment on why
-// 32 filled up): a bare defensive sanity cap against a malformed/unbounded host route array, not
-// a deliberately-reasoned architectural ceiling — 32 was simply how many routes existed when this
-// constant was added, not a limit anything depends on. Raised with headroom for near-term work
-// (a real Finance module screen, BI explore) rather than to the exact next number needed.
-export const SHELL_MAX_ROUTES = 40;
+// Raised from 40 to 64 (owner-directed, 2026-09-17 — found live while building a docs-site demo
+// of `AppShell`'s own documented no-`navigation`-prop fallback, `examples/AppShell.tsx`'s
+// `sampleRoutes()`, which maps its full 9-module `NAV` table unconditionally): that fallback
+// already produces 52 real routes today (every M7 slice's own NAV growth counted, including
+// still-unbuilt Finance placeholders), past the 40 raised here only the day before — a real,
+// pre-existing latent bug, not something this batch introduced. Invisible until now because the
+// one real caller, `preview/client.tsx`, always supplies its own explicit `navigation` and never
+// exercises this fallback path at all. Same bare-defensive-cap reasoning as the 32->40 raise
+// below still applies — not a reasoned architectural ceiling, just headroom past what's real
+// today, since a genuinely malformed/unbounded host array is what this constant actually guards
+// against, not this repo's own sample data. Raised from 32 (owner-directed, 2026-09-16 — see
+// examples/AppShell.tsx's own comment on why 32 filled up): a bare defensive sanity cap against a
+// malformed/unbounded host route array, not a deliberately-reasoned architectural ceiling — 32
+// was simply how many routes existed when this constant was added, not a limit anything depends
+// on. Raised with headroom for near-term work (a real Finance module screen, BI explore) rather
+// than to the exact next number needed.
+export const SHELL_MAX_ROUTES = 64;
 export const SHELL_MAX_ROUTE_ID_LENGTH = 64;
 export const SHELL_MAX_ROUTE_LABEL_LENGTH = 80;
 

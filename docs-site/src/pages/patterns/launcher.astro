@@ -1,16 +1,39 @@
 ---
+import { getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-// Same pre-compiled-source exception as dashboard.astro — Launcher.tsx has no package export
-// subpath either. See that file's comment for the full reasoning.
+// Pre-compiled-source exception, not a package import: Launcher.tsx has no
+// @busyoffice/design-system/examples/* subpath export (only app-shell, list-report and
+// record-detail are in package.json's `exports` map today) — see docs-site/scripts/build-examples.mjs.
 import { Launcher } from '../../generated/launcher.js';
 import '../../generated/examples.css';
+
+const entry = await getEntry('docs', 'launcher');
+const { Content } = await render(entry);
 ---
 <Base title="Launcher pattern">
   <a href="/">&larr; Home</a>
   <h1>Launcher</h1>
+  {entry.data.category && <p class="category-badge">{entry.data.category}</p>}
   <p>
-    Home/launcher sample screen. Source:
+    Source:
     <a href="https://github.com/Busy-Office-Codex/busy-office-ui/blob/main/examples/Launcher.tsx">examples/Launcher.tsx</a>
   </p>
-  <Launcher client:load />
+
+  <article>
+    <Content />
+  </article>
+
+  <h2>Live demo</h2>
+  <div class="live-demo">
+    <Launcher client:load />
+  </div>
+
+  {entry.data.tests && entry.data.tests.length > 0 && (
+    <>
+      <h2>Tests</h2>
+      <ul class="tests-list">
+        {entry.data.tests.map((test) => <li>{test}</li>)}
+      </ul>
+    </>
+  )}
 </Base>
