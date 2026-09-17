@@ -40,6 +40,17 @@ const patterns = [
   <h1>Busy Office UI</h1>
   <p>Docs for <code>@busyoffice/design-system</code>, generated from the package's own <code>docs/*.md</code> files, tokens and example compositions.</p>
 
+  <h2>Foundations</h2>
+  <h3>Design System</h3>
+  <p>Tokens, themes and density — the ambient system every component reads from.</p>
+  <ul>
+    <li><a href="/tokens/">Tokens</a> — color (light/dark), spacing and type scale</li>
+    <li><a href="/components/theme/">Theme</a> — light/dark/system theming</li>
+    <li><a href="/density/">Density</a> — compact/comfortable/spacious tiers</li>
+  </ul>
+  <h3>Base Styles</h3>
+  <p><a href="/base-styles/">Elevation, radius, glass, motion and the icon set</a> — the visual primitives every component is built from.</p>
+
   <h2>Components</h2>
   {componentsByCategory.map((group) => (
     <>
@@ -61,12 +72,6 @@ const patterns = [
       </ul>
     </>
   )}
-
-  <h2>Tokens &amp; density</h2>
-  <ul>
-    <li><a href="/tokens/">Tokens</a></li>
-    <li><a href="/density/">Density</a></li>
-  </ul>
 
   <h2>Patterns</h2>
   <p>Composed sample-page journeys, not single components — see each page's "Not for" note.</p>

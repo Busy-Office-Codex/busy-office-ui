@@ -682,13 +682,66 @@ issues.
     boundary statement ("a UI dependency, not an ERP platform kernel"),
     and a link to a live ERP pattern page; `docs-site`'s link check stays
     green. Serves: intent.md "documentation". Needs: issue #21.
-43. [ ] Foundations restructure: merge tokens/density/theme content under
-    one Foundations section; add a Base Styles page for typography/
-    spacing/elevation/motion/icons (none exists today — `shadow`/`glass`/
-    motion tokens and `Icon`'s glyph set exist in source with no docs-site
-    page of their own). Accept: a new page renders real `shadow`/`glass`/
-    motion token values and `Icon`'s glyph set live from source, not
-    hand-copied. Serves: intent.md "documentation". Needs: issue #21.
+43. [x] Foundations restructure: merged tokens/density/theme under one
+    "Foundations" section on the docs-site index (a "Design System"
+    subsection linking Tokens/Theme/Density, plus a "Base Styles"
+    subsection) — real content, not just a new heading: `/tokens/` now
+    cross-links `/base-styles/`, `/components/theme/` and `/density/`;
+    `/density/` links back to `/tokens/`. New `/base-styles/` page (none
+    existed before this) renders `shadow`/`radius`/`glass`/`motion` token
+    values, `Icon`'s glyph set, and motion durations/easing live from
+    source, not hand-copied: `docs-site/src/lib/parseTokens.ts` gained
+    `readMotionDurations()`/`readMotionEasing()` (motion's 3 durations are
+    `{ default, '@media (prefers-reduced-motion: reduce)' }` objects, the
+    same shape `color` already needed special handling for in item 40 —
+    not flat strings `readTokens()` could read directly), `readIconNames()`
+    (reads `Icon.tsx`'s own `IconName` union from its source text, the
+    same technique `readTokensSource()` already uses for tokens — no
+    runtime introspection possible either way), and widened `readTokens()`
+    to also accept `radius`/`shadow`/`glass`. Motion durations render as a
+    real, clickable button using each token's actual `transition-duration`/
+    `easing` value (not just printed text) — click it and feel the real
+    120/200/320ms difference, and it genuinely disables itself under
+    `prefers-reduced-motion: reduce` via `matchMedia`, not just a claim in
+    the paragraph above it.
+    Found and fixed live while building this page (a fresh instance of
+    the exact class of bug item 40 already fixed twice): `.motion-demo`'s
+    button and the `.swatch-value`/`.scale-value` label text were
+    light-only, unreadable under `prefers-color-scheme: dark` — fixed
+    with the same `@media (prefers-color-scheme: dark)` pattern already
+    established in `Base.astro`/`tokens.astro`, confirmed live in Chrome
+    DevTools in both themes before merge.
+    A required independent fresh-context review found and fixed three
+    further issues before merge, all real: (1) the Accept clause below
+    originally claimed `Icon`'s glyph set was "live from source" while
+    the page actually hand-listed `['sliders', 'bell']` — closed for
+    real via `readIconNames()` above, not just reworded; (2) the motion
+    demo's own script set each button's transition duration
+    unconditionally, ignoring `prefers-reduced-motion` — the literal
+    irony of a page whose own text claims every duration respects it —
+    fixed by checking `matchMedia` directly, the same discipline
+    `src/tokens.stylex.ts`'s own comment demands ("components should
+    never hardcode a transition duration"); (3) 4 of 6 `glass` swatches
+    demonstrated nothing (`border`/`highlight` had no CSS branch, and
+    `blur`/`blurStrong` had no backdrop to blur) — fixed with a colorful
+    backdrop behind every glass demo and a real property per token
+    (background/border/inset box-shadow as appropriate). Follow-up,
+    disclosed not deferred silently: `parseTokens.ts` has no automated
+    test coverage of its own (item 40's original bug was exactly this
+    class of silent parse drift) — genuinely worth closing, but adding
+    it needs either a vitest setup in `docs-site` (none exists — its own
+    `test` script is `build + check-links` only, v1 scope per item 15) or
+    a path-resolution change to `readTokensSource()`'s `process.cwd()`
+    assumption so a root-level test could import it; neither is a
+    same-batch fix.
+    Accept: `/base-styles/` renders real `shadow`/`radius`/`glass`/
+    `motion` token values and `Icon`'s real glyph set, all live from
+    source with zero hand-copied lists; `docs-site`'s index groups
+    Tokens/Theme/Density under "Foundations → Design System" and links
+    "Base Styles" alongside them; check-links stays green (24/24 pages);
+    legible in both themes and functionally correct under reduced motion,
+    manually confirmed. Serves: intent.md "documentation". Needs: issue
+    #21 (owner-directed, 2026-09-17).
 44. [x] Components section: group the 14 docs by their existing
     frontmatter `category` (actions/forms/data-display/feedback/layout/
     typography/media) instead of one flat alphabetical list — `index.astro`

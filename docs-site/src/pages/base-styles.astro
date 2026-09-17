@@ -1,0 +1,160 @@
+---
+import Base from '../layouts/Base.astro';
+import { Icon, type IconName } from '@busyoffice/design-system';
+import { readTokens, readMotionDurations, readMotionEasing, readIconNames } from '../lib/parseTokens.ts';
+
+const radiusTokens = readTokens('radius');
+const shadowTokens = readTokens('shadow');
+const glassTokens = readTokens('glass');
+const motionDurations = readMotionDurations();
+const motionEasing = readMotionEasing();
+const iconNames = readIconNames();
+---
+<Base title="Base Styles">
+  <a href="/">&larr; Home</a>
+  <h1>Base Styles</h1>
+  <p>Elevation, glass, motion, radius and icons — read live from <code>src/tokens.stylex.ts</code> and <code>src/components/Icon.tsx</code> at build time, not hand-copied. For color, spacing and the type scale, see <a href="/tokens/">Tokens</a>; for typography component usage, see <a href="/components/text/">Text</a>.</p>
+
+  <h2>Elevation</h2>
+  <p><code>shadow.*</code> — real CSS <code>box-shadow</code> values, applied to a plain <code>Card</code>-shaped box below so you see the actual rendered elevation, not just the string.</p>
+  <div class="swatch-grid">
+    {shadowTokens.map((token) => (
+      <div class="swatch">
+        <div class="elevation-demo" style={`box-shadow:${token.value}`}></div>
+        <code>{token.name}</code>
+        <span class="swatch-value">{token.value}</span>
+      </div>
+    ))}
+  </div>
+
+  <h2>Radius</h2>
+  <p><code>radius.*</code> — corner rounding, from a subtle 6px up to <code>pill</code> (999px, the capsule shape <code>Button</code>/filter <code>Chip</code>/<code>Dropdown</code>'s trigger always use — see <code>docs/design-conventions.md</code>'s "Capsule vs. rounded rectangle").</p>
+  <div class="swatch-grid">
+    {radiusTokens.map((token) => (
+      <div class="swatch">
+        <div class="radius-demo" style={`border-radius:${token.value}`}></div>
+        <code>{token.name}</code>
+        <span class="swatch-value">{token.value}</span>
+      </div>
+    ))}
+  </div>
+
+  <h2>Glass</h2>
+  <p><code>glass.*</code> — translucent-surface tokens for secondary chrome only (command bar, dock, dropdowns, modals — <strong>never</strong> tables, forms or record bodies, per this token group's own source comment). Each demo sits over a colorful backdrop so the effect (blur, translucency, the inset highlight) is actually visible, not just a value you have to imagine.</p>
+  <div class="swatch-grid">
+    {glassTokens.map((token) => (
+      <div class="swatch">
+        <div class="glass-backdrop">
+          <div
+            class="glass-demo"
+            style={
+              token.name === 'bg' || token.name === 'bgStrong' ? `background:${token.value}`
+              : token.name === 'blur' || token.name === 'blurStrong' ? `background:rgba(255,255,255,.3);backdrop-filter:blur(${token.value})`
+              : token.name === 'border' ? `background:rgba(255,255,255,.3);border:${token.value}`
+              : `background:#0f172a;box-shadow:${token.value}` /* highlight — needs a dark surface to read against */
+            }
+          ></div>
+        </div>
+        <code>{token.name}</code>
+        <span class="swatch-value">{token.value}</span>
+      </div>
+    ))}
+  </div>
+
+  <h2>Motion</h2>
+  <p><code>motion.*</code> durations shown below are each token's real value under normal settings — every one of the three collapses to <code>0ms</code> under <code>prefers-reduced-motion: reduce</code> (the same per-value media-query shape <code>color</code>'s own dark-mode tokens use), so a host that respects the OS setting already gets that for free with zero extra code. Click a button to feel the real transition at its token's actual duration and easing curve (disabled if your OS has reduced motion on).</p>
+  <div class="scale">
+    {motionDurations.map((token) => (
+      <div class="scale-row">
+        <code>{token.name}</code>
+        <button type="button" class="motion-demo" data-duration={token.value} data-easing={motionEasing.find((e) => e.name === 'easeStandard')?.value}>Click me</button>
+        <span class="scale-value">{token.value} (0ms reduced-motion)</span>
+      </div>
+    ))}
+  </div>
+  <p>Easing curves:</p>
+  <ul>
+    {motionEasing.map((token) => (
+      <li><code>{token.name}</code>: <code>{token.value}</code></li>
+    ))}
+  </ul>
+
+  <h2>Icons</h2>
+  <p>The package's closed icon set (<code>IconName</code>, <code>src/components/Icon.tsx</code>) — inline SVG, sized and colored via props, decorative (<code>aria-hidden</code>) by default. See <a href="/components/icon/">Icon</a> for the full component doc.</p>
+  <div class="icon-grid">
+    {(iconNames as IconName[]).map((name) => (
+      <div class="icon-demo">
+        <Icon name={name} size={24} />
+        <code>{name}</code>
+      </div>
+    ))}
+  </div>
+
+  <style>
+    .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin: 16px 0; }
+    .swatch { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+    .elevation-demo, .radius-demo { width: 100%; height: 64px; background: #ffffff; border: 1px solid #e2e8f0; }
+    .radius-demo { background: #0057b8; border: none; }
+    .glass-backdrop {
+      width: 100%;
+      height: 64px;
+      padding: 12px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0057b8, #ef4444 50%, #16a34a);
+      border-radius: 10px;
+    }
+    .glass-demo { width: 100%; height: 100%; border-radius: 6px; }
+    .swatch-value { font-size: 12px; color: #64748b; word-break: break-all; }
+    .scale { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+    .scale-row { display: flex; align-items: center; gap: 12px; }
+    .scale-row code { min-width: 140px; }
+    .scale-value { color: #64748b; font-size: 12px; }
+    .motion-demo {
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #0f172a;
+      cursor: pointer;
+      transition-property: transform, background;
+    }
+    .motion-demo:active { transform: scale(0.92); background: #e2e8f0; }
+    .icon-grid { display: flex; gap: 24px; margin: 16px 0; }
+    .icon-demo { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+
+    @media (prefers-color-scheme: dark) {
+      /* Interactive chrome (the motion demo button) and page-background label text follow the
+         docs theme, same fix as Base.astro/tokens.astro — found live while building this page,
+         2026-09-17 (same class of bug, a fresh instance). The elevation/radius/glass SWATCHES
+         above stay their own literal values in both themes deliberately: they ARE the sample
+         material a reader is inspecting, the same way tokens.astro's color swatches always show
+         their real light/dark hex regardless of the surrounding page theme — only the value/label
+         TEXT sitting on the page's own background (not inside a swatch) needs to re-tint. */
+      .motion-demo { background: #1e293b; color: #f8fafc; border-color: #334155; }
+      .motion-demo:active { background: #334155; }
+      .swatch-value, .scale-value { color: #94a3b8; }
+    }
+  </style>
+
+  <script>
+    // Reads each button's own real token value/easing (set server-side above, straight from
+    // src/tokens.stylex.ts) and applies it as the actual CSS transition-duration/timing-function
+    // — the click you feel IS the token's real value, not a description of it. Genuinely respects
+    // prefers-reduced-motion, not just a claim in the paragraph above it: found live while
+    // building this page (an independent review's own point, 2026-09-17) that the first version
+    // set the real duration unconditionally, ignoring the exact setting this page's own text says
+    // every motion token respects. `src/tokens.stylex.ts`'s own comment is explicit — "components
+    // should never hardcode a transition duration" — so this checks the media query directly,
+    // same as the real component tokens do via their own `@media` branch.
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    for (const button of document.querySelectorAll<HTMLButtonElement>('.motion-demo')) {
+      const duration = prefersReducedMotion ? '0ms' : button.dataset.duration;
+      const easing = button.dataset.easing;
+      if (duration) button.style.transitionDuration = `${duration}, ${duration}`;
+      if (easing) button.style.transitionTimingFunction = `${easing}, ${easing}`;
+    }
+  </script>
+</Base>
