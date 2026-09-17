@@ -34,6 +34,7 @@ import { AuditLog } from '../examples/AuditLog.js';
 import { Analytics } from '../examples/Analytics.js';
 import { BuilderScreens } from '../examples/BuilderScreens.js';
 import { BuilderReports } from '../examples/BuilderReports.js';
+import { Finance } from '../examples/Finance.js';
 import { PasswordReset } from '../examples/PasswordReset.js';
 import { AccountLocked } from '../examples/AccountLocked.js';
 import { SessionExpired } from '../examples/SessionExpired.js';
@@ -106,8 +107,15 @@ const routes = [
   // pre-existing M6 placeholder (see AppShell.tsx's NAV.Builder comment and BuilderReports.tsx's
   // own header comment). This was the 32nd and, at the time, final entry — SHELL_MAX_ROUTES was a
   // hard cap at exactly 32, raised to 40 (owner-directed, 2026-09-16) for the Finance module and
-  // BI explore, still-open issue #16 consumers.
+  // BI explore, still-open issue #16 consumers — raised again to 64 in a later, unrelated batch
+  // (docs-site work, issue #21); 40 is this comment's own historical record, not the current cap.
   { id: 'builder-reports', module: 'Builder', label: 'Reports & dashboards' },
+  // ROADMAP item 34, "Finance" slice — the module's first real route, closing issue #16's own
+  // "17 Finance — cash flow, 12 months" named consumer. Fills the pre-existing NAV.Finance
+  // 'Overview' placeholder (M6) the same way Administration's own 'Overview' route did — no
+  // AppShell.tsx NAV change needed, and this is what turns the dock's Finance tile from disabled
+  // to real (examples/AppShell.tsx's PINNED entry finds this route by module alone).
+  { id: 'finance-overview', module: 'Finance', label: 'Overview' },
 ] as const satisfies readonly AppShellRoute[];
 
 const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
@@ -143,6 +151,7 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
   companies: <Companies />,
   integrations: <Integrations />,
   'builder-reports': <BuilderReports />,
+  'finance-overview': <Finance />,
 };
 
 /** A local sample host for the package's existing pure example compositions. */
