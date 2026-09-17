@@ -3,6 +3,7 @@ import { Button, ButtonGroup, Card, Chart, type ChartSeries, Chip, type ChipTone
 import { color, space } from '../src/tokens.stylex.js';
 import { appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { materialsStockedByWarehouse } from './data/types.js';
 
 /**
  * A report/dashboard-definition builder (ROADMAP M7's ERP reference-app initiative, Slice 13,
@@ -115,11 +116,10 @@ export function BuilderReports() {
   const state = useStoreState(appStore, (s) => s);
 
   // Same aggregation Inventory.tsx's own "stock by warehouse" bar chart computes, read live from
-  // the same shared store — a genuine live aggregation, not a snapshot copied in at build time.
-  const byWarehouse: ChartSeries = Object.values(state.warehouses).map((warehouse) => ({
-    label: warehouse.name,
-    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).reduce((sum, level) => sum + level.qtyOnHand, 0),
-  }));
+  // the same shared store via the same shared helper (data/types.ts's materialsStockedByWarehouse)
+  // rather than a third copy — duplicating this byte-identical across files was the original bug
+  // (ROADMAP item 52/issue #22).
+  const byWarehouse: ChartSeries = materialsStockedByWarehouse(state.stockLevels, state.warehouses);
 
   // "Open" = not yet resolved — the same `pending_approval` status Requisitions.tsx's own
   // "Pending approval" Chip already names, not a new definition of "open".
@@ -179,15 +179,15 @@ export function BuilderReports() {
       return <Chart type="line" title="Revenue trend, last 6 months" valueLabel="$" data={REVENUE_TREND} height={140} />;
     }
     if (widget.type === 'Bar chart' && widget.label === 'Stock by warehouse') {
-      return <Chart type="bar" title="Units on hand by warehouse" valueLabel="units" data={byWarehouse} height={140} />;
+      return <Chart type="bar" title="Materials stocked by warehouse" valueLabel="materials" data={byWarehouse} height={140} />;
     }
     if (widget.type === 'Donut chart' && widget.label === 'Stock mix by warehouse') {
       // Same `byWarehouse` data as the bar widget above, deliberately — the widget's own seeded
       // label asks for a warehouse mix, not a different cut of the data the way Inventory.tsx's
       // sibling bar/donut pair (by warehouse vs. by material) does. A distinct chart `title`
-      // ("share of total", not a restatement of the bar's own title) is the one visible cue that
-      // this is a proportional view of the same totals, not a second, independent metric.
-      return <Chart type="donut" title="Share of total units by warehouse" valueLabel="units" data={byWarehouse} height={140} />;
+      // ("share of", not a restatement of the bar's own title) is the one visible cue that this is
+      // a proportional view of the same totals, not a second, independent metric.
+      return <Chart type="donut" title="Share of materials stocked by warehouse" valueLabel="materials" data={byWarehouse} height={140} />;
     }
     if (widget.type === 'Table' && widget.label === 'Open requisitions') {
       return (

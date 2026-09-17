@@ -44,20 +44,20 @@ test('Preview renders the 5 seeded widgets with real content inside their existi
   // bordered box, type caption and label line; this only adds real content inside it.
   await page.getByRole('button', { name: /Operations dashboard/ }).click();
   await expect(page.getByTestId('chart-canvas')).toHaveCount(2);
-  const barTable = page.getByRole('table', { name: 'Units on hand by warehouse' });
-  const donutTable = page.getByRole('table', { name: 'Share of total units by warehouse' });
+  const barTable = page.getByRole('table', { name: 'Materials stocked by warehouse', exact: true });
+  const donutTable = page.getByRole('table', { name: 'Share of materials stocked by warehouse' });
   await expect(barTable).toBeAttached();
   await expect(donutTable).toBeAttached();
-  // The real per-warehouse values (from examples/data/seed.ts's stockLevels), not just "some
-  // table exists" — a wrong aggregation (e.g. summing the wrong field) would still pass a
-  // structure-only check but fails this.
+  // The real per-warehouse values (from examples/data/seed.ts's stockLevels) — a count of
+  // distinct materials stocked, not a sum of `qtyOnHand` across materials that use different
+  // units (ream/spool/unit — ROADMAP item 52/issue #22's fix, applied here since this widget
+  // reused Inventory.tsx's own figure byte-identically). Row-scoped regex, not a bare cell-text
+  // match: East Coast Hub and West Coast Hub both stock 2 materials, so their cell text alone
+  // would be ambiguous.
   for (const table of [barTable, donutTable]) {
-    await expect(table.getByRole('cell', { name: 'Main DC' })).toBeAttached();
-    await expect(table.getByRole('cell', { name: '370 units' })).toBeAttached();
-    await expect(table.getByRole('cell', { name: 'East Coast Hub' })).toBeAttached();
-    await expect(table.getByRole('cell', { name: '100 units' })).toBeAttached();
-    await expect(table.getByRole('cell', { name: 'West Coast Hub' })).toBeAttached();
-    await expect(table.getByRole('cell', { name: '63 units' })).toBeAttached();
+    await expect(table.getByRole('row', { name: /Main DC.*3 materials/ })).toBeAttached();
+    await expect(table.getByRole('row', { name: /East Coast Hub.*2 materials/ })).toBeAttached();
+    await expect(table.getByRole('row', { name: /West Coast Hub.*2 materials/ })).toBeAttached();
   }
   await expect(page.getByRole('cell', { name: 'REQ-4001' })).toBeVisible();
   await expect(page.getByRole('cell', { name: 'Marcus Webb' })).toBeVisible();

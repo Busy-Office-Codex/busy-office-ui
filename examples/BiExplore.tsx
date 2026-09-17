@@ -3,6 +3,7 @@ import { Card, Chart, type ChartSeries, Dropdown, Table, TableBody, TableCell, T
 import { color, space } from '../src/tokens.stylex.js';
 import { appStore } from './data/appStore.js';
 import { useStoreState } from './data/store.js';
+import { materialsStockedByWarehouse } from './data/types.js';
 
 /**
  * BI "Explore" — a real pivot-result screen (ROADMAP item 34's "BI explore" slice, closing issue
@@ -34,17 +35,28 @@ const PIVOT_DIMENSIONS: PivotDimension[] = ['Warehouse', 'Material'];
 // catalog description truncates unreadably in a chart legend column).
 const SHORT_NAME: Record<string, string> = { 'mat-paper': 'Paper', 'mat-cable': 'Cable', 'mat-switch': 'Switches' };
 
+// Per-pivot metric — the "by warehouse" pivot can't honestly share the "by material" pivot's own
+// "units on hand" label (ROADMAP item 52/issue #22): `qtyOnHand` uses a different unit per
+// material (ream/spool/unit — each Product's own `unit` field, examples/data/seed.ts), so summing
+// it ACROSS materials within one warehouse would silently combine incompatible physical
+// quantities. Summing it across warehouses for a SINGLE material (the "by material" pivot) stays a
+// genuine physical-quantity total, since that never crosses a unit boundary.
+const PIVOT_METRIC: Record<PivotDimension, { label: string; valueLabel: string }> = {
+  Warehouse: { label: 'Materials stocked', valueLabel: 'materials' },
+  Material: { label: 'Units on hand', valueLabel: 'units' },
+};
+
 export function BiExplore() {
   const state = useStoreState(appStore, (s) => s);
   const [pivotBy, setPivotBy] = useState<PivotDimension>('Warehouse');
 
-  // Byte-identical to Inventory.tsx's own "stock by warehouse" bar chart aggregation.
-  const byWarehouse: ChartSeries = Object.values(state.warehouses).map((warehouse) => ({
-    label: warehouse.name,
-    value: state.stockLevels.filter((level) => level.warehouseId === warehouse.id).reduce((sum, level) => sum + level.qtyOnHand, 0),
-  }));
+  // Same fix as Inventory.tsx's own "stock by warehouse" bar chart, and the same shared helper
+  // (data/types.ts's materialsStockedByWarehouse) rather than a third copy of the aggregation —
+  // duplicating it byte-identical across files was the original bug (ROADMAP item 52/issue #22).
+  const byWarehouse: ChartSeries = materialsStockedByWarehouse(state.stockLevels, state.warehouses);
 
-  // Byte-identical to Inventory.tsx's own "mix by material" donut chart aggregation.
+  // Byte-identical to Inventory.tsx's own "mix by material" donut chart aggregation — scoped to
+  // one material at a time, so summing across warehouses here never crosses a unit boundary.
   const byMaterial: ChartSeries = Object.values(state.products)
     .filter((product) => state.stockLevels.some((level) => level.productId === product.id))
     .map((product) => ({
@@ -53,6 +65,7 @@ export function BiExplore() {
     }));
 
   const data = pivotBy === 'Warehouse' ? byWarehouse : byMaterial;
+  const metric = PIVOT_METRIC[pivotBy];
 
   return (
     <div
@@ -78,26 +91,30 @@ export function BiExplore() {
 
         <Card>
           <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
-            <Text variant="title">Units on hand by {pivotBy.toLowerCase()}</Text>
-            <Chart type="bar" title={`Units on hand by ${pivotBy.toLowerCase()}`} valueLabel="units" data={data} />
+            <Text variant="title">
+              {metric.label} by {pivotBy.toLowerCase()}
+            </Text>
+            <Chart type="bar" title={`${metric.label} by ${pivotBy.toLowerCase()}`} valueLabel={metric.valueLabel} data={data} />
           </div>
         </Card>
 
         <Card>
           <div style={{ display: 'flex', flexDirection: 'column', gap: space.space4 }}>
             <Text variant="title">Pivot result</Text>
-            <Table aria-label={`Units on hand by ${pivotBy.toLowerCase()}, table`}>
+            <Table aria-label={`${metric.label} by ${pivotBy.toLowerCase()}, table`}>
               <TableHead>
                 <TableRow>
                   <TableHeaderCell>{pivotBy}</TableHeaderCell>
-                  <TableHeaderCell align="end">Units on hand</TableHeaderCell>
+                  <TableHeaderCell align="end">{metric.label}</TableHeaderCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {data.map((point) => (
                   <TableRow key={point.label}>
                     <TableCell>{point.label}</TableCell>
-                    <TableCell align="end">{point.value.toLocaleString('en-US')} units</TableCell>
+                    <TableCell align="end">
+                      {point.value.toLocaleString('en-US')} {metric.valueLabel}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

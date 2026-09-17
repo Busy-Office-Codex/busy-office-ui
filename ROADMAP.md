@@ -226,6 +226,24 @@ it was a bare defensive array-length sanity check, not a reasoned ceiling,
 and sat at exactly 32/32 after item 13, blocking any new route the Finance
 module or BI explore would need.
 
+Corrected again (2026-09-17, ROADMAP item 53/issue #22): the "5.5KB
+minified/1.9KB gzipped... zero chart.js code" figure above predates the
+Chart.js→ECharts swap just above and was never re-verified afterward — it
+was also only ever checked by grepping this workspace's own `dist/`,
+reached through the pnpm workspace symlink, not the packaged `"files":
+["dist"]`/`exports` boundary a real external installer depends on. A new
+`pnpm verify:consumer` script (`scripts/verify-consumer.mjs`) now builds
+this package, packs it with `pnpm pack`, installs that tarball with `npm
+install` into a fresh fixture outside the pnpm workspace, bundles a
+Button-only import from that isolated install with esbuild, and asserts
+the result contains no `echarts`/`zrender` code — wired into `.github/
+workflows/gates.yml` so it runs on every push to `main`, not a one-time
+manual grep. Current, automation-checked number, same order of magnitude
+as the stale figure but now verified against ECharts rather than assumed
+unchanged since Chart.js: a Button-only import ships **5.60KB minified /
+1.91KB gzipped, 0 bytes of echarts/zrender** (see the M8-complete note
+below for the 3 independent runs that confirm this).
+
 Further expanded (owner-directed, 2026-09-17, issue #21): a website, content
 and sample-app reorganization — items 40–48 below track it. This is not
 framework expansion (no new component, prop or export), so it doesn't need
@@ -263,13 +281,13 @@ again until the next request clears the same bar.
 
 **M8 — Core correctness: Input a11y/id-safety, Chart tooltip/theme/negative-
 axis, honest ERP units + partial-payment coverage, independent consumer
-proof — in progress.** Items 50–53, issue #22 (`agreed`, project owner,
+proof — complete.** Items 50–53, issue #22 (`agreed`, project owner,
 2026-09-17, via direct instruction — "set goal to complete all, let's
 start," recorded here rather than a separate issue comment, matching the
 M7/issue-#16 precedent for owner-directed agreements). All four items
-agreed together as one milestone; building starts as a single batch (the
-batch cap is 4, so this milestone closes in one batch if all four items
-clear verify/review). These are fixes/hardening to existing shared
+agreed together as one milestone; built as a single batch
+(`feat/m8-batch-49`, 4 parallel isolated-worktree builders, one wave — the
+items touched disjoint files). These are fixes/hardening to existing shared
 contracts (`Input`, `Chart`) and existing examples, not new components —
 Objective 3's "two named consumers" bar doesn't apply; each item's own Serves
 line below names Objective 2 (boundary) or the `intent.md` clause it serves
@@ -278,6 +296,51 @@ for the reproduced/source-confirmed findings); `resolved` findings from that
 audit (Input/docs drift-free, Chart's accessible-table fallback, `Finance`/
 `BiExplore` unit-clean totals, `package.json`'s exports map) are not items
 here — they were checked and found fine.
+
+**Verify/review.** Full gate suite green at the batch head: `pnpm
+typecheck`/`lint`/`test` (218/218), `pnpm build`, `pnpm security` (no known
+vulnerabilities), `pnpm build:preview`, `pnpm build:docs` (27 pages),
+docs-site `check-links` (27/27), `pnpm test:browser` (247/247 — one
+locator-ambiguity bug in `test/browser/builder-reports.spec.ts` found and
+fixed during this verify, not shipped uncaught), `pnpm verify:consumer`
+(new this milestone — item 53's own check; PASS). Per this file's own rule,
+closing a milestone fans the batch diff to 3 parallel reviewer lenses
+instead of one: **spec-match** found all 4 items' Accept clauses genuinely
+met with cited, non-shallow tests (DOM attributes, exact token colors,
+canvas pixel evidence, a stamped-canvas reinit-survival check, a live
+independently-run consumer-install script) — no FAILs. **Simplicity** found
+one real HIGH: the item-52 units-count aggregation was copy-pasted
+byte-identical across 3 files, the same duplication pattern that caused the
+bug — fixed by extracting `materialsStockedByWarehouse()` into
+`examples/data/types.ts` (same pattern as the existing `documentTotal()`).
+**Contrast/accessibility** found one real MEDIUM fixed before merge:
+`Billing.tsx`'s payment-amount field disabled its button on an invalid
+amount (a real, accessible native `disabled` state) but never explained why
+— wired through the `error`/`aria-invalid`/`aria-describedby` mechanism
+item 50 itself just built, plus a persistent visible label (was
+`aria-label`-only) and a "$NaN" button-label edge-case fix.
+
+**Disclosed, not fixed (both real, neither blocking):** Chart's gridline/
+axis-line color (`color.border`) measures ~1.2:1 (light) / ~1.7:1 (dark)
+against the chart's real backing surface — genuinely under the 3:1 non-text
+floor, numerically verified by the reviewer, not just asserted. Pre-existing
+(the light-mode value was already hardcoded before M8; M8 only added the
+dark-mode equivalent via the same token, carrying the gap forward rather
+than creating it) and softened by the chart's always-present accessible
+`<Table>` fallback, which carries the real values regardless of the
+canvas's visual contrast. A token-value change is a bigger, system-wide
+decision than this milestone's scope — left as a named gap for a future
+item, not silently accepted. Separately, `Inventory.tsx`'s new
+units-caveat caption (explaining why the figure is a count, not a physical
+quantity) isn't `aria-describedby`-linked to the `Chart`'s own accessible
+table — doing so would mean exposing an id from `Chart`'s internals, a
+larger change than this finding's LOW severity warrants.
+
+`pnpm verify:consumer`'s own measured number (run 3 times independently
+across this milestone — the main session, the spec-match reviewer's own
+live run, and this closing verification): **5.60KB minified / 1.91KB
+gzipped, 0 bytes of echarts/zrender**, consistent to within rounding each
+time.
 
 ## Items
 
@@ -1242,7 +1305,7 @@ issues.
     usage. Needs: issue #21 (owner-directed, 2026-09-17). Follow-up, not a
     blocker for this item: extend the ratchet to spacing, and to discover new
     `examples/*.tsx` files automatically instead of a hardcoded list.
-50. [ ] **Input: accessible error state, id safety, className passthrough.**
+50. [x] **Input: accessible error state, id safety, className passthrough.**
     Reproduced (2026-09-17 audit): `error` sets no `aria-invalid`/
     `aria-describedby` and the error `<span>` has no `id`, so nothing can
     point at it; `id` has no collision fallback (no `useId`); a
@@ -1256,7 +1319,7 @@ issues.
     asserting the DOM attribute/class directly. Serves: Objective 2
     (boundary — a presentation contract every consumer form relies on).
     Needs: issue #22 (`agreed`, project owner, 2026-09-17).
-51. [ ] **Chart: tooltip text safety, theme reactivity, negative-axis
+51. [x] **Chart: tooltip text safety, theme reactivity, negative-axis
     correctness, unnecessary reinit.** Reproduced/source-confirmed
     (2026-09-17 audit): the tooltip formatter interpolates consumer-supplied
     label strings into HTML ECharts renders unescaped — a real XSS sink;
@@ -1272,8 +1335,8 @@ issues.
     zero axis; a render-identity test shows no dispose/reinit when `data` is
     value-equal to the previous render. Serves: Objective 2 (boundary — a
     presentation contract 7 real consumers already depend on). Needs: issue
-    #22 (`proposed`, 2026-09-17).
-52. [ ] **Honest ERP units, partial-payment coverage, complete sample-data
+    #22 (`agreed`, project owner, 2026-09-17).
+52. [x] **Honest ERP units, partial-payment coverage, complete sample-data
     disclosure.** Reproduced/source-confirmed (2026-09-17 audit): "Stock by
     warehouse"/"Units on hand" sums quantities across incompatible units
     (reams, spools, discrete items) as one figure in `Inventory.tsx`, then
@@ -1288,7 +1351,7 @@ issues.
     the "unpaid" filter; `quality.astro` names every sample-data literal
     actually present in the components it covers. Serves: intent.md "honest
     ERP examples". Needs: issue #22 (`agreed`, project owner, 2026-09-17).
-53. [ ] **Independent consumer proof.** Source-confirmed (2026-09-17 audit):
+53. [x] **Independent consumer proof.** Source-confirmed (2026-09-17 audit):
     no script, CI job or test packs this workspace and installs the tarball
     into an isolated project outside the pnpm workspace — every export path,
     `styles.css`, and `sideEffects:false` tree-shaking are only ever

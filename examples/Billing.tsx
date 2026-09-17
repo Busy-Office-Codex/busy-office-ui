@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Button, Card, Chip, type ChipTone, Density, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
+import { useEffect, useState } from 'react';
+import { Button, Card, Chip, type ChipTone, Density, Input, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Text } from '../src/index.js';
 import { appActions, appStore, useFocusRecord } from './data/appStore.js';
 import { documentTotal } from './data/types.js';
 import { useStoreState } from './data/store.js';
@@ -16,7 +16,15 @@ import { color, space } from '../src/tokens.stylex.js';
  * Reads live from the shared `examples/data` store — "Record payment" calls `appActions
  * .recordPayment`, a real transition (the payment appears in the list below, the balance due
  * shrinks, and the status Chip flips to "Paid" once it reaches zero) rather than a static
- * rendered outcome.
+ * rendered outcome. The payment amount is a real, editable field (defaulting to the full balance
+ * due, same one-click behavior as before) — `recordPayment` itself already applied whatever
+ * amount it was given as a genuine partial payment when it fell short of the total (see its own
+ * comment, `data/appStore.ts`); this screen's own gap (ROADMAP item 52, issue #22) was that
+ * nothing in the shipped UI ever gave it less than the full balance, so that path was real in the
+ * data layer but unreachable and untested. `INV-3105` (`data/seed.ts`) seeds one invoice already
+ * partially paid, so the "unpaid" status filter's correctness for a real partial balance (not the
+ * full original amount, and not excluded) is exercised from the very first render, not only after
+ * an in-session action.
  *
  * Slice 10 (Billing completions) added "+ New invoice" (bills a confirmed sales order that has
  * no invoice yet — real worklist-driven creation, not a hand-typed blank form) and "Cancel
@@ -66,6 +74,14 @@ export function Billing() {
   const invoiceList = Object.values(state.invoices).sort((a, b) => (a.id < b.id ? 1 : -1));
   const [selectedId, setSelectedId] = useState(invoiceList[0]?.id ?? '');
   const [confirmingCancel, setConfirmingCancel] = useState(false);
+  // The payment-amount field's raw text — empty means "use the full balance due" (the original
+  // one-click behavior); a non-empty value is a real, possibly-partial override. Reset whenever
+  // the selected invoice changes so a leftover amount from one invoice never gets applied to
+  // another (ROADMAP item 52, issue #22).
+  const [paymentAmountInput, setPaymentAmountInput] = useState('');
+  useEffect(() => {
+    setPaymentAmountInput('');
+  }, [selectedId]);
   useFocusRecord(
     (id) => Boolean(state.invoices[id]),
     (id) => setSelectedId(id),
@@ -75,6 +91,18 @@ export function Billing() {
   const total = selected ? documentTotal(selected.lines) : 0;
   const paid = selected ? selected.payments.reduce((sum, payment) => sum + payment.amount, 0) : 0;
   const balanceDue = total - paid;
+  const paymentAmount = paymentAmountInput.trim() === '' ? balanceDue : Number(paymentAmountInput);
+  const paymentAmountValid = Number.isFinite(paymentAmount) && paymentAmount > 0 && paymentAmount <= balanceDue;
+  // Disabling the button on an invalid amount communicates the STATE accessibly (native `disabled`),
+  // but not the REASON — this message closes that gap using the same error/aria-invalid/
+  // aria-describedby wiring Input just gained (ROADMAP item 50/issue #22), rather than leaving a
+  // silently-disabled control (found in the item 51-53 batch's own independent review).
+  const paymentAmountError =
+    paymentAmountInput.trim() === '' || paymentAmountValid
+      ? undefined
+      : paymentAmount <= 0 || !Number.isFinite(paymentAmount)
+        ? 'Enter an amount greater than $0.'
+        : `Cannot exceed the balance due (${formatCurrency(balanceDue)}).`;
 
   const uninvoicedOrders = Object.values(state.salesOrders).filter((order) => order.status === 'confirmed' && order.invoiceIds.length === 0);
 
@@ -238,19 +266,37 @@ export function Billing() {
                         Cancel invoice
                       </Button>
                       {balanceDue > 0 && (
-                        <Button
-                          type="button"
-                          variant="primary"
-                          onClick={() =>
-                            appActions.recordPayment(selected.id, {
-                              date: new Date().toISOString().slice(0, 10),
-                              amount: balanceDue,
-                              method: 'ACH transfer',
-                            })
-                          }
-                        >
-                          Record payment — {formatCurrency(balanceDue)}
-                        </Button>
+                        <>
+                          <div style={{ width: 180 }}>
+                            <Input
+                              label="Payment amount"
+                              error={paymentAmountError}
+                              type="number"
+                              inputMode="decimal"
+                              min={0.01}
+                              max={balanceDue}
+                              step="0.01"
+                              placeholder={formatCurrency(balanceDue)}
+                              value={paymentAmountInput}
+                              onChange={(event) => setPaymentAmountInput(event.target.value)}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="primary"
+                            disabled={!paymentAmountValid}
+                            onClick={() => {
+                              appActions.recordPayment(selected.id, {
+                                date: new Date().toISOString().slice(0, 10),
+                                amount: paymentAmount,
+                                method: 'ACH transfer',
+                              });
+                              setPaymentAmountInput('');
+                            }}
+                          >
+                            {paymentAmountValid ? `Record payment — ${formatCurrency(paymentAmount)}` : 'Record payment'}
+                          </Button>
+                        </>
                       )}
                     </>
                   )}
