@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Density, Icon, Theme } from '../src/index.js';
 import { Shell, validateShellNavigation, SHELL_MAX_ROUTES, SHELL_MAX_ROUTE_ID_LENGTH, SHELL_MAX_ROUTE_LABEL_LENGTH, type ShellCommand, type ShellPinnedApp, type ShellRoute } from '../src/shell/index.js';
 import { color } from '../src/tokens.stylex.js';
@@ -196,6 +196,16 @@ export function AppShell({ module = 'General', active = 'Home', children, naviga
   // falls back to the same default the old useState always started at, rather than rendering
   // Shell with an activeRouteId that matches nothing in `routes`.
   const sampleActiveId = routes.some((route) => route.id === hashRouteId) ? hashRouteId : defaultSampleRouteId;
+  // The fallback above corrects what RENDERS, but not `location.hash` itself — found live during
+  // this same review, not assumed: without this, the address bar keeps showing the stale/invalid
+  // hash while the page shows the default route, so a bookmarked or shared URL wouldn't describe
+  // what it actually showed. Gated to uncontrolled mode only (`!navigation`) — this must never
+  // fire when a host supplies its own `navigation`, since `hashRouteId`/`sampleActiveId` are
+  // computed from `useHashRoute` unconditionally (Rules of Hooks) but are meaningless in that
+  // mode, and correcting the hash there would silently fight the host's own routing.
+  useEffect(() => {
+    if (!navigation && sampleActiveId !== hashRouteId) navigateHash(sampleActiveId);
+  }, [navigation, sampleActiveId, hashRouteId, navigateHash]);
   const activeRouteId = navigation ? (hostErrors.length === 0 ? navigation.activeRouteId : '') : sampleActiveId;
   const onNavigate = navigation ? navigation.onNavigate : navigateHash;
   // Control center (owner-directed, 2026-09-15): drives the whole app's ambient Density tier —

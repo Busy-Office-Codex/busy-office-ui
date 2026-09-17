@@ -33,7 +33,11 @@ test('Login\'s Continue button enters the sample app with a real hash, and the U
 });
 
 test('browser back/forward moves between previously-visited routes in the sample app', async ({ page }) => {
-  await page.goto('/#examples');
+  // A real route hash, not `/#examples` — `#examples` isn't a real route id, so the stale-hash
+  // correction effect (added this same review round) immediately rewrites it to
+  // `#purchase-orders`, pushing an extra history entry that would make a single `goBack()` land
+  // on that correction rather than truly re-testing back/forward across in-app navigation.
+  await page.goto('/#purchase-orders');
   await expect(page.getByRole('heading', { name: 'Purchase orders', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Sales', exact: true }).click();
@@ -41,7 +45,7 @@ test('browser back/forward moves between previously-visited routes in the sample
 
   await page.goBack();
   await expect(page.getByRole('heading', { name: 'Purchase orders', exact: true })).toBeVisible();
-  expect(await page.evaluate(() => location.hash)).toBe('#examples');
+  expect(await page.evaluate(() => location.hash)).toBe('#purchase-orders');
 
   await page.goForward();
   await expect(page.getByRole('heading', { name: 'SO-1042 · Northwind Traders' })).toBeVisible();
@@ -51,6 +55,10 @@ test('browser back/forward moves between previously-visited routes in the sample
 test('a stale or invalid hash falls back to the default route instead of rendering nothing', async ({ page }) => {
   await page.goto('/#not-a-real-route-id');
   await expect(page.getByRole('heading', { name: 'Purchase orders', exact: true })).toBeVisible();
+  // Found live during review: the content fallback alone left the address bar still showing the
+  // invalid hash, so a bookmarked/shared URL wouldn't describe what it actually displayed — the
+  // hash is now corrected to match what's really on screen, not just the rendered content.
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#purchase-orders');
 });
 
 test('deep-linking straight to a specific route works on first load, not just after in-app navigation', async ({ page }) => {

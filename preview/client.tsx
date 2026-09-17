@@ -194,6 +194,12 @@ function SamplePreview() {
   useEffect(() => {
     setVisitedRouteIds((visited) => (visited.includes(activeRouteId) ? visited : [...visited, activeRouteId]));
   }, [activeRouteId]);
+  // Corrects a stale/invalid hash back to the resolved default — same fix and same reasoning as
+  // AppShell.tsx's own fallback (found live during review): otherwise the address bar keeps
+  // showing a hash that doesn't match what's actually on screen.
+  useEffect(() => {
+    if (activeRouteId !== hashRouteId) navigateHash(activeRouteId);
+  }, [activeRouteId, hashRouteId, navigateHash]);
 
   return (
     <AppShell navigation={{ routes, activeRouteId, onNavigate: navigate }}>

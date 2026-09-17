@@ -38,3 +38,36 @@ test('navigating inside the self-contained sample updates the hash and does not 
   // that exact disabled-with-count precedent).
   await expect(page.getByRole('button', { name: 'Home' })).toBeVisible();
 });
+
+// Adversarial review of the first cut of item 54/issue #23 found the tests above only prove
+// hash-sync WORKS SOMEWHERE (via preview/client.tsx's separate SamplePreview) — neither actually
+// loads this fallback directly with a real route hash, nor exercises its own back/forward. Those
+// two are added here, mirroring test/browser/preview-routing.spec.ts's equivalent SamplePreview
+// coverage, since the Accept clause names both for "AppShell with no navigation prop" by name.
+test('loading the self-contained sample with a valid route hash renders that route on first load, not just after a click', async ({ page }) => {
+  await page.goto('/#general/inbox');
+
+  await expect(page.getByRole('button', { name: 'Inbox', exact: true })).toHaveAttribute('aria-current', 'page');
+});
+
+test('browser back/forward moves between previously-visited routes in the self-contained sample', async ({ page }) => {
+  await page.goto('/#app-shell-fallback-lab');
+  const roleButton = page.getByRole('button', { name: 'Role page', exact: true });
+  const inboxButton = page.getByRole('button', { name: 'Inbox', exact: true });
+
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Role page\b/ }).click();
+  await expect(roleButton).toHaveAttribute('aria-current', 'page');
+
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Inbox\b/ }).click();
+  await expect(inboxButton).toHaveAttribute('aria-current', 'page');
+
+  await page.goBack();
+  await expect(roleButton).toHaveAttribute('aria-current', 'page');
+  expect(await page.evaluate(() => location.hash)).toBe('#general/role-page');
+
+  await page.goForward();
+  await expect(inboxButton).toHaveAttribute('aria-current', 'page');
+  expect(await page.evaluate(() => location.hash)).toBe('#general/inbox');
+});
