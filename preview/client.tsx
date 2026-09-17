@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
-import { useCallback, useEffect, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import { AppShell, type AppShellRoute } from '../examples/AppShell.js';
+import { useHashRoute } from '../examples/useHashRoute.js';
 import { ListReport } from '../examples/ListReport.js';
 import { RecordDetail } from '../examples/RecordDetail.js';
 import { Dashboard } from '../examples/Dashboard.js';
@@ -53,8 +54,9 @@ import '../fonts/ibm-plex-sans.css';
 // app-strip siblings before M6 finishes populating them, changing the single-route-per-module
 // premise test/browser/sample-pages-navigation.spec.ts documents and relies on today. Each
 // module below gains real siblings only as its own screens actually land.
+const SAMPLE_PREVIEW_HOME_ROUTE_ID = 'purchase-orders';
 const routes = [
-  { id: 'purchase-orders', module: 'Purchase', label: 'Purchase orders' },
+  { id: SAMPLE_PREVIEW_HOME_ROUTE_ID, module: 'Purchase', label: 'Purchase orders' },
   { id: 'sales-order-detail', module: 'Sales', label: 'Sales order' },
   { id: 'dashboard', module: 'BI', label: 'Dashboards' },
   { id: 'profile', module: 'General', label: 'Profile' },
@@ -165,14 +167,39 @@ const panes: Record<(typeof routes)[number]['id'], ReactElement> = {
 
 /** A local sample host for the package's existing pure example compositions. */
 function SamplePreview() {
-  const [activeRouteId, setActiveRouteId] = useState<(typeof routes)[number]['id']>('purchase-orders');
-  const [visitedRouteIds, setVisitedRouteIds] = useState<readonly (typeof routes)[number]['id'][]>(['purchase-orders']);
+  // ROADMAP item 54/issue #23: real deep-linking/back-forward for this preview host, the same
+  // fix AppShell.tsx's own uncontrolled fallback gets — this host always supplies its own
+  // explicit `navigation` below, so it needs the same hash-sync wired in directly rather than
+  // inheriting AppShell's fallback (it never takes that code path).
+  const [hashRouteId, navigateHash] = useHashRoute(SAMPLE_PREVIEW_HOME_ROUTE_ID);
+  const activeRouteId = (routes.some((route) => route.id === hashRouteId) ? hashRouteId : SAMPLE_PREVIEW_HOME_ROUTE_ID) as (typeof routes)[number]['id'];
+  // Lazy initializer (not a hardcoded `[SAMPLE_PREVIEW_HOME_ROUTE_ID]`) so a deep link straight to
+  // a non-default route (`/#sales-order-detail`) has that route's pane mounted from first render.
+  const [visitedRouteIds, setVisitedRouteIds] = useState<readonly (typeof routes)[number]['id'][]>(() => [activeRouteId]);
   const navigate = useCallback((routeId: string) => {
     if (!routes.some((route) => route.id === routeId)) return;
     const supportedRouteId = routeId as (typeof routes)[number]['id'];
-    setActiveRouteId(supportedRouteId);
-    setVisitedRouteIds((visited) => visited.includes(supportedRouteId) ? visited : [...visited, supportedRouteId]);
-  }, []);
+    navigateHash(supportedRouteId);
+    // Updated in the SAME callback as the hash change, not a reactive useEffect a render cycle
+    // later — found live, not assumed: the effect version left the newly-active route's pane
+    // (and therefore its actual content) missing from the DOM for one extra render, which
+    // test/browser/inbox-workspace-layout.spec.ts's own scrollHeight measurement caught as a real
+    // difference, not flakiness. `routeId` is already confirmed a real route id by the guard
+    // above, so it's exactly what `activeRouteId` will resolve to once this render lands.
+    setVisitedRouteIds((visited) => (visited.includes(supportedRouteId) ? visited : [...visited, supportedRouteId]));
+  }, [navigateHash]);
+  // Safety net for a route reached WITHOUT going through `navigate` above — browser back/forward
+  // (fires `hashchange` directly) or a hand-edited URL. A no-op on the common click path (already
+  // synchronously covered above), so this doesn't reintroduce the extra-render problem there.
+  useEffect(() => {
+    setVisitedRouteIds((visited) => (visited.includes(activeRouteId) ? visited : [...visited, activeRouteId]));
+  }, [activeRouteId]);
+  // Corrects a stale/invalid hash back to the resolved default — same fix and same reasoning as
+  // AppShell.tsx's own fallback (found live during review): otherwise the address bar keeps
+  // showing a hash that doesn't match what's actually on screen.
+  useEffect(() => {
+    if (activeRouteId !== hashRouteId) navigateHash(activeRouteId);
+  }, [activeRouteId, hashRouteId, navigateHash]);
 
   return (
     <AppShell navigation={{ routes, activeRouteId, onNavigate: navigate }}>
@@ -204,25 +231,62 @@ function SamplePreview() {
 // `<a href="#...">`/`window.location.hash =` navigation now (PasswordReset ↔ Login, etc.) — a
 // hash change alone doesn't re-render a React tree with no listener, so this needs to actually
 // watch `hashchange` and re-render, not just read `location.hash` once at module load.
+//
+// ROADMAP item 54/issue #23: the empty-hash default changed from SamplePreview straight to Login
+// — the preview previously skipped the one screen a real user actually lands on first, and
+// Login's own "Continue" button had no handler at all (dead click) until this same change gave
+// it one. Reaching SamplePreview now goes through Login's real navigation, same as any other
+// pre-auth screen here.
+//
+// Disambiguating SamplePreview's own hash-synced routes (ROADMAP item 54) from
+// AppShellFallbackLab's (both now write real route ids into `location.hash`, so neither can be
+// matched by a fixed literal once you've navigated inside either) uses the one structural
+// difference their two id schemes already have: SamplePreview's `routes` above are flat dashed
+// strings (`purchase-orders`), AppShell.tsx's own `sampleRoutes()` are `module/label` slugs
+// (`general/home`) — checked directly, every id in both real lists confirms this. Relying on an
+// implicit shape rather than an explicit namespace prefix is a disclosed simplification for
+// dev-only preview tooling, not something to assume holds if either id scheme changes.
 function App() {
   const [hash, setHash] = useState(() => window.location.hash);
+  // `examples/NotFound.tsx`'s own "Back to workspace" button clears the hash entirely
+  // (`location.hash = ''`) to mean "whatever the host's default view is" — host-agnostic on
+  // purpose, the same reasoning Login.tsx's `onContinue` prop uses, so it's not preview-specific
+  // route naming. Landing on Login only for a TRUE first visit (never showing it again just
+  // because the hash happens to go back to empty later, e.g. from that same "Back to workspace"
+  // button after a 404) needs distinguishing "empty hash at the very first mount" from "empty
+  // hash after already having been somewhere non-empty" — a ref, not the `hash` state itself,
+  // since it must survive the hash returning to empty without resetting.
+  const hasLeftLandingRef = useRef(window.location.hash !== '');
   useEffect(() => {
-    const onHashChange = () => setHash(window.location.hash);
+    const onHashChange = () => {
+      const newHash = window.location.hash;
+      if (newHash !== '') hasLeftLandingRef.current = true;
+      setHash(newHash);
+    };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
+  const enterSamplePreview = useCallback(() => {
+    window.location.hash = SAMPLE_PREVIEW_HOME_ROUTE_ID;
+  }, []);
+
+  if (hash === '') return hasLeftLandingRef.current ? <SamplePreview /> : <Login onContinue={enterSamplePreview} />;
+  if (hash === '#login') return <Login onContinue={enterSamplePreview} />;
   if (hash === '#density-lab') return <DensityLab />;
   if (hash === '#shell-breadcrumbs-lab') return <ShellBreadcrumbsLab />;
   if (hash === '#button-group-lab') return <ButtonGroupLab />;
   if (hash === '#app-shell-fallback-lab') return <AppShellFallbackLab />;
   if (hash === '#chart-lab') return <ChartLab />;
-  if (hash === '#login') return <Login />;
   if (hash === '#password-reset') return <PasswordReset />;
   if (hash === '#account-locked') return <AccountLocked />;
   if (hash === '#session-expired') return <SessionExpired />;
   if (hash === '#access-denied') return <AccessDenied />;
   if (hash === '#404') return <NotFound />;
+  // Every reserved literal is already handled above, so reaching here means this is either
+  // SamplePreview's or AppShellFallbackLab's own internal navigation (see the disambiguation
+  // comment above).
+  if (hash.slice(1).includes('/')) return <AppShellFallbackLab />;
   return <SamplePreview />;
 }
 
