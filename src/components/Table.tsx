@@ -115,11 +115,23 @@ export function TableBody({ children }: { children: ReactNode }) {
   return <tbody>{children}</tbody>;
 }
 
-export function TableRow({ children, onClick, onKeyDown, tabIndex, ...rest }: HTMLAttributes<HTMLTableRowElement>) {
+export type TableRowProps = HTMLAttributes<HTMLTableRowElement> & {
+  /**
+   * Marks this row as the current selection for a clickable row (only meaningful alongside
+   * `onClick`). Every real consumer of the row-selection pattern today drives a matching visual
+   * cue off its own `selectedId === row.id` check (`color.bgSelected`) — this makes the same
+   * state real to assistive tech too (`aria-selected`), the same "state needs a non-visual
+   * channel too" contract `Card`'s own `selected`/`aria-pressed` already established.
+   */
+  selected?: boolean;
+};
+
+export function TableRow({ children, onClick, onKeyDown, tabIndex, selected, ...rest }: TableRowProps) {
   const interactive = Boolean(onClick);
   return (
     <tr
       tabIndex={interactive ? (tabIndex ?? 0) : tabIndex}
+      aria-selected={interactive && selected !== undefined ? selected : undefined}
       onClick={onClick}
       onKeyDown={(event) => {
         onKeyDown?.(event);

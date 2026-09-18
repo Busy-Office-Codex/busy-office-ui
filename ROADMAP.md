@@ -2011,7 +2011,7 @@ issues.
     hover-fill bug, item 61) — and a self-caught overclaim corrected
     before it ever reached the record, not after independent review had
     to catch it. Needs: issue #24 (`agreed`, project owner, 2026-09-18).
-63. [x] **Table scored: 31/36 (86/100) found → 35/36 (97/100) after fix,
+63. [x] **Table scored: 31/36 (86/100) found → 34/36 (94/100) after fix,
     provisional. Real, previously-undisclosed keyboard-accessibility gap
     found and fixed.** Fourth component scored against the frozen
     rubric. Readability 4/4, density 4/4 (live-verified,
@@ -2022,32 +2022,53 @@ issues.
     4/4. Performance 3/4, provisional — the same repo-wide gap every
     component this round has disclosed.
 
-    **Interaction/accessibility: found 2/4, real bug, fixed to 4/4.**
-    `TableRow` accepted `onClick` via prop spread with zero
-    accessibility contract for it — no `role`, `tabIndex`, or keyboard
-    handler — unlike `Card`, which has exactly this contract for its own
-    `interactive` mode. **10 real `examples/*.tsx` consumers** confirmed
-    by a precise `<TableRow ... onClick=` grep, not a loose file-level
-    one (`Billing.tsx`, `Companies.tsx`, `Integrations.tsx`,
-    `Delivery.tsx`, `Planning.tsx`, `Quotations.tsx`, `Roles.tsx`,
-    `Users.tsx`, `ProductionOrders.tsx`, `Requisitions.tsx`) use this
-    exact pattern for row selection — all mouse-only until now. Fixed by
-    mirroring `Card`'s own `tabIndex`/`onKeyDown` (Enter/Space → click)
-    shape, deliberately **not** copying `role="button"`: overriding a
-    `<tr>`'s role would break its native row/cell structure for
-    assistive tech, a real difference from `Card`'s own `<div>` case, not
-    an oversight. The focus-visible outline is inset (`outlineOffset:
-    '-2px'`), not outset like `Card`'s — a row has no independent box
-    separation from its neighbors, so an outset ring would overlap the
-    adjacent row. Red-proofed live against a real consumer
-    (`test/browser/billing.spec.ts`, Billing's own invoice row): failed
-    with the exact predicted symptom (no focus reachable, no outline)
-    against the pre-fix code, passed after.
+    **Interaction/accessibility: found 2/4, real bug, fixed to 3/4 (not
+    4/4 — corrected by independent review).** `TableRow` accepted
+    `onClick` via prop spread with zero accessibility contract for it —
+    no `role`, `tabIndex`, or keyboard handler — unlike `Card`, which has
+    exactly this contract for its own `interactive` mode. **10 real
+    `examples/*.tsx` consumers** confirmed by a precise `<TableRow ...
+    onClick=` grep, not a loose file-level one (`Billing.tsx`,
+    `Companies.tsx`, `Integrations.tsx`, `Delivery.tsx`, `Planning.tsx`,
+    `Quotations.tsx`, `Roles.tsx`, `Users.tsx`, `ProductionOrders.tsx`,
+    `Requisitions.tsx`) use this exact pattern for row selection — all
+    mouse-only until now. Fixed by mirroring `Card`'s own
+    `tabIndex`/`onKeyDown` (Enter/Space → click) shape, deliberately
+    **not** copying `role="button"`: overriding a `<tr>`'s role would
+    break its native row/cell structure for assistive tech, a real
+    difference from `Card`'s own `<div>` case, not an oversight. The
+    focus-visible outline is inset (`outlineOffset: '-2px'`), not outset
+    like `Card`'s — a row has no independent box separation from its
+    neighbors, so an outset ring would overlap the adjacent row.
+    Red-proofed live against a real consumer (`test/browser/
+    billing.spec.ts`, Billing's own invoice row): failed with the exact
+    predicted symptom (no focus reachable, no outline) against the
+    pre-fix code, passed after.
+
+    **Independent review found a real HIGH gap in the first draft**: all
+    10 cited consumers expose "currently selected" purely as a color
+    (`color.bgSelected`), with zero AT-exposed state — the fix solved
+    reachability and activation but not announcement. Added a `selected`
+    prop (new, exported `TableRowProps`) setting `aria-selected`,
+    mirroring `Card`'s own `selected`/`aria-pressed` shape exactly. But
+    this closes only the *programmatic* channel — `test/state-
+    channels.test.ts`'s own documented contract requires a non-colour
+    cue too (Card's checkmark badge is its match), and no non-colour
+    marker for a selected row exists yet; deliberately not designed here
+    (a real UI decision, not something to improvise inside an
+    accessibility bugfix). Scored 3/4, not 4/4, and NOT added to
+    `state-channels.test.ts`'s own `STATE_PROPS` list (which requires
+    both channels per entry) — a separate, narrower test
+    (`test/components.test.ts`) checks `aria-selected` alone, honestly
+    scoped to what's actually done. Named as real, disclosed,
+    not-yet-designed follow-up, the same "capability added, examples/
+    migration and full non-colour design deferred" shape item 56 already
+    used for color-scale tokens.
 
     **A genuine test-authoring lesson, not a code defect**: the first
-    version of this test used a scripted `.focus()` to establish a
-    keyboard-navigation starting point, which reproducibly flaked under
-    parallel test load — confirmed the underlying fix was solid by
+    version of the browser test used a scripted `.focus()` to establish
+    a keyboard-navigation starting point, which reproducibly flaked
+    under parallel test load — confirmed the underlying fix was solid by
     stress-testing the already-proven Card/Button focus-ring tests 50x
     with zero failures in the same run, isolating the flakiness to the
     test's own mechanism, not the implementation. A genuine mouse click
@@ -2055,29 +2076,29 @@ issues.
     browser's `:focus-visible` heuristic reliable for the Tab press that
     follows — the same reason the pre-existing Card test clicks an
     adjacent element rather than calling `.focus()`. Stress-tested 135x
-    after the fix with zero failures before merge.
+    after the fix, then 180x by independent review, zero failures.
 
     **Documentation/specimen usability: found 2/4, fixed to 4/4.**
     `docs/Table.md`'s prose and fenced example never mentioned row-click
     selection at all, despite it being Table's single most common real
     usage (10 consumers, more than any other documented pattern). Added
-    a prose paragraph naming the real contract and an `onClick` example
-    to the fenced sample; added `test/browser/billing.spec.ts` to the
-    frontmatter `tests:` list, which didn't cite it despite it (after
-    this fix) containing the real assertion.
+    a prose paragraph naming the real contract (including the
+    `aria-selected`-only disclosure above) and an `onClick`/`selected`
+    example to the fenced sample; added `test/browser/billing.spec.ts`
+    and `test/state-channels.test.ts` to the frontmatter `tests:` list.
 
-    **35/36 → 97/100, clears the 85 threshold and every dimension is
+    **34/36 → 94/100, clears the 85 threshold and every dimension is
     ≥3/4 — reported PROVISIONAL, same standard as Input/Button/Text**:
     performance's missing evidence is real and disclosed, not exempted
     for being repo-wide rather than component-specific. Serves: this
     round's component-scoring scope; the third real bug this round's
     scoring process has found and fixed in framework code (after
-    items 55 and 61), and — unlike item 61's own score-arithmetic slip
-    and item 62's own scope-of-claim gap — this one's own record needed
-    no independent-review correction on the scoring text itself, only on
-    the test's mechanism (caught and fixed before the review, via
-    deliberate stress-testing rather than trusting a single green run).
-    Needs: issue #24 (`agreed`, project owner, 2026-09-18).
+    items 55 and 61); a fourth real, independent-review-caught
+    improvement (the `aria-selected` gap) made *before* merge rather
+    than disclosed-and-deferred, unlike item 61's score-arithmetic slip
+    and item 62's scope-of-claim gap, which were text corrections only —
+    this one changed the shipped code. Needs: issue #24 (`agreed`,
+    project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
