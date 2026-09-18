@@ -15,6 +15,11 @@ Known gaps, disclosed rather than silently dropped: this covers the `color.*` to
   <Card>
     <Text variant="title">Always dark, regardless of system setting</Text>
     <Button variant="primary">Continue</Button>
+    <Theme value="light">
+      <Card>
+        <Text variant="caption">A nested light region — the nearest Theme always wins</Text>
+      </Card>
+    </Theme>
   </Card>
 </Theme>
 ```
