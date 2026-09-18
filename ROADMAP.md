@@ -2136,14 +2136,22 @@ issues.
     (genuinely exemplary — full keyboard support, correct `listbox`/
     `option`/`aria-activedescendant` pattern, extensively tested live),
     API simplicity 4/4, relevant security 4/4. Performance 3/4,
-    provisional. Density: found 3/4 (a real mechanism — the trigger
-    genuinely reads `density.fontSize`/`controlHeight`, live-verified
-    directly at 36px comfortable — but zero test anywhere checked it,
-    the same "claimed, never verified" gap class `Button`'s own focus
-    ring was before item 61), fixed to 4/4: a new
-    `test/browser/compact-controls.spec.ts` case asserting the trigger's
-    real height at both ambient (36px) and compact (28px) tiers,
-    red-proofed live. Maintainability: found 3/4 (a real but invisible
+    provisional. Density: found 3/4 — **first draft overclaimed the gap,
+    corrected by independent review**: the trigger genuinely reads
+    `density.fontSize`/`controlHeight`, and `test/browser/
+    control-center.spec.ts` (pre-existing, unmodified here) already
+    verifies the exact 36px/28px claim on the same Supplier trigger via
+    Control Center's global density toggle — not the "zero test anywhere
+    checked it" gap first claimed. The real, narrower gap:
+    `docs/Dropdown.md`'s own `tests:` frontmatter never cited that test,
+    and no test covered a *local* `<Density>`-wrapper region specifically
+    (the mechanism most documented examples actually use, as opposed to
+    Control Center's global re-theme). Fixed to 4/4: added
+    `test/browser/control-center.spec.ts` to the frontmatter, and a new
+    `test/browser/compact-controls.spec.ts` case covering the untested
+    local-wrapper path (Users.tsx's Role Dropdown, genuinely inside its
+    own `<Density value="compact">`), red-proofed live. Maintainability:
+    found 3/4 (a real but invisible
     defect — `Dropdown.tsx`'s menu item carried a dead `:hover:
     'rgba(15, 23, 42, 0.06)'` rule, masked on every real hover by
     `itemHighlighted`'s own `bgSubtle`, which `onMouseEnter` sets before
@@ -2167,12 +2175,19 @@ issues.
     named this gap generically but was stale (still cited `Button`'s
     danger-hover fill, already fixed by item 61) and imprecise (named
     "Shell's `glass`" when Shell doesn't actually consume the `glass`
-    token group at all — only `Modal` and `Dropdown` do; `Shell`'s own
-    chrome uses separate hardcoded `rgba()` literals, a related but
-    distinct gap the M10 Text-scoring independent review already
-    surfaced for one instance, item 62). Corrected `docs/Theme.md` to
-    name the real consumers and disclosed the gap explicitly in
-    `docs/Dropdown.md` too — but did **not** design or add real
+    token group at all — `Shell`'s own chrome uses separate hardcoded
+    `rgba()` literals, a related but distinct gap the M10 Text-scoring
+    independent review already surfaced for one instance, item 62).
+    Corrected `docs/Theme.md` to name the real consumers — **a second
+    independent-review correction**: the first draft undercounted them
+    too ("only `Modal` and `Dropdown`"), missing `examples/
+    ControlCenter.tsx`, which genuinely imports and uses `glass.bg`/
+    `blur`/`border`/`highlight` directly for its own popover (the same
+    unfixed dark-mode gap, not a hypothetical), and also missing that
+    `docs/Theme.md`'s own pre-existing "examples/ never use StyleX"
+    sentence was itself inaccurate for this exact file — both corrected
+    together. Disclosed the gap explicitly in `docs/Dropdown.md` too —
+    but did **not** design or add real
     dark-mode `glass` values: picking translucent colors that read
     correctly against the dark palette is a genuine visual-design
     decision, the same category item 56 already deferred for the

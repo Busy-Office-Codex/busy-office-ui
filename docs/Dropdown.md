@@ -5,6 +5,7 @@ tests:
   - test/browser/design-fidelity-fixes.spec.ts
   - test/browser/filter-hierarchy.spec.ts
   - test/browser/compact-controls.spec.ts
+  - test/browser/control-center.spec.ts
   - test/state-channels.test.ts
 ---
 
