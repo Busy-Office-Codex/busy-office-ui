@@ -154,3 +154,31 @@ test('cancelling the cancel-invoice confirmation leaves the invoice untouched', 
   await expect(page.getByRole('button', { name: 'Cancel invoice' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Record payment/ })).toBeVisible();
 });
+
+// M10 Table scoring (issue #24): this row's own onClick (setSelectedId) had no keyboard path to
+// it at all before TableRow's own fix — real, previously-undisclosed gap, this Billing table is
+// one of 10 real consumers of the identical pattern.
+test('a clickable invoice row is keyboard-focusable and Enter activates it', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoBilling(page);
+
+  const row = page.getByRole('row', { name: /INV-3201/ });
+  await expect(row).toHaveCSS('outline-width', '0px');
+
+  // A bare scripted `.focus()` on the row itself doesn't reliably trigger `:focus-visible` in
+  // Chromium (a `<tr>` is not a natively interactive element) — confirmed live, the same caveat
+  // this repo's own Card focus-ring test already documents for `div[role="button"]`. What matters
+  // for `:focus-visible` is how the ROW's own focus transition happens, not how the previously-
+  // focused element got there — so script-focus the table's own scrollable region first (a real
+  // ancestor a keyboard user would already be on), then a genuine Tab keypress moves focus onto
+  // the row exactly as real keyboard navigation would, and that transition is what the browser
+  // credits as keyboard-caused.
+  await page.getByRole('region', { name: 'Invoices table' }).focus();
+  await page.keyboard.press('Tab');
+  await expect(row).toBeFocused();
+  await expect(row).toHaveCSS('outline-width', '2px');
+  await expect(row).toHaveCSS('outline-style', 'solid');
+
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { name: 'INV-3201', exact: true })).toBeVisible();
+});

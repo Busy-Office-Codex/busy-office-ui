@@ -337,6 +337,18 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('>$1,240.00</span>');
   });
 
+  it('a clickable TableRow is keyboard-focusable; a plain one is not', () => {
+    const clickableMarkup = renderToStaticMarkup(
+      createElement(designSystem.TableRow, { onClick: () => {} }, createElement(designSystem.TableCell, null, 'Row')),
+    );
+    const plainMarkup = renderToStaticMarkup(
+      createElement(designSystem.TableRow, null, createElement(designSystem.TableCell, null, 'Row')),
+    );
+
+    expect(clickableMarkup).toContain('tabindex="0"');
+    expect(plainMarkup).not.toContain('tabindex');
+  });
+
   it('renders a decorative Icon as aria-hidden with no accessible-name role', () => {
     const markup = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'sliders' }));
 

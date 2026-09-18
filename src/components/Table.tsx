@@ -76,6 +76,25 @@ const styles = stylex.create({
   alignEnd: {
     textAlign: 'end',
   },
+  // M10 Table scoring (issue #24): a clickable row (Card's own `interactive` contract already
+  // covers the identical case for a `<div>`) had no keyboard-operability counterpart here — 10
+  // real `examples/*.tsx` consumers pass `onClick` for row selection with zero way to reach or
+  // activate it from a keyboard. `outlineOffset` is negative (inset), unlike `Card`'s positive
+  // one: a `<tr>` has no independent box model separation from its neighbors, so an outset ring
+  // would overlap the adjacent row instead of framing this one.
+  interactiveRow: {
+    cursor: 'pointer',
+    outlineStyle: 'solid',
+    outlineOffset: '-2px',
+    outlineColor: {
+      default: 'transparent',
+      ':focus-visible': color.focusRing,
+    },
+    outlineWidth: {
+      default: 0,
+      ':focus-visible': '2px',
+    },
+  },
 });
 
 export type TableProps = HTMLAttributes<HTMLTableElement> & { children: ReactNode };
@@ -96,9 +115,22 @@ export function TableBody({ children }: { children: ReactNode }) {
   return <tbody>{children}</tbody>;
 }
 
-export function TableRow({ children, ...rest }: HTMLAttributes<HTMLTableRowElement>) {
+export function TableRow({ children, onClick, onKeyDown, tabIndex, ...rest }: HTMLAttributes<HTMLTableRowElement>) {
+  const interactive = Boolean(onClick);
   return (
-    <tr {...rest} {...stylex.props(styles.row)}>
+    <tr
+      tabIndex={interactive ? (tabIndex ?? 0) : tabIndex}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        if (interactive && !event.defaultPrevented && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          event.currentTarget.click();
+        }
+      }}
+      {...rest}
+      {...stylex.props(styles.row, interactive && styles.interactiveRow)}
+    >
       {children}
     </tr>
   );
