@@ -18,7 +18,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   media: 'Media',
 };
 
-const componentEntries = (await getCollection('docs', (entry) => entry.id !== 'design-conventions' && !PATTERN_DOC_IDS.includes(entry.id))).sort(
+const componentEntries = (await getCollection('docs', (entry) => entry.id !== 'design-conventions' && entry.id !== 'layouts' && !PATTERN_DOC_IDS.includes(entry.id))).sort(
   (a, b) => a.id.localeCompare(b.id),
 );
 const componentsByCategory = CATEGORY_ORDER.map((category) => ({
@@ -100,6 +100,9 @@ import { Shell } from '@busyoffice/design-system/shell';`}</code></pre>
 
   <h2>Build with AI</h2>
   <p><a href="/build-with-ai/">Scope, the two-way/one-way gate, and common mistakes</a> — for an agent or contributor about to make a change here.</p>
+
+  <h2>Layouts</h2>
+  <p><a href="/layouts/">Standard layout skeletons</a> — named structural patterns real screens already repeat (list+detail, record-detail two-column, KPI row), each a guideline with real consumer counts, not an exported component.</p>
 
   <h2>Conventions</h2>
   <ul>

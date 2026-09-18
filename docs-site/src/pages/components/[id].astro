@@ -17,7 +17,7 @@ export async function getStaticPaths() {
   // a sibling module-scope `const` (found live — a module-scope version threw "PATTERN_DOC_IDS
   // is not defined" during `astro build`, 2026-09-17).
   const PATTERN_DOC_IDS = ['listreport', 'recorddetail', 'launcher', 'dashboard'];
-  const entries = await getCollection('docs', (entry) => entry.id !== 'design-conventions' && !PATTERN_DOC_IDS.includes(entry.id));
+  const entries = await getCollection('docs', (entry) => entry.id !== 'design-conventions' && entry.id !== 'layouts' && !PATTERN_DOC_IDS.includes(entry.id));
   return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
 }
 
