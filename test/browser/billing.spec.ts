@@ -165,14 +165,6 @@ test('a clickable invoice row is keyboard-focusable and Enter activates it', asy
   const row = page.getByRole('row', { name: /INV-3201/ });
   await expect(row).toHaveCSS('outline-width', '0px');
 
-  // A bare scripted `.focus()` on the row itself doesn't reliably trigger `:focus-visible` in
-  // Chromium (a `<tr>` is not a natively interactive element) — confirmed live, the same caveat
-  // this repo's own Card focus-ring test already documents for `div[role="button"]`. What matters
-  // for `:focus-visible` is how the ROW's own focus transition happens, not how the previously-
-  // focused element got there — so script-focus the table's own scrollable region first (a real
-  // ancestor a keyboard user would already be on), then a genuine Tab keypress moves focus onto
-  // the row exactly as real keyboard navigation would, and that transition is what the browser
-  // credits as keyboard-caused.
   // A genuine mouse click is what makes the browser's `:focus-visible` heuristic reliable for the
   // Tab press right after it — a scripted `.focus()` (tried first) reproducibly flaked under
   // repeated runs, even with an explicit synchronization point, because it doesn't cleanly
