@@ -1865,6 +1865,56 @@ issues.
     Serves: Objective 3 (proven reuse — 3 named, verified consumers, not
     manufactured); this round's ERP-gap-investigation scope. Needs: issue
     #25 (`agreed`, project owner, 2026-09-18).
+61. [x] **Button scored: 31/36 (86/100), one real dark-mode bug found and
+    fixed.** Second component scored against the frozen rubric (after
+    Input). Readability 4/4, density 4/4 (live-verified,
+    `test/browser/compact-controls.spec.ts`), API simplicity 4/4,
+    maintainability 4/4, relevant security 4/4 (no
+    `dangerouslySetInnerHTML`, all text as React children). Performance
+    3/4, provisional — same as Input, no re-render-count test exists
+    anywhere in this repo yet, disclosed not fixed here.
+
+    **Themes: found 2/4, real bug, fixed to 4/4.** `Button.tsx`'s
+    `danger` variant's `:hover` fill was a hardcoded `'rgba(180, 35, 24,
+    0.08)'` literal — this hue's own *light-mode* `danger` value frozen
+    in place — that never re-tinted in dark mode. Framework code, not an
+    examples/ raw-hex gap (worse than what's already tracked). Fixed with
+    a new `color.dangerSubtle` token (`tokens.stylex.ts`, light/dark pair,
+    same 8% alpha each side), extending the already-exported `color`
+    group the same way item 56 added `success`/`warning` — not a new
+    top-level export, so covered by this round's own #24 agreement, not
+    a separate one-way gate. Red-proofed live: a new
+    `test/browser/theme-contrast.spec.ts` pair (dark: hovers the real
+    "Reject" button on `RecordDetail.tsx`, asserts the dark tint; light:
+    asserts the original literal is unchanged) failed with the exact
+    predicted symptom against the pre-fix build, passed after.
+
+    **Interaction/accessibility: found 3/4 (claimed, never verified),
+    fixed to 4/4.** Button's own `:focus-visible` outline was defined in
+    code but had no live check anywhere — same "never actually checked"
+    gap class Input had before its own M10 fix. New
+    `test/browser/focus-ring-and-placeholder.spec.ts` test, Tab-focuses a
+    real Button, asserts the real rendered outline.
+
+    **Documentation/specimen usability: found 3/4, fixed to 4/4.**
+    `docs/Button.md`'s fenced example only demonstrated 2 of 4 real
+    variants (primary, danger) and no disabled state. Added `ghost` and a
+    `disabled` example; also found and fixed the doc's own `tests:`
+    frontmatter was missing both test files above (declaring behavior
+    claims — focus ring, theme reactivity — with no test citing them,
+    the exact gap class `test/docs-contract.test.ts` exists to catch,
+    that had gone unnoticed until this round's scoring actually looked).
+
+    **31/36 → 86/100, clears the 85 threshold and every dimension is now
+    ≥3/4 — full acceptance met**, unlike Input's still-provisional 88 (no
+    unresolved evidence gap here beyond the pre-existing, disclosed
+    performance caveat every component in this repo currently shares).
+    Bundle size unaffected (`pnpm verify:consumer`: 6.99KB minified,
+    unchanged — a token reference in place of a literal). Serves: this
+    round's component-scoring scope; demonstrates the rubric finding a
+    real bug, not just a missing test, the second time this round
+    (after item 55's Shell command-palette accessible-name gap). Needs:
+    issue #24 (`agreed`, project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).

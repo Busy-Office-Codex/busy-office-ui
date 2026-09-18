@@ -122,6 +122,23 @@ test.describe('prefers-color-scheme: dark flips color.* tokens with no Theme wra
     const pageRoot = page.getByRole('heading', { name: 'Inventory', exact: true }).locator('xpath=../..');
     await expect(pageRoot).toHaveCSS('background-color', 'rgb(2, 6, 23)'); // darkPalette.bgCanvas, #020617
   });
+
+  // M10 Button scoring (issue #24) found a real framework-code theming defect: the danger
+  // variant's hover fill was a hardcoded `rgba(180, 35, 24, 0.08)` — this hue's own light-mode
+  // value — that never re-tinted in dark mode. Fixed via a new `color.dangerSubtle` token
+  // (tokens.stylex.ts); this is the live check that would have caught the original bug (a token
+  // value assertion alone can't prove :hover actually resolves it on a real element).
+  test('a danger Button\'s hover fill uses the dark dangerSubtle tint, not the frozen light-mode rgba', async ({
+    page,
+  }) => {
+    await page.goto('/#examples');
+    await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+    await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Sales order\b/ }).click();
+
+    const rejectButton = page.getByRole('button', { name: 'Reject', exact: true });
+    await rejectButton.hover();
+    await expect(rejectButton).toHaveCSS('background-color', 'rgba(239, 68, 68, 0.08)'); // darkPalette.dangerSubtle
+  });
 });
 
 test.describe('prefers-color-scheme: light keeps the existing light palette unchanged', () => {
@@ -132,5 +149,15 @@ test.describe('prefers-color-scheme: light keeps the existing light palette unch
 
     const head = page.locator('thead');
     await expect(head).toHaveCSS('background-color', 'rgb(248, 250, 252)'); // lightPalette.bgCanvas, #f8fafc
+  });
+
+  test('a danger Button\'s hover fill stays the existing light-mode dangerSubtle tint, unchanged', async ({ page }) => {
+    await page.goto('/#examples');
+    await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+    await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Sales order\b/ }).click();
+
+    const rejectButton = page.getByRole('button', { name: 'Reject', exact: true });
+    await rejectButton.hover();
+    await expect(rejectButton).toHaveCSS('background-color', 'rgba(180, 35, 24, 0.08)'); // lightPalette.dangerSubtle
   });
 });

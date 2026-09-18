@@ -71,7 +71,10 @@ const styles = stylex.create({
   danger: {
     backgroundColor: {
       default: 'transparent',
-      ':hover': 'rgba(180, 35, 24, 0.08)',
+      // Was a hardcoded literal frozen at this hue's own light-mode value — never re-tinted in
+      // dark mode (M10 Button scoring, issue #24). `color.dangerSubtle` tracks the active theme
+      // the same way `color.danger` itself already does two lines below.
+      ':hover': color.dangerSubtle,
       ':active': color.danger,
     },
     borderColor: color.danger,
