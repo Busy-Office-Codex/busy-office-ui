@@ -61,6 +61,15 @@ export const lightPalette = {
   // matching every existing hand-written instance exactly — zero visual change in light mode for
   // any file this migrates.
   bgSelected: '#eff6ff',
+  // Extracted from `Button.tsx`'s own hardcoded `danger` hover fill (M10 Button scoring, issue
+  // #24): a hand-picked `rgba(180, 35, 24, 0.08)` — exactly this hue's own light-mode `danger`
+  // value at 8% — that never re-tinted in dark mode, a real framework-code theming defect (not
+  // just an examples/ raw-hex gap). A flat opaque hex isn't the right fix here: `danger`'s
+  // ghost-style hover can sit against more than one real background (`bgCanvas`, `bgSurface`, a
+  // `Card`), so a translucent tint stays correct across all of them the way one flattened value
+  // wouldn't; `Modal.tsx`'s scrim and `Dropdown.tsx`'s hover tint already establish translucent
+  // rgba as this package's own precedent for exactly this kind of layered-over-anything fill.
+  dangerSubtle: 'rgba(180, 35, 24, 0.08)',
 };
 
 // Dark values (ROADMAP item 19 / issue #19, `agreed`, project owner, 2026-09-16). Built from the
@@ -129,6 +138,11 @@ export const darkPalette = {
   // 14.0:1 / 9.9:1, both comfortably over the 4.5:1 body-text floor every other bg/text pair here
   // clears.
   bgSelected: '#172554',
+  // Same alpha (8%) as the light value, at this palette's own `danger` hue (`#ef4444`) — the
+  // whole point is that this tracks whichever `danger` the active theme actually uses, the same
+  // way `bgSelected`'s own light/dark pair each independently pick the right value for their
+  // theme rather than sharing one.
+  dangerSubtle: 'rgba(239, 68, 68, 0.08)',
 };
 
 // Each var gets `lightPalette`'s value as its `default` and `darkPalette`'s value under
@@ -162,6 +176,7 @@ export const color = stylex.defineVars({
   success: { default: lightPalette.success, '@media (prefers-color-scheme: dark)': darkPalette.success },
   warning: { default: lightPalette.warning, '@media (prefers-color-scheme: dark)': darkPalette.warning },
   bgSelected: { default: lightPalette.bgSelected, '@media (prefers-color-scheme: dark)': darkPalette.bgSelected },
+  dangerSubtle: { default: lightPalette.dangerSubtle, '@media (prefers-color-scheme: dark)': darkPalette.dangerSubtle },
 });
 
 // Explicit host opt-in (ROADMAP item 19) — mirrors `compactDensity`/`comfortableDensity`/

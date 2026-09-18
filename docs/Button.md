@@ -4,6 +4,8 @@ tests:
   - test/browser/compact-controls.spec.ts
   - test/browser/design-fidelity-fixes.spec.ts
   - test/browser/density.spec.ts
+  - test/browser/focus-ring-and-placeholder.spec.ts
+  - test/browser/theme-contrast.spec.ts
   - test/components.test.ts
 ---
 
@@ -12,6 +14,8 @@ Pill-shaped action trigger. `variant="primary"` (solid ink, the default call-to-
 ```jsx
 <Button variant="primary">Approve</Button>
 <Button variant="danger">Reject</Button>
+<Button variant="ghost">Cancel</Button>
+<Button variant="primary" disabled>Approve</Button>
 <Density value="compact">
   <Button variant="secondary">Export</Button>
 </Density>

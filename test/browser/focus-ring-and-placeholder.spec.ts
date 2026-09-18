@@ -59,6 +59,20 @@ test('a Dropdown filter trigger shows a visible focus-visible ring on keyboard f
   await expect(trigger).toHaveCSS('outline-style', 'solid');
 });
 
+// M10 Button scoring (issue #24) found Button's own focus-visible outline (Button.tsx's
+// `outlineColor`/`outlineWidth` `:focus-visible` pair) had no live check anywhere — claimed in
+// code, never actually verified in a real browser, the same "never actually checked" gap class
+// Input had before its own M10 pilot fix.
+test('a real Button shows a visible focus-visible ring on keyboard focus', async ({ page }) => {
+  await page.goto('/#examples');
+  const newPoButton = page.getByRole('button', { name: '+ New PO', exact: true });
+
+  await expect(newPoButton).toHaveCSS('outline-width', '0px');
+  await newPoButton.focus();
+  await expect(newPoButton).toHaveCSS('outline-width', '2px');
+  await expect(newPoButton).toHaveCSS('outline-style', 'solid');
+});
+
 test('Input placeholder text meets AA contrast, not the disabled/faded token', async ({ page }) => {
   await page.goto('/#examples');
   const input = page.getByPlaceholder('Search POs…');

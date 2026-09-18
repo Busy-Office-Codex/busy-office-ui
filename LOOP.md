@@ -86,7 +86,19 @@ without an agreed request.
      tags, releases, publishing, editing `intent.md`, the ROADMAP Objective or
      the Milestone section, closing issues): comment the proposal on a
      `[UI request]` issue as `proposed` and leave the item out of the batch.
-     Never mark your own proposal `agreed`.
+     Never mark your own proposal `agreed`. "New exports" means a new
+     top-level name importable from a package entry point (`Avatar`,
+     `useSomething`) — a real, evidenced M10 miss (issue #25) caught this
+     exactly, corrected before merge. Adding a new key to an *already*-
+     exported token/style object (`color.dangerSubtle` alongside the
+     already-exported `color`) is two-way, same as additive ARIA
+     attributes above — real precedent, not just asserted: items 56 and 61
+     both did this citing only their milestone's own agreed issue, and
+     both cleared independent review on that basis. Removing or renaming
+     an existing key on such an object is still one-way (covered by
+     "removing or renaming... exports" above) — additions are cheap,
+     subtractions are gated, the same asymmetry a minor-version bump
+     already implies.
 6. **Record.** Tick the closed items in `ROADMAP.md` on the batch branch.
    `git fetch`; rebase the batch branch onto `origin/main` if it moved; merge
    it into local `main` with `--no-ff`; push `main`; delete the local
