@@ -1951,22 +1951,36 @@ issues.
     has disclosed, no re-render-count test exists anywhere yet.
 
     **Themes: found 2/4, real near-miss/fail, fixed to 4/4.** The
-    `overline` variant used `color.textTertiary` — against its own real
-    consumers today (5 files, all rendering on `bgCanvas`/`bgSurface`)
-    this happens to clear 4.5:1, but only barely on `bgCanvas` (4.55:1 —
-    computed directly, not assumed, a hair above the floor at this exact
-    11px/semibold/uppercase size, which doesn't qualify for WCAG's
-    "large text" 3:1 exemption) and fails outright against `bgSubtle`
-    (4.34:1 — the identical confirmed HIGH finding `Table.tsx`'s own
-    header comment already documents for this exact token/size/weight/
-    case, and the identical fix `src/shell/Shell.tsx`'s command-palette
-    labels already made, issue #13). **Corrected mid-review**: the first
-    pass characterized this as "a proven live WCAG AA failure in 5
-    consumers" — checked each of the 5 directly against their real
-    rendered background before writing the fix, found none actually sits
-    on `bgSubtle` today, so the honest framing is a fragile near-miss
-    plus a real failure against a background this design system uses
-    elsewhere, not a live failure today. Fixed to `color.textSecondary`
+    `overline` variant used `color.textTertiary` — against its 5 real
+    `examples/*.tsx` consumers today (all rendering on `bgCanvas`/
+    `bgSurface`) this happens to clear 4.5:1, but only barely on
+    `bgCanvas` (4.55:1 — computed directly, not assumed, a hair above the
+    floor at this exact 11px/semibold/uppercase size, which doesn't
+    qualify for WCAG's "large text" 3:1 exemption) and fails outright
+    against `bgSubtle` (4.34:1 — the identical confirmed HIGH finding
+    `Table.tsx`'s own header comment already documents for this exact
+    token/size/weight/case, and the identical fix `src/shell/Shell.tsx`'s
+    command-palette labels already made, issue #13). **Corrected
+    mid-review**: the first pass characterized this as "a proven live
+    WCAG AA failure in 5 consumers" — checked each of the 5 directly
+    against their real rendered background before writing the fix, found
+    none actually sits on `bgSubtle` today, so the honest framing is a
+    fragile near-miss plus a real failure against a background this
+    design system uses elsewhere, not a live failure today.
+    **Independent review found the "5 consumers" count itself was scoped
+    only to `examples/*.tsx`** — `Shell.tsx` (framework code, not an
+    example) has 2 more real `overline` usages of its own; one (the
+    app-strip module label, `Shell.tsx:692`) sits inside a hardcoded,
+    non-theme-reactive `rgba(255, 255, 255, 0.6)` glass panel with a
+    genuinely unverified effective background (this file already has one
+    confirmed contrast failure in a different glass panel, the
+    command-palette section headers this same item's own fix traces
+    back to — not a hypothetical concern). This fix helps that consumer
+    regardless of its background; the glass panel's own non-theme-
+    reactivity is a separate, real, pre-existing gap, named here as
+    disclosed follow-up, not fixed in this item (out of scope — a Shell
+    chrome theming gap, not a `Text` component defect). Fixed to
+    `color.textSecondary`
     (clears 4.5:1 against every real background in both palettes by a
     wide margin — `test/color-contrast.test.ts`, extended with a new
     `textSecondary`-on-`bgSubtle` case completing the matrix), the same
