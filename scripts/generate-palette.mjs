@@ -18,7 +18,7 @@
 
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const repoRoot = path.dirname(fileURLToPath(new URL('.', import.meta.url)));
 
@@ -137,6 +137,18 @@ function toSource(ranges) {
   return lines.join('\n');
 }
 
-const outputPath = path.join(repoRoot, 'src/palette.generated.ts');
-writeFileSync(outputPath, toSource(generatePalette()));
-console.log(`Wrote ${outputPath} (${RANGE_NAMES.length} ranges x ${STEPS.length} steps = ${RANGE_NAMES.length * STEPS.length} colors).`);
+// Independent review (M10, issue #24) found this write firing unconditionally at module scope —
+// not just when run as the CLI script, but on every plain `import` of this module too (e.g.
+// test/palette-generator.test.ts importing `generatePalette`/`oklchToHex` for their own sake).
+// That silently overwrote src/palette.generated.ts before the test's own "no drift" comparison
+// ran, so the comparison always passed by construction — reproduced live: hand-edit CHROMA,
+// re-run the test with no `pnpm generate:palette` in between, and it passed anyway, defeating the
+// entire point of a drift check. Gating the write behind "am I the process entrypoint" makes a
+// plain import side-effect-free, so the drift test now genuinely compares the committed file
+// against a value the test's own import never touched.
+const isMainModule = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMainModule) {
+  const outputPath = path.join(repoRoot, 'src/palette.generated.ts');
+  writeFileSync(outputPath, toSource(generatePalette()));
+  console.log(`Wrote ${outputPath} (${RANGE_NAMES.length} ranges x ${STEPS.length} steps = ${RANGE_NAMES.length * STEPS.length} colors).`);
+}
