@@ -1,0 +1,15 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const entries = await getCollection('docs', (entry) => entry.id === 'layouts');
+const entry = entries[0];
+const { Content } = await render(entry);
+---
+<Base title="Layouts">
+  <a href="/">&larr; Home</a>
+  <h1>Standard layouts</h1>
+  <article>
+    <Content />
+  </article>
+</Base>

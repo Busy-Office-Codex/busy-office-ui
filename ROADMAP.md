@@ -1640,6 +1640,35 @@ issues.
     Objective 3 (proven reuse — 2+ real, disclosed consumer scenarios
     named) and this round's color-scale scope. Needs: issue #24 (`agreed`,
     project owner, 2026-09-18).
+57. [x] **Standard layouts: named skeletons, not components.** Owner note
+    (issue #24): "variation for different purpose (skeleton layout — as
+    guideline)." New `docs/layouts.md` + `docs-site/src/pages/layouts.astro`
+    (`/layouts/`, linked from the nav and the homepage) catalog 3
+    structural patterns real `examples/*.tsx` screens already repeat, each
+    with a real consumer count, not invented: list + detail in one route
+    (14 screens use the `selectedId`/`row.id === selectedId` shape —
+    Billing, Companies, Delivery, and more; packaged as `ListReport` when
+    the list is the whole screen), record detail two-column main+sidebar
+    (9 screens — Invoice, Approvals, Inventory, and more; packaged as
+    `RecordDetail`), and a KPI/stat-tile row (5 screens — Dashboard,
+    BuilderReports, and more). Explicitly guidelines, not exported layout
+    components — this package's own boundary rule already refuses
+    screen-specific composition as a package export (`AGENTS.md`); named
+    here so the pattern doesn't have to be rediscovered per screen.
+    `Inbox.tsx`'s own two-pane split (independently-scrolling panes, a
+    real resizable divider) is disclosed as a real but not-yet-standard
+    pattern — one consumer today, short of Objective 3's two-consumer
+    reuse bar, named for visibility rather than claimed proven. Accept:
+    `pnpm build:docs`/`check-links` clean with the new page reachable from
+    both the nav and the homepage (not an orphan); every named consumer
+    count checked directly against real `examples/*.tsx` files, not
+    assumed from memory. No `examples/*.tsx` file touched (out of this
+    round's scope — the layouts are described from what already exists,
+    not built into new compositions). Serves: this round's standard-layout
+    scope; Objective 3 (each documented layout cites its real reuse count,
+    the not-yet-standard one discloses its single-consumer status rather
+    than rounding up). Needs: issue #24 (`agreed`, project owner,
+    2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
