@@ -501,8 +501,9 @@ named rather than claimed fully done:
   against docs-site's first interactive browser-test target, closed this.
   Not done: the 4 precompiled "pattern" pages (dashboard/list-report/
   launcher/record-detail) render through a separate build path and don't
-  get this toggle yet (named, not yet started); no component has been
-  re-scored against the now-unblocked dimensions yet (see below).
+  get this toggle yet (named, not yet started); only Input has been
+  re-scored against the now-unblocked dimensions so far (item 59, below)
+  — the remaining 11 components are still open.
 
 **Pilot: Input, scored 30/36 → 83/100 — below the 85 threshold, honestly
 reported, not rounded up.** Readability 3/4 (placeholder contrast not
@@ -527,16 +528,31 @@ never demonstrated interactively). The dimension holding Input back below
 is the shared specimen-toggle fix named above, which would also lift
 themes for every component, not just Input.
 
-**This score (83/100) is not yet updated.** Item 58 has since closed the
-shared specimen-toggle gap that was the stated reason both themes and
-documentation/specimen usability were held down — Input's own live demo is
-now directly verified rendering in dark mode
-(`docs-site/test/browser/live-demo-controls.spec.ts`). Re-scoring Input
-(and starting the remaining 12 components, still entirely open) against
-the now-unblocked dimensions is the next eligible action, not done as part
-of item 58 itself — a score change needs its own verification pass against
-the frozen rubric, not a silent bump alongside the infrastructure fix that
-enabled it.
+**Re-scored after item 58, item 59: 32/36 → 88/100 — provisional, not a
+clean pass.** Item 58 closed the shared specimen-toggle gap that was the
+stated reason both themes and documentation/specimen usability were held
+down. Re-verified live, not assumed: themes 3/4→4/4 — Input's own live
+demo, including its `error="Tax ID must be 9 digits."` example (already
+in `docs/Input.md`'s fenced sample, previously only ever rendered once,
+statically), now genuinely re-renders with dark-palette tokens on toggle —
+confirmed directly (border/caption `rgb(180,35,24)` light-danger →
+`rgb(239,68,68)` dark-danger, not just the input's own background as
+already checked when item 58 shipped). Documentation/specimen usability
+2/4→3/4, not 4/4 — the static-specimen gap is closed, but a narrower gap
+survives undisclosed-turned-disclosed: the error/valid states are two
+separate static `<Input>` elements shown side by side, not one field
+toggled between them on demand: "meets the bar," not "exemplary." All
+other dimensions unchanged (no new evidence): readability 3/4, density
+4/4, interaction/accessibility 3/4, API simplicity 4/4, maintainability
+4/4, performance 3/4, relevant security 4/4. Every applicable dimension is
+now ≥3/4 and the score (88) clears the 85 threshold — but full acceptance
+is not yet met: the frozen rubric lists "complete required
+evidence/specimen coverage" as its own acceptance gate, separate from the
+score and per-dimension thresholds, and performance (3/4) still has no
+re-render-count test — real, missing evidence, not a rounding footnote.
+Read strictly against the rubric's own gate list, Input clears two of
+three acceptance criteria, not all three; closing the performance-evidence
+gap is real, disclosed, not-yet-started follow-up work.
 
 ## Items
 
@@ -1761,6 +1777,26 @@ issues.
     re-scoring Input's themes (3/4→ eligible for re-check) and
     documentation/specimen usability (2/4→ eligible for re-check)
     dimensions, and every other component's, once scored. Needs: issue #24
+    (`agreed`, project owner, 2026-09-18).
+59. [x] **Input pilot re-scored: 30/36→32/36 (83→88/100), provisional.**
+    The next eligible action item 58 itself named. Re-verified live, not
+    assumed: themes 3/4→4/4 (Input's own live demo, including its
+    `error=` example, genuinely re-renders with dark-palette tokens on
+    toggle — confirmed directly against real computed-style values, not
+    just the background check item 58 already ran); documentation/
+    specimen usability 2/4→3/4, not 4/4 — a narrower, distinct gap
+    survives: the error/valid states are two separate static elements
+    shown side by side, not one field toggled between them on demand.
+    Every other dimension unchanged (no new evidence gathered for them).
+    Score clears the round's 85 threshold, but full acceptance is not yet
+    met: the rubric's "complete required evidence/specimen coverage" gate
+    is its own acceptance criterion, and performance (3/4) still has no
+    re-render-count test — real, missing evidence, not a footnote.
+    No src/test changes — a documentation-only re-assessment against
+    already-existing evidence (item 58's live verification, the
+    pre-existing `test/color-contrast.test.ts` numeric checks). Serves:
+    closes the loop on this round's own pilot; demonstrates the frozen
+    rubric can move a real score, not just record one. Needs: issue #24
     (`agreed`, project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
