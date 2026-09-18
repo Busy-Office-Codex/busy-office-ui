@@ -2381,10 +2381,14 @@ issues.
     gridline-contrast disclosure.
 
     **Density.** Readability 4/4. Density (the dimension, scored against
-    this component's own core mechanism, the same way `Theme`'s own
-    "themes" dimension scores its color-forcing correctness rather than
-    being marked N/A for itself) 4/4 — genuinely exemplary and already
-    real-tested: `test/browser/density.spec.ts` includes a real nested-
+    this component's own core mechanism, not marked N/A for itself) 4/4
+    — a real, non-manufactured question for the one component that
+    *produces* its own token group's override/cascade behavior rather
+    than consuming it (`Theme` is scored the identical way in this same
+    item, for the identical reason — a simultaneous pairing, not an
+    established prior precedent being extended) — genuinely exemplary
+    and already real-tested: `test/browser/density.spec.ts` includes a
+    real nested-
     override test ("an inner Density tier overrides an outer, non-
     default Density tier") proving nesting is genuine nearest-ancestor
     CSS cascade, not "compact always wins." Themes and interaction/
