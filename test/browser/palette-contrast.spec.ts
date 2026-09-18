@@ -25,3 +25,17 @@ test('the "esc" keyboard hint reads color.textSecondary, not color.textTertiary'
   const escHint = dialog.locator('span').filter({ hasText: /^esc$/ });
   await expect(escHint).toHaveCSS('color', 'rgb(71, 85, 105)'); // color.textSecondary
 });
+
+// M10 Text scoring (issue #24): the same class of finding, this time in `Text`'s own `overline`
+// variant (src/components/Text.tsx) rather than Shell's hand-styled command-palette labels above
+// — `textTertiary` clears 4.5:1 against this variant's real consumers today only barely (4.55:1
+// on `bgCanvas`) and fails outright against `bgSubtle` (4.34:1). Moved to `textSecondary`, the
+// same fix already applied twice above for the identical token/size/weight/case combination.
+test('a Text overline label reads color.textSecondary, not color.textTertiary', async ({ page }) => {
+  await page.goto('/#examples');
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Dashboards\b/ }).click();
+
+  const overline = page.getByText('OPEN ORDERS', { exact: true });
+  await expect(overline).toHaveCSS('color', 'rgb(71, 85, 105)'); // color.textSecondary
+});
