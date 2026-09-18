@@ -76,6 +76,25 @@ const styles = stylex.create({
   alignEnd: {
     textAlign: 'end',
   },
+  // M10 Table scoring (issue #24): a clickable row (Card's own `interactive` contract already
+  // covers the identical case for a `<div>`) had no keyboard-operability counterpart here — 10
+  // real `examples/*.tsx` consumers pass `onClick` for row selection with zero way to reach or
+  // activate it from a keyboard. `outlineOffset` is negative (inset), unlike `Card`'s positive
+  // one: a `<tr>` has no independent box model separation from its neighbors, so an outset ring
+  // would overlap the adjacent row instead of framing this one.
+  interactiveRow: {
+    cursor: 'pointer',
+    outlineStyle: 'solid',
+    outlineOffset: '-2px',
+    outlineColor: {
+      default: 'transparent',
+      ':focus-visible': color.focusRing,
+    },
+    outlineWidth: {
+      default: 0,
+      ':focus-visible': '2px',
+    },
+  },
 });
 
 export type TableProps = HTMLAttributes<HTMLTableElement> & { children: ReactNode };
@@ -96,9 +115,34 @@ export function TableBody({ children }: { children: ReactNode }) {
   return <tbody>{children}</tbody>;
 }
 
-export function TableRow({ children, ...rest }: HTMLAttributes<HTMLTableRowElement>) {
+export type TableRowProps = HTMLAttributes<HTMLTableRowElement> & {
+  /**
+   * Marks this row as the current selection for a clickable row (only meaningful alongside
+   * `onClick`). Every real consumer of the row-selection pattern today drives a matching visual
+   * cue off its own `selectedId === row.id` check (`color.bgSelected`) — this makes the same
+   * state real to assistive tech too (`aria-selected`), the same "state needs a non-visual
+   * channel too" contract `Card`'s own `selected`/`aria-pressed` already established.
+   */
+  selected?: boolean;
+};
+
+export function TableRow({ children, onClick, onKeyDown, tabIndex, selected, ...rest }: TableRowProps) {
+  const interactive = Boolean(onClick);
   return (
-    <tr {...rest} {...stylex.props(styles.row)}>
+    <tr
+      tabIndex={interactive ? (tabIndex ?? 0) : tabIndex}
+      aria-selected={interactive && selected !== undefined ? selected : undefined}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        if (interactive && !event.defaultPrevented && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          event.currentTarget.click();
+        }
+      }}
+      {...rest}
+      {...stylex.props(styles.row, interactive && styles.interactiveRow)}
+    >
       {children}
     </tr>
   );

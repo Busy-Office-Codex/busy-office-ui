@@ -154,3 +154,31 @@ test('cancelling the cancel-invoice confirmation leaves the invoice untouched', 
   await expect(page.getByRole('button', { name: 'Cancel invoice' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Record payment/ })).toBeVisible();
 });
+
+// M10 Table scoring (issue #24): this row's own onClick (setSelectedId) had no keyboard path to
+// it at all before TableRow's own fix — real, previously-undisclosed gap, this Billing table is
+// one of 10 real consumers of the identical pattern.
+test('a clickable invoice row is keyboard-focusable and Enter activates it', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await gotoBilling(page);
+
+  const row = page.getByRole('row', { name: /INV-3201/ });
+  await expect(row).toHaveCSS('outline-width', '0px');
+
+  // A genuine mouse click is what makes the browser's `:focus-visible` heuristic reliable for the
+  // Tab press right after it — a scripted `.focus()` (tried first) reproducibly flaked under
+  // repeated runs, even with an explicit synchronization point, because it doesn't cleanly
+  // establish "last input was known-modality" the way a real click does (the same reason this
+  // repo's own Card focus-ring test clicks an adjacent element with the mouse before Tab-ing, not
+  // `.focus()`). The header row has no `onClick` of its own, so clicking its text is safe — no
+  // closer focusable target exists under the click, so the browser's own hit-test walks up to the
+  // nearest focusable ancestor, the region.
+  await page.getByRole('columnheader', { name: 'Invoice #' }).click();
+  await page.keyboard.press('Tab');
+  await expect(row).toBeFocused();
+  await expect(row).toHaveCSS('outline-width', '2px');
+  await expect(row).toHaveCSS('outline-style', 'solid');
+
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { name: 'INV-3201', exact: true })).toBeVisible();
+});

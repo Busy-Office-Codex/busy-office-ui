@@ -337,6 +337,42 @@ describe('design-system rendered contracts', () => {
     expect(markup).toContain('>$1,240.00</span>');
   });
 
+  it('a clickable TableRow is keyboard-focusable; a plain one is not', () => {
+    const clickableMarkup = renderToStaticMarkup(
+      createElement(designSystem.TableRow, { onClick: () => {} }, createElement(designSystem.TableCell, null, 'Row')),
+    );
+    const plainMarkup = renderToStaticMarkup(
+      createElement(designSystem.TableRow, null, createElement(designSystem.TableCell, null, 'Row')),
+    );
+
+    expect(clickableMarkup).toContain('tabindex="0"');
+    expect(plainMarkup).not.toContain('tabindex');
+  });
+
+  // `selected` exposes the programmatic (aria-selected) channel only — deliberately NOT added to
+  // state-channels.test.ts's own STATE_PROPS list, which requires a non-colour visual cue too
+  // (Card's own checkmark badge for its identical `selected`). Every real examples/*.tsx consumer
+  // of row selection today drives it purely off `color.bgSelected`; picking and building a real
+  // non-colour marker for a selected table row is its own design decision, not improvised here —
+  // named as real, disclosed follow-up (ROADMAP item 63), not silently claimed solved.
+  it('a selected, clickable TableRow exposes aria-selected; a non-interactive one never does', () => {
+    const selectedMarkup = renderToStaticMarkup(
+      createElement(designSystem.TableRow, { onClick: () => {}, selected: true }, createElement(designSystem.TableCell, null, 'Row')),
+    );
+    const unselectedMarkup = renderToStaticMarkup(
+      createElement(designSystem.TableRow, { onClick: () => {}, selected: false }, createElement(designSystem.TableCell, null, 'Row')),
+    );
+    const plainMarkup = renderToStaticMarkup(
+      createElement(designSystem.TableRow, { selected: true }, createElement(designSystem.TableCell, null, 'Row')),
+    );
+
+    expect(selectedMarkup).toContain('aria-selected="true"');
+    expect(unselectedMarkup).toContain('aria-selected="false"');
+    // `selected` without `onClick` is meaningless (not a real "selection" without an activation
+    // path) — stays silent rather than emitting a stray aria-selected on a non-interactive row.
+    expect(plainMarkup).not.toContain('aria-selected');
+  });
+
   it('renders a decorative Icon as aria-hidden with no accessible-name role', () => {
     const markup = renderToStaticMarkup(createElement(designSystem.Icon, { name: 'sliders' }));
 
