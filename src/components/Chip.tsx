@@ -91,15 +91,39 @@ const styles = stylex.create({
     borderColor: color.danger,
     color: color.danger,
   },
+  // M10 color-scale work (issue #24): same outlined shape as `toneDanger` (a semantic status
+  // color reads as a status, not the generic filled `toneAccent` treatment) — real, evidenced
+  // gap: 8+ real `examples/*.tsx` screens use `tone="accent"` for status text that isn't
+  // accent-colored in meaning (AdminOverview.tsx's "All systems operational" reads as success,
+  // RecordDetail.tsx's "Awaiting approval" reads as pending/caution), because `accent` was the
+  // only non-neutral, non-danger tone available. Adding the tones here is in scope (framework);
+  // reclassifying those existing examples' own `tone=` values is not (modifying example
+  // applications is out of this round's scope) — named as real, evidenced next-eligible work.
+  toneSuccess: {
+    backgroundColor: color.bgSurface,
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    borderColor: color.success,
+    color: color.success,
+  },
+  toneWarning: {
+    backgroundColor: color.bgSurface,
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    borderColor: color.warning,
+    color: color.warning,
+  },
 });
 
-export type ChipTone = 'neutral' | 'strong' | 'accent' | 'danger';
+export type ChipTone = 'neutral' | 'strong' | 'accent' | 'danger' | 'success' | 'warning';
 
 const toneStyles: Record<ChipTone, stylex.StyleXStyles> = {
   neutral: styles.toneNeutral,
   strong: styles.toneStrong,
   accent: styles.toneAccent,
   danger: styles.toneDanger,
+  success: styles.toneSuccess,
+  warning: styles.toneWarning,
 };
 
 export type FilterChipProps = ButtonHTMLAttributes<HTMLButtonElement> & {

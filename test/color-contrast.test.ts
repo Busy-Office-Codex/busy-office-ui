@@ -144,6 +144,24 @@ describe.each([
     expect(contrastRatio(palette.danger, palette.bgCanvas)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
   });
 
+  // `success`/`warning` (M10 color-scale work, issue #24) — same outlined-Chip flat-text usage
+  // as `danger` above, same two backgrounds.
+  it('success as flat text on bgSurface clears 4.5:1', () => {
+    expect(contrastRatio(palette.success, palette.bgSurface)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
+  });
+
+  it('success as flat text on bgCanvas clears 4.5:1', () => {
+    expect(contrastRatio(palette.success, palette.bgCanvas)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
+  });
+
+  it('warning as flat text on bgSurface clears 4.5:1', () => {
+    expect(contrastRatio(palette.warning, palette.bgSurface)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
+  });
+
+  it('warning as flat text on bgCanvas clears 4.5:1', () => {
+    expect(contrastRatio(palette.warning, palette.bgCanvas)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
+  });
+
   // focusRing is a non-text UI-component boundary (WCAG 1.4.11), not text — 3:1, not 4.5:1.
   it('focusRing clears 3:1 against bgSurface (non-text UI component)', () => {
     expect(contrastRatio(palette.focusRing, palette.bgSurface)).toBeGreaterThanOrEqual(AA_UI_COMPONENT);

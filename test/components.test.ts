@@ -184,6 +184,29 @@ describe('design-system rendered contracts', () => {
     expect(statusMarkup).not.toContain('<button');
   });
 
+  // M10 color-scale work (issue #24): `success`/`warning` are new ChipTone values — this proves
+  // they actually apply distinct styling (not silently falling back to `neutral` or colliding
+  // with `danger`'s own classes), the same structural-not-narrative check this repo's own AGENTS.md
+  // asks for. Real color VALUES are verified separately by test/color-contrast.test.ts's AA checks.
+  it('renders success and warning status chips with distinct classes from danger and from each other', () => {
+    const classesFor = (tone: 'danger' | 'success' | 'warning') =>
+      renderToStaticMarkup(createElement(designSystem.Chip, { variant: 'status', tone, children: 'x' }))
+        .match(/class="([^"]*)"/)?.[1]
+        .split(' ') ?? [];
+
+    const dangerClasses = new Set(classesFor('danger'));
+    const successClasses = new Set(classesFor('success'));
+    const warningClasses = new Set(classesFor('warning'));
+
+    expect(successClasses.size).toBeGreaterThan(0);
+    expect(warningClasses.size).toBeGreaterThan(0);
+    // Each tone's class set differs from the other two by at least one class (the tone-specific
+    // border/text color classes) - proves they're genuinely distinct style rules, not aliases.
+    expect([...successClasses].some((c) => !dangerClasses.has(c))).toBe(true);
+    expect([...warningClasses].some((c) => !dangerClasses.has(c))).toBe(true);
+    expect([...successClasses].some((c) => !warningClasses.has(c))).toBe(true);
+  });
+
   it('renders a ButtonGroup as a labelled radiogroup with one checked radio and disabled segments preserved', () => {
     const markup = renderToStaticMarkup(
       createElement(designSystem.ButtonGroup, {
