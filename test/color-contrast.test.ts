@@ -101,6 +101,17 @@ describe.each([
     expect(contrastRatio(palette.textSecondary, palette.bgSelected)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
   });
 
+  // M10 Text scoring (issue #24): `Text`'s `overline` variant moved from `textTertiary` to
+  // `textSecondary` — `textTertiary` clears 4.5:1 against `bgCanvas`/`bgSurface` only barely
+  // (4.55:1/4.76:1 in light) and fails outright against `bgSubtle` (4.34:1, the same confirmed
+  // finding `Table.tsx`'s own header comment already documents). `bgSubtle` wasn't in this file's
+  // own coverage before (`textSecondary` was only checked against `bgCanvas`/`bgSurface`/
+  // `bgSelected`) — completing the matrix here, at `overline`'s stricter 11px/semibold/uppercase
+  // size (no "large text" exemption), not just body text.
+  it('textSecondary on bgSubtle clears 4.5:1 (body text)', () => {
+    expect(contrastRatio(palette.textSecondary, palette.bgSubtle)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
+  });
+
   // `textOnInk` is the text color placed on top of `action`/`accent`/`danger` when any of those
   // three is used as a filled background (Button primary, filter Chip selected, Dropdown active
   // trigger/item, Chip status "accent" tone, Shell's dock badge/active tab, Button danger's

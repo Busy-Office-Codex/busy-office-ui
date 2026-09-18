@@ -1938,6 +1938,79 @@ issues.
     real bug, not just a missing test, the second time this round
     (after item 55's Shell command-palette accessible-name gap). Needs:
     issue #24 (`agreed`, project owner, 2026-09-18).
+62. [x] **Text scored: 23/28 (82/100) found → 27/28 (96/100) after fixes,
+    provisional.** Third component scored against the frozen rubric.
+    Density and interaction/accessibility marked N/A (stated reason:
+    `docs/Text.md`'s own contract — a fixed type scale, not
+    density-tiered like `Button`/`Input`/`Table`; static markup only, no
+    interactive behavior to score), excluded from both sum and max per
+    the rubric's own rule — denominator 28, not 36. Readability 4/4, API
+    simplicity 4/4, maintainability 4/4, relevant security 4/4 (no
+    `dangerouslySetInnerHTML`, plain React children). Performance 3/4,
+    provisional — the same repo-wide gap every component in this round
+    has disclosed, no re-render-count test exists anywhere yet.
+
+    **Themes: found 2/4, real near-miss/fail, fixed to 4/4.** The
+    `overline` variant used `color.textTertiary` — against its 5 real
+    `examples/*.tsx` consumers today (all rendering on `bgCanvas`/
+    `bgSurface`) this happens to clear 4.5:1, but only barely on
+    `bgCanvas` (4.55:1 — computed directly, not assumed, a hair above the
+    floor at this exact 11px/semibold/uppercase size, which doesn't
+    qualify for WCAG's "large text" 3:1 exemption) and fails outright
+    against `bgSubtle` (4.34:1 — the identical confirmed HIGH finding
+    `Table.tsx`'s own header comment already documents for this exact
+    token/size/weight/case, and the identical fix `src/shell/Shell.tsx`'s
+    command-palette labels already made, issue #13). **Corrected
+    mid-review**: the first pass characterized this as "a proven live
+    WCAG AA failure in 5 consumers" — checked each of the 5 directly
+    against their real rendered background before writing the fix, found
+    none actually sits on `bgSubtle` today, so the honest framing is a
+    fragile near-miss plus a real failure against a background this
+    design system uses elsewhere, not a live failure today.
+    **Independent review found the "5 consumers" count itself was scoped
+    only to `examples/*.tsx`** — `Shell.tsx` (framework code, not an
+    example) has 2 more real `overline` usages of its own; one (the
+    app-strip module label, `Shell.tsx:692`) sits inside a hardcoded,
+    non-theme-reactive `rgba(255, 255, 255, 0.6)` glass panel with a
+    genuinely unverified effective background (this file already has one
+    confirmed contrast failure in a different glass panel, the
+    command-palette section headers this same item's own fix traces
+    back to — not a hypothetical concern). This fix helps that consumer
+    regardless of its background; the glass panel's own non-theme-
+    reactivity is a separate, real, pre-existing gap, named here as
+    disclosed follow-up, not fixed in this item (out of scope — a Shell
+    chrome theming gap, not a `Text` component defect). Fixed to
+    `color.textSecondary`
+    (clears 4.5:1 against every real background in both palettes by a
+    wide margin — `test/color-contrast.test.ts`, extended with a new
+    `textSecondary`-on-`bgSubtle` case completing the matrix), the same
+    fix already proven twice elsewhere in this codebase for the
+    identical token. Red-proofed live: a new
+    `test/browser/palette-contrast.spec.ts` case (checks Dashboard's
+    real "OPEN ORDERS" overline) failed with the exact predicted
+    `textTertiary` rgb value against the pre-fix code, passed after.
+
+    **Documentation/specimen usability: found 2/4, fixed to 4/4.**
+    `docs/Text.md`'s fenced example demonstrated only 2 of 6 real
+    variants (`heading`, `body`) and never the `as` polymorphic-element
+    override, despite both being described in prose. Added all 6
+    variants plus an `as` example; also fixed the frontmatter `tests:`
+    list, which cited neither test file that actually backs the themes
+    claim above (now includes `test/color-contrast.test.ts` and
+    `test/browser/palette-contrast.spec.ts`) — the same "doc claims a
+    behavior with no test declared for it" gap class item 61 found for
+    `Button`.
+
+    **27/28 → 96/100, clears the 85 threshold and every applicable
+    dimension is ≥3/4 — but reported PROVISIONAL, same standard as
+    Button (item 61) and Input (item 59):** performance's missing
+    evidence is real and disclosed, not exempted for being a repo-wide
+    gap rather than a Text-specific one. Serves: this round's
+    component-scoring scope; the second real bug this round's scoring
+    process has found and fixed in framework code (after Button's
+    hover-fill bug, item 61) — and a self-caught overclaim corrected
+    before it ever reached the record, not after independent review had
+    to catch it. Needs: issue #24 (`agreed`, project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
