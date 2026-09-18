@@ -33,6 +33,11 @@ const styles = stylex.create({
     border: 'none',
     padding: 0,
     color: 'inherit',
+    // Deliberate literal, not a token gap (M10 Modal scoring, issue #24): a backdrop scrim needs
+    // to darken whatever's behind it by the same amount regardless of theme, unlike `Dropdown`'s
+    // menu panel (real content, needs to re-tint) — the same reasoning already used for `Modal`'s
+    // own `glass.*` panel styling below, which stays light-only for the opposite reason (real
+    // content, disclosed in docs/Theme.md as a known gap, not fixed here either).
     backgroundColor: 'rgba(15, 23, 42, 0.32)',
     display: 'flex',
     alignItems: 'center',

@@ -73,6 +73,30 @@ test('a real Button shows a visible focus-visible ring on keyboard focus', async
   await expect(newPoButton).toHaveCSS('outline-style', 'solid');
 });
 
+// M10 Chip scoring (issue #24): filter Chip's own `:focus-visible` outline (Chip.tsx) is defined
+// in code, but no test anywhere asserted it live — grepped every test/browser/*.spec.ts and
+// test/*.test.ts for "Chip" first; the real hits (state-channels.test.ts, color-contrast.test.ts,
+// components.test.ts) check `selected`/tone/contrast, never a rendered focus ring. Shell's own
+// command-palette category row (`src/shell/Shell.tsx`) is a real, live filter Chip consumer.
+test('a filter Chip shows a visible focus-visible ring on keyboard focus', async ({ page }) => {
+  await page.goto('/#examples');
+  // A bare scripted `.focus()` right after a real mouse click (opening the palette) doesn't
+  // reliably trigger `:focus-visible` in Chromium — confirmed live, the same caveat Table's own
+  // fix documented: what matters is genuine keyboard-caused focus, not just "is this a native
+  // button." The search input auto-focuses on open; 3 real Tab presses reach "Actions" (search →
+  // Close → "All" → "Actions"), confirmed via the actual DOM tab order, not assumed.
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  const actionsChip = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: 'Actions', exact: true });
+
+  await expect(actionsChip).toHaveCSS('outline-width', '0px');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(actionsChip).toBeFocused();
+  await expect(actionsChip).toHaveCSS('outline-width', '2px');
+  await expect(actionsChip).toHaveCSS('outline-style', 'solid');
+});
+
 test('Input placeholder text meets AA contrast, not the disabled/faded token', async ({ page }) => {
   await page.goto('/#examples');
   const input = page.getByPlaceholder('Search POs…');

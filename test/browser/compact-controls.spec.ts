@@ -113,3 +113,47 @@ test('Dropdown trigger height follows density: 36px ambient, 28px inside a local
   const compactTrigger = page.getByRole('button', { name: /^Role ·/ });
   await expect(compactTrigger).toHaveCSS('height', '28px');
 });
+
+// M10 ButtonGroup scoring (issue #24): docs/ButtonGroup.md and the component's own code comments
+// both claim `density.controlHeight`-driven sizing, but grepped every test file for "ButtonGroup"
+// first — none of the real hits (button-group.spec.ts, control-center.spec.ts, chart.spec.ts,
+// components.test.ts) assert a height at any density tier. Heights below are the segment's own
+// bounding box, not the raw `density.controlHeight` value: the track's 1px border is subtracted
+// from its `box-sizing: border-box` content area, which `align-items: stretch` then fills exactly
+// — measured live, not assumed (34px/26px, not the token's own 36px/28px).
+test('ButtonGroup segment height follows density: 34px ambient, 26px inside a compact region', async ({ page }) => {
+  await page.goto('/#examples');
+  await page.getByRole('button', { name: 'Control center' }).click();
+  const ambientSegment = page.getByRole('radiogroup', { name: 'Density' }).getByRole('radio').first();
+  await expect(ambientSegment).toHaveCSS('height', '34px');
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Pages\s+[A-Z]/ }).click();
+  const compactSegment = page.getByRole('radiogroup', { name: 'View mode' }).getByRole('radio').first();
+  await expect(compactSegment).toHaveCSS('height', '26px');
+});
+
+// M10 Chip scoring (issue #24): independent review corrected a real miss in the first pass — a
+// grep for the literal string `variant="filter"` only matched 5 files and missed that
+// `examples/filterTabs.tsx` (the shared component every `<FilterTabs>` consumer renders through)
+// wraps its own filter Chip row in `<Density value="compact">` internally, so every one of its 7
+// real consumers genuinely renders at compact density regardless of what any OUTER Density region
+// in the calling file does (Density.tsx's own nesting rule: the nearest wrapper always wins).
+// Unlike ButtonGroup's track+stretched-segment shape, `filterBase` has no `boxSizing:
+// 'border-box'` override and no bordered ancestor stretching it — height is the raw
+// `density.controlHeight` value unmodified, verified live (36px/28px, not an adjusted number).
+test('filter Chip height follows density: 36px ambient, 28px inside FilterTabs\' own compact wrapper', async ({
+  page,
+}) => {
+  await page.goto('/#examples');
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  const ambientChip = page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: 'Actions', exact: true });
+  await expect(ambientChip).toHaveCSS('height', '36px');
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Approvals\s+[A-Z]/ }).click();
+  const compactChip = page.getByRole('button', { name: 'Mine', exact: true });
+  await expect(compactChip).toHaveCSS('height', '28px');
+});

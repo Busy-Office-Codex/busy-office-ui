@@ -14,8 +14,12 @@ Compact tag for displaying record or view state. `variant="status"` (default rea
 `success`/`warning` (added M10, issue #24) use the same outlined shape as `danger` — a bordered, tinted-text tag, not a filled background — so a semantic status color reads as a status, distinct from the generic filled `accent` tone. Use `success` for a genuinely positive/healthy state ("All systems operational"), `warning` for a pending/caution state ("Awaiting approval", "3 days overdue"), `danger` only for something actually wrong or blocking. `accent` is not a status color — avoid it for state that has a real success/warning/danger reading; it's for drawing attention to a value without implying good or bad (a count, a highlight).
 
 ```jsx
+<Chip variant="status" tone="neutral">Draft</Chip>
+<Chip variant="status" tone="strong">Reviewed</Chip>
+<Chip variant="status" tone="accent">3 new</Chip>
 <Chip variant="status" tone="danger">Overdue 12d</Chip>
 <Chip variant="status" tone="success">Active</Chip>
 <Chip variant="status" tone="warning">Awaiting approval</Chip>
+<Chip variant="filter">All suppliers</Chip>
 <Chip variant="filter" selected onRemove={() => {}}>Awaiting approval</Chip>
 ```

@@ -7,7 +7,8 @@
     "dev": "node scripts/build-examples.mjs && astro dev",
     "build": "node scripts/build-examples.mjs && astro build",
     "check-links": "node scripts/check-links.mjs",
-    "test": "pnpm build && pnpm check-links",
+    "check-live-demos": "node scripts/check-live-demos.mjs",
+    "test": "pnpm build && pnpm check-links && pnpm check-live-demos",
     "test:browser": "playwright test",
     "preview": "astro preview"
   },

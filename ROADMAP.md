@@ -2209,6 +2209,131 @@ issues.
     behavior (after item 55's Shell command-palette gap — Dropdown's own
     dead `:hover` rule is the same class, verified dead not assumed).
     Needs: issue #24 (`agreed`, project owner, 2026-09-18).
+65. [x] **Chip, Modal, and ButtonGroup scored: seventh through ninth
+    components — plus a real, previously-undisclosed docs-site bug found
+    along the way, now a permanent gate.** Chip 30/36 (83/100) found →
+    35/36 (97/100) fixed, provisional. Modal 33/36 (91/100) found →
+    31/32 (96/100) fixed, provisional. ButtonGroup 33/36 (91/100) found
+    → 35/36 (97/100) fixed, provisional.
+
+    **Chip.** Readability 4/4, API simplicity 4/4, maintainability 4/4,
+    relevant security 4/4. Performance 3/4, provisional.
+
+    **Density: found 3/4, real bug in the FIRST DRAFT's own claim,
+    corrected by independent review before merge — a BLOCKER, not a
+    nit.** The first pass claimed no real consumer of filter `Chip` is
+    ever wrapped in a compact `Density` region, checked by grepping the
+    literal string `variant="filter"` (5 hits) and verifying none of
+    those *calling* files locally wraps a `Chip` in a compact region.
+    That methodology never actually read `examples/filterTabs.tsx` — the
+    one shared component every `<FilterTabs>` consumer renders filter
+    `Chip` through — which wraps its own `Chip` row in `<Density
+    value="compact">` **internally**. Per `Density.tsx`'s own nesting
+    rule (the nearest wrapper always wins), all **7 real consumers**
+    (`Approvals.tsx`, `BuilderForms.tsx` ×2, `Notifications.tsx`,
+    `Profile.tsx`, `RolePage.tsx`, `SalesOrderList.tsx`,
+    `UsersAndRoles.tsx`) genuinely render at compact density regardless
+    of what any *outer* `Density` region does — the exact opposite of
+    "no real consumer exists." Fixed to 4/4 with a real live test
+    (Shell's command-palette "Actions" chip for ambient, `Approvals`'
+    real `FilterTabs` "Mine" chip for compact), red-proofed live — 36px/
+    28px, the raw `density.controlHeight` value unmodified (unlike
+    `ButtonGroup`'s track+stretched-segment shape, `filterBase` has no
+    `box-sizing: border-box` override and no bordered ancestor
+    stretching it, confirmed by direct measurement before writing the
+    assertions, not assumed from the token value alone).
+
+    Themes: found 3/4 — `toneStrong` (`backgroundColor: color.border`,
+    `color: color.textPrimary`) had zero contrast check anywhere
+    (grepped `test/color-contrast.test.ts` for `palette.border` as a
+    background: no hits before this), fixed to 4/4 with a new case
+    (14.48:1 light / 9.90:1 dark, computed directly — comfortably
+    clears, not a live failure, just previously unverified).
+    Interaction/accessibility: found 3/4 — filter Chip's own
+    `:focus-visible` outline was defined in code but never asserted live
+    (grepped every test file for "Chip" first: the real hits check
+    `selected`/tone/contrast, never a rendered ring), fixed to 4/4 with
+    a live test on Shell's real command-palette category row. Docs/
+    specimen usability: found 2/4 — the fenced example showed only 3 of
+    6 tones (missing `neutral`/`strong`/`accent`) and only one filter
+    state, fixed to 4/4 with all 6 tones plus both filter states.
+
+    **Modal.** Readability 4/4, themes 4/4 — `glass.*` styling is the
+    same already-disclosed dark-mode gap item 64 named for Dropdown/
+    Modal/ControlCenter, not new here; the backdrop's own `rgba(15, 23,
+    42, 0.32)` scrim literal is a deliberate, disclosed choice (not a
+    token gap — a scrim darkens identically regardless of theme, unlike
+    real content), so the two real raw-value literals in this file are
+    both accounted for, not counted against the score — interaction/
+    accessibility 4/4 (genuinely exemplary — native `<dialog>`/
+    `showModal()`, an explicit Tab-wrap loop with a code comment on why
+    Chromium needs it, 5 real live tests), API simplicity 4/4,
+    maintainability 4/4, relevant security 4/4. Performance 3/4,
+    provisional. Density: found 2/4 (undisclosed — zero `density.*`
+    usage, no stated reason anywhere, the same shape `Card`'s own gap
+    was before its fix, item 64), reclassified N/A after adding one
+    disclosure sentence (a full-screen interruption surface, not a
+    density-tiered control). Documentation/specimen usability already
+    4/4, found and unchanged.
+
+    **ButtonGroup.** Readability 4/4, themes 4/4 (zero raw literals;
+    both real color pairs already covered by `Button`'s own existing
+    contrast tests), interaction/accessibility 4/4 (genuinely exemplary
+    — the real WAI-ARIA radiogroup pattern, roving `tabindex`, arrow-key
+    wrap, Home/End, disabled-skip, all 6 behaviors live-tested), API
+    simplicity 4/4, maintainability 4/4, relevant security 4/4.
+    Performance 3/4, provisional. Density: found 3/4 — a real mechanism
+    (`density.controlHeight`/`fontSize`), zero test coverage anywhere
+    (grepped every test file for "ButtonGroup" first: real hits check
+    ARIA/keyboard behavior, never height), on the component that is
+    literally the implementation behind every docs-site specimen's own
+    Theme/Density toggle (item 58) — a regression here would silently
+    break that infrastructure across all 13 component docs at once.
+    Fixed to 4/4 with a live test (Control Center's own Density selector
+    for ambient, `Pages`' "View mode" selector, genuinely inside its own
+    compact `Density` region, for compact) — segment heights are 34px/
+    26px, not the raw `controlHeight` token's 36px/28px, since the
+    track's 1px border is subtracted from its own `box-sizing:
+    border-box` content area before `align-items: stretch` fills it;
+    measured live, not assumed.
+
+    **Real, previously-undisclosed bug found while fixing the docs
+    example, unrelated to any rubric dimension above: `docs/
+    ButtonGroup.md`'s own fenced example was silently broken.** It
+    referenced undefined `density`/`setDensity` variables — `astro
+    build`/`check-links` both stayed green because `LiveDemo.tsx`
+    catches a compile/render error at runtime and shows it as a visible
+    `<pre role="alert">` instead of throwing, so nothing in the existing
+    gate suite could ever catch this class of defect. Fixed with a
+    self-contained `React.useState` IIFE (the same pattern `docs/
+    Modal.md`'s own example already uses). Swept all 29 built pages for
+    the same symptom — no other page was affected, this was isolated,
+    not systemic. **Turned into a permanent gate, not just a one-off
+    fix**: new `docs-site/scripts/check-live-demos.mjs` walks the built
+    `dist/` output for any `role="alert"` LiveDemo error, wired into
+    `docs-site`'s own `test` script (alongside `check-links`) and both
+    CI workflows (`gates.yml`, `docs.yml` — the one that actually
+    publishes the live docs image). Red-proofed live: reverted the doc
+    fix, confirmed the new check fails with the exact error message,
+    restored, reverified clean.
+
+    **Independent review found one real BLOCKER before merge, fixed
+    same item**: the first draft's Chip density claim above — see the
+    corrected text — was itself the exact recurring failure class this
+    round's own reviews have caught before (items 61/62/64): a "no real
+    consumer exists" claim from an incomplete grep, this time inverted
+    (claiming a gap that didn't need to exist, rather than
+    undercounting a fix's own evidence). Caught, verified, and fixed
+    with a real test before this item ever merged — not shipped and
+    corrected after.
+
+    Serves: this round's component-scoring scope; the sixth real,
+    previously-undisclosed defect this round's process has found (after
+    items 55, 61, 62, 63, 64's dead-code finding) — and the first one
+    found not by scoring a *component* but by actually verifying a doc
+    fix compiled, the same "don't trust build success, check the real
+    output" discipline this whole round has run on. Needs: issue #24
+    (`agreed`, project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
