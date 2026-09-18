@@ -4,6 +4,7 @@ tests:
   - test/browser/dropdown-focus.spec.ts
   - test/browser/design-fidelity-fixes.spec.ts
   - test/browser/filter-hierarchy.spec.ts
+  - test/browser/compact-controls.spec.ts
   - test/state-channels.test.ts
 ---
 
@@ -15,10 +16,13 @@ The trigger itself now carries real rest/hover/pressed/open states — rest is a
 
 Full keyboard support: the trigger exposes `aria-haspopup="listbox"`/`aria-expanded`; ArrowDown/ArrowUp/Enter/Space on the trigger opens the menu; inside it, ArrowUp/ArrowDown move the highlight (wrapping at the ends), Home/End jump to the first/last item, Enter/Space selects the highlighted item, and Escape closes without selecting — both return focus to the trigger. Clicking outside the menu closes it without selecting. The menu is `role="listbox"` (labelled by `label`) with `role="option"`/`aria-selected` items and `aria-activedescendant` tracking the highlight. The keyboard-highlighted option carries a `color.bgSubtle` fill plus an inset `focusRing`-colored outline (not a bare color tint) so it stays visible against the menu's glass background. Opening the menu via the keyboard moves DOM focus onto the listbox itself, so it — not the trigger — is what shows a `:focus-visible` ring while the menu is open; opening it with a mouse click does not show that ring, matching how `:focus-visible` behaves everywhere else in this system.
 
+Known gap, disclosed rather than silently dropped (M10, issue #24): the menu popover reads the `glass.*` token group (`tokens.stylex.ts`), which has no dark-mode variant — see `docs/Theme.md`'s own disclosure. The menu stays a frozen light-glass panel regardless of theme; the trigger itself (all `color.*` tokens) re-tints correctly.
+
 ```jsx
 <Dropdown
   label="Status · Awaiting"
   items={[{ label: 'All' }, { label: 'Awaiting approval', selected: true }]}
   onSelect={(label) => console.log(label)}
+  active
 />
 ```

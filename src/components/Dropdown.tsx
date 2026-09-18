@@ -121,10 +121,12 @@ const styles = stylex.create({
     display: 'flex',
     justifyContent: 'space-between',
     cursor: 'pointer',
-    backgroundColor: {
-      default: 'transparent',
-      ':hover': 'rgba(15, 23, 42, 0.06)',
-    },
+    // No `:hover` rule here (M10 Dropdown scoring, issue #24): `onMouseEnter` below sets
+    // `highlighted` on the very first hover frame, so `itemHighlighted`'s own real background
+    // always wins before a CSS `:hover` rule could ever paint — a leftover from before that state
+    // existed, verified dead live (real hover renders `itemHighlighted`'s `bgSubtle`, never this
+    // value), not a visible defect but stale code masquerading as a real style rule.
+    backgroundColor: 'transparent',
     // Authored zero-width/transparent baseline (matching the `trigger`/`menu` pattern above)
     // rather than leaving outline unset, so `itemHighlighted` below has a real "off" state to
     // override, not an unstyled default the browser fills in on its own.

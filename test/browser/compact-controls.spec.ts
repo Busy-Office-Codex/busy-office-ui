@@ -91,3 +91,18 @@ test('the active app-strip nav item is a rounded-rect highlight, not a capsule',
   const active = page.getByRole('button', { name: 'Purchase orders', exact: true });
   await expect(active).toHaveCSS('border-radius', '6px');
 });
+
+// M10 Dropdown scoring (issue #24): docs/Dropdown.md claims specific trigger heights per density
+// tier, but no live test anywhere checked the trigger itself at any tier — the same "claimed,
+// never verified" gap class Button's own focus ring was before item 61.
+test('Dropdown trigger height follows density: 36px ambient, 28px inside a compact region', async ({ page }) => {
+  await page.goto('/#examples');
+  const defaultTrigger = page.getByRole('button', { name: /^Supplier ·/ });
+  await expect(defaultTrigger).toHaveCSS('height', '36px');
+
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Users\s+[A-Z]/ }).click();
+  await page.getByRole('row', { name: /Elena Cho/ }).click();
+  const compactTrigger = page.getByRole('button', { name: /^Role ·/ });
+  await expect(compactTrigger).toHaveCSS('height', '28px');
+});
