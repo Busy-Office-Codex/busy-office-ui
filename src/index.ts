@@ -24,3 +24,5 @@ export { Icon } from './components/Icon.js';
 export type { IconProps, IconName } from './components/Icon.js';
 export { Theme } from './components/Theme.js';
 export type { ThemeProps, ThemeMode } from './components/Theme.js';
+export { Avatar } from './components/Avatar.js';
+export type { AvatarProps } from './components/Avatar.js';

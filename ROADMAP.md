@@ -1798,6 +1798,73 @@ issues.
     closes the loop on this round's own pilot; demonstrates the frozen
     rubric can move a real score, not just record one. Needs: issue #24
     (`agreed`, project owner, 2026-09-18).
+60. [x] **ERP component-gap investigation: `Avatar`, one real evidenced
+    gap.** M10's own last-named-but-not-started scope item. A read-only
+    research pass across every `examples/*.tsx` screen, checked against
+    Objective 3's 2+-consumer bar (not manufactured, not a naive grep hit)
+    found exactly one real gap: a decorative circular placeholder div —
+    `{ width, height, borderRadius: 999, background: color.border,
+    flexShrink: 0 }`, byte-identical — duplicated across 3 real consumers
+    (`AppShell.tsx`'s command-bar account slot, `Profile.tsx`'s header,
+    `RolePage.tsx`'s team-list row), 2 of which already self-documented
+    the duplication in their own comments ("same pattern as..."). New
+    `src/components/Avatar.tsx` (`size` prop, pixel width/height, default
+    32 — the size 2 of the 3 consumers already use), StyleX-styled
+    matching this package's own convention, exported from `src/index.ts`.
+    Real test (`test/components.test.ts`): default size, an explicit
+    `size={64}` override, `aria-hidden="true"`, and asserts the exact
+    rendered markup shape (a plain non-interactive `<div>`, not an `<img>`
+    or button). `docs/Avatar.md` states its real boundary — not for a
+    real photo, upload, or identity-bearing glyph (initials/category
+    color); `examples/Inbox.tsx`'s colored initial-letter avatar is a
+    related but distinct pattern with only 1 consumer, short of the bar,
+    named as real-but-not-yet-proven follow-up, not built speculatively
+    into this component's API.
+
+    Every other candidate the investigation surfaced was checked and
+    explicitly ruled out, not silently dropped: a hand-rolled pill-with-
+    caret "static switcher" label (`RolePage.tsx`'s "Switch role ▾",
+    byte-identical to `Login.tsx`'s pre-existing "Acme Co ▾") has 2 real
+    consumers but no unmet need — both already carry their own comment
+    explaining why a real `Dropdown` doesn't fit ("nothing to switch to
+    on a sample page"), so promoting it would manufacture a need rather
+    than serve one (Objective 1); a shipment-tracker step indicator
+    (`Delivery.tsx`), a payment progress bar (`Invoice.tsx`), an editable
+    line-item table, and a multi-step wizard flow (`PasswordReset`) each
+    still have only 1 real consumer, unchanged from earlier ticks'
+    triage, still short of the bar; pagination, tooltip, date picker,
+    multi-select, accordion, file-upload, and drag-handle patterns were
+    grepped and read, not just assumed — none had a second real consumer
+    doing the genuinely same thing. Tab-from-`FilterTabs` and Checkbox-
+    from-`checkboxStyles` promotions, already examined and rejected in
+    earlier ticks, were not re-litigated (no new evidence surfaced that
+    would change either call).
+
+    **Deliberately not done, disclosed not silently expanded:** the 3
+    real `examples/*.tsx` consumers are not migrated to use `Avatar` —
+    modifying example applications is out of this round's scope, same
+    boundary item 56 already drew for the color-scale tokens. One real,
+    disclosed side effect of that: `AppShell.tsx`'s own copy of this div
+    is missing the `aria-hidden="true"` both `Profile.tsx`'s and
+    `RolePage.tsx`'s copies already carry — a pre-existing inconsistency
+    this investigation found, not introduced by it, and one a future
+    migration to `Avatar` would automatically close (the component always
+    renders it) — named here rather than fixed in `examples/` this round.
+
+    **Governance gate correction, before merge:** the first draft cited
+    only the round-level issue #24 as authorization — independent review
+    correctly caught that a genuinely new package export is a strict
+    one-way decision (`LOOP.md`'s Gate section: "new exports"), and #24's
+    own agreement to *investigate* ERP gaps does not extend to *building*
+    whatever a gap turns out to be, the identical distinction this repo's
+    own history already drew for Icon/Theme/Breadcrumbs (issues #18/#19/
+    #20 — each proposed and separately agreed, not built on the strength
+    of the broader mission agreement alone). Filed issue #25 with the full
+    evidence, `proposed`, left this item out of the merged batch until a
+    real, separate `agreed` came back — not inferred, not assumed.
+    Serves: Objective 3 (proven reuse — 3 named, verified consumers, not
+    manufactured); this round's ERP-gap-investigation scope. Needs: issue
+    #25 (`agreed`, project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).

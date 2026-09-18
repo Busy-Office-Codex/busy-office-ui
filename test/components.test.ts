@@ -406,4 +406,17 @@ describe('design-system rendered contracts', () => {
     // Different variants carry different size/weight tokens, so their compiled class lists differ.
     expect(heading).not.toBe(caption);
   });
+
+  it('renders a decorative, non-interactive Avatar sized by the size prop, defaulting to 32px', () => {
+    const defaultMarkup = renderToStaticMarkup(createElement(designSystem.Avatar, {}));
+    const sizedMarkup = renderToStaticMarkup(createElement(designSystem.Avatar, { size: 64 }));
+
+    expect(defaultMarkup).toContain('aria-hidden="true"');
+    expect(defaultMarkup).toContain('width:32px');
+    expect(defaultMarkup).toContain('height:32px');
+    expect(sizedMarkup).toContain('width:64px');
+    expect(sizedMarkup).toContain('height:64px');
+    // No image, no text content, no interactive role — a plain decorative <div>, not a button/img.
+    expect(defaultMarkup).toMatch(/^<div aria-hidden="true" class="[^"]+" style="[^"]+"><\/div>$/);
+  });
 });
