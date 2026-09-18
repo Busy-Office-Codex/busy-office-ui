@@ -243,7 +243,8 @@ function buildChartOption(type: ChartProps['type'], data: ChartSeries, valueLabe
  * "why Chart.js" reasoning that decision was made from, with this switch noted alongside it). The
  * public contract this component wraps around ECharts is unchanged from the Chart.js version —
  * `ChartProps`/`ChartSeries` are identical — and `echarts` is never imported anywhere outside this
- * file; every real consumer (Dashboard, Inventory, Planning, Analytics) needed no changes.
+ * file; every real consumer at the time of the switch (Dashboard, Inventory, Planning, Analytics)
+ * needed no changes — a historical snapshot, not the current count; see `docs/Chart.md` for that.
  *
  * ECharts renders into a container element it owns and manages internally — unlike Chart.js,
  * which is handed a `<canvas>` this component created — so the wrapping `<div>` below, not a bare

@@ -2334,6 +2334,149 @@ issues.
     fix compiled, the same "don't trust build success, check the real
     output" discipline this whole round has run on. Needs: issue #24
     (`agreed`, project owner, 2026-09-18).
+66. [x] **Chart, Density, Icon, and Theme scored — the tenth through
+    thirteenth and final components. All 13 `src/components/*.tsx`
+    files now have a first scoring pass under the frozen rubric.**
+    Chart 30/36 (83/100) found → 30/32 (93/100) fixed, provisional.
+    Density 26/28 (92/100) found → 27/28 (96/100) fixed, provisional.
+    Icon 31/36 (86/100) found → 31/32 (96/100) fixed, provisional.
+    Theme 25/28 (89/100) found → 27/28 (96/100) fixed, provisional.
+
+    **Chart.** Readability 4/4, API simplicity 4/4, maintainability 4/4,
+    relevant security 4/4 (verified: the ECharts tooltip-XSS fix was
+    cross-checked directly against the installed library's own render
+    path, not assumed). Performance 3/4, provisional. Themes 4/4 —
+    genuinely the best-tested theme-reactivity of any component this
+    round: 3 real live tests (a `Theme`-wrapped light/dark pair reading
+    distinct gridline tokens, a *live* `Theme` toggle recoloring an
+    already-mounted chart with no remount, and an OS-level
+    `prefers-color-scheme` flip recoloring live). Interaction/
+    accessibility stays 3/4, correctly — a real, pre-existing (M8)
+    gridline/axis-contrast limitation (`color.border` measures ~1.2:1
+    light / ~1.7:1 dark against the chart surface, under WCAG's 3:1
+    non-text floor; already numerically verified in `ROADMAP.md`,
+    softened but not fixed by the always-present accessible `Table`
+    fallback) was disclosed in `ROADMAP.md` but never in `docs/Chart.md`
+    itself — now cross-referenced there too, which doesn't change the
+    underlying capability so doesn't move the score, the same
+    "disclosure isn't a fix" standard item 64 already applied to
+    Dropdown's `glass` gap.
+
+    Density: found 2/4 (undisclosed — zero `density.*` usage, no stated
+    reason), reclassified **N/A** after one disclosure sentence (a
+    data-visualization surface, not a control — same shape as `Card`/
+    `Modal`/`Icon`'s own N/A precedents this round). Documentation/
+    specimen usability: found 2/4 — the fenced example showed only
+    `type="line"`, and both `docs/Chart.md`'s own "5 named consumers"
+    and `Chart.tsx`'s own JSDoc "(Dashboard, Inventory, Planning,
+    Analytics)" are stale as *current-count* claims (though accurate as
+    the historical snapshots they actually were — the original issue
+    #16 scoping decision, then the ECharts-migration point respectively;
+    re-read in context, neither ever claimed to be a live-updated
+    total). Checked directly, not carried forward: **7 real consumers
+    today** (`Analytics`, `BiExplore`, `BuilderReports`, `Dashboard`,
+    `Finance`, `Inventory`, `Planning`). Fixed to 4/4: added `bar`/
+    `donut` examples, a dated current-count line naming the historical
+    mentions as snapshots rather than silently overwriting them, and the
+    gridline-contrast disclosure.
+
+    **Density.** Readability 4/4. Density (the dimension, scored against
+    this component's own core mechanism, not marked N/A for itself) 4/4
+    — a real, non-manufactured question for the one component that
+    *produces* its own token group's override/cascade behavior rather
+    than consuming it (`Theme` is scored the identical way in this same
+    item, for the identical reason — a simultaneous pairing, not an
+    established prior precedent being extended) — genuinely exemplary
+    and already real-tested: `test/browser/density.spec.ts` includes a
+    real nested-
+    override test ("an inner Density tier overrides an outer, non-
+    default Density tier") proving nesting is genuine nearest-ancestor
+    CSS cascade, not "compact always wins." Themes and interaction/
+    accessibility **N/A** — zero `color.*` usage (a purely structural
+    wrapper, nothing to theme) and a passive, non-interactive `<div>`
+    (no click/keyboard surface of its own). API simplicity 4/4,
+    maintainability 4/4, relevant security 4/4. Performance 3/4,
+    provisional. Documentation/specimen usability: found 3/4 —
+    `docs/Density.md`'s own list of density-aware components ("Button,
+    Input, Dropdown's trigger, filter Chip, and Table") omitted
+    `ButtonGroup`, despite item 65 already confirming it's genuinely
+    `density.controlHeight`-driven — fixed to 4/4 by adding it.
+
+    **Icon.** Readability 4/4, themes 4/4 (both real consumers,
+    `ControlCenter.tsx`/`AppShell.tsx`, verified passing a real
+    `color.*` token, not a hardcoded hex), interaction/accessibility 4/4
+    (genuinely real, not assumed — `test/components.test.ts` does test
+    the `title`/accessible-name branch, `role="img"`, not just the
+    decorative default), API simplicity 4/4, maintainability 4/4,
+    relevant security 4/4. Performance 3/4, provisional. Density: found
+    2/4 (undisclosed, same shape as Chart's own gap), reclassified N/A
+    after one disclosure sentence (a glyph, not a control). Documentation/
+    specimen usability: found 2/4 — the fenced example showed only the
+    decorative `sliders` case; `bell` and the real, tested `title` prop
+    were never demonstrated, fixed to 4/4 by adding both.
+
+    **Theme.** Readability 4/4. Density and interaction/accessibility
+    **N/A** — same reasoning as `Density` itself (zero `density.*`
+    usage; a passive, non-interactive `<div>`). API simplicity 4/4,
+    maintainability 4/4, relevant security 4/4. Performance 3/4,
+    provisional.
+
+    **Themes: found 3/4, a real "claimed, never verified" gap — the
+    sixth time this exact failure class has surfaced this round (after
+    Button/Dropdown/ButtonGroup/Chip/Table).** `Theme.tsx`'s own
+    docstring states, citing `test/browser/theme-contrast.spec.ts` by
+    name: "a `dark`-forced region can still contain a `light`-forced
+    region inside it." That file's real tests only cover the *no-
+    wrapper* OS-driven case; `test/browser/control-center.spec.ts`'s own
+    `Theme` test forces one mode app-wide, never nests two explicit
+    overrides. Grepped every real `Theme`/`designSystem.Theme` usage in
+    the repo before concluding this — no test anywhere actually nests
+    one `Theme` inside another and checks the inner one wins. Fixed to
+    4/4: new `preview/ThemeLab.tsx` (mirrors `DensityLab.tsx`'s own
+    already-established pattern) gives the claim a real, addressable
+    element; a new live test in `theme-contrast.spec.ts` nests `light`
+    inside `dark` and asserts the inner region's real computed
+    background is the light palette's `bgCanvas`, not the outer dark
+    one. Red-proofed live: reverted the nesting in `ThemeLab.tsx`,
+    confirmed the test fails with the exact predicted symptom (inner
+    region stays dark), restored, reverified stable across 10 repeats.
+
+    Documentation/specimen usability: found 3/4 — the fenced example
+    showed only `value="dark"`, never `light`, and never demonstrated
+    the nesting behavior its own prose claims; fixed to 4/4 with a
+    nested `light`-inside-`dark` example matching the new test.
+
+    **All 13 components now scored at least once.** 7 of the 13 needed
+    a real code and/or test fix this round — 4 with a genuine
+    functional code change plus new tests (`Button`/61, `Text`/62,
+    `Table`/63, `Dropdown`/64's dead-code removal), 3 with a real new
+    test closing a "claimed, never verified" coverage gap but no
+    functional change needed (`Chip`/65, `ButtonGroup`/65, `Theme`/66);
+    `Input`'s own item 55 fix landed in `Shell.tsx` (framework code
+    Input's pilot scoring surfaced, not a change to `Input.tsx` itself)
+    and item 59 was documentation-only, so `Input` itself isn't counted
+    in this 7 despite being where the round started. Every fix was
+    red-proofed live, not just written and trusted. Full inventory:
+    Input 88/100 (provisional), Button 97/100 (provisional), Text
+    96/100 (provisional), Table 94/100 (provisional), Card 96/100
+    (provisional), Dropdown 91/100 (clears the score threshold but NOT
+    the per-dimension floor — a real, disclosed, deliberately-deferred
+    `glass` dark-mode gap), Chip 97/100 (provisional), Modal 96/100
+    (provisional), ButtonGroup 97/100 (provisional), Chart 93/100
+    (provisional), Density 96/100 (provisional), Icon 96/100
+    (provisional), Theme 96/100 (provisional). Every score above 85
+    except none — every component clears the round's own 85 threshold;
+    12 of 13 clear every per-dimension floor too, `Dropdown` alone
+    falling short on a real, named, disclosed gap rather than being
+    smoothed into the same language as the rest. "Provisional" across
+    the board traces to the one repo-wide gap named from the start of
+    this round and never claimed fixed: no re-render-count test exists
+    anywhere, so performance stays 3/4 (real, disclosed, not exemplary)
+    for every single component — closing that gap for real is named
+    here as the clearest next-eligible action for a future round, not
+    started in this one. Serves: completes this round's component-
+    scoring scope. Needs: issue #24 (`agreed`, project owner,
+    2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
