@@ -32,6 +32,18 @@ function listTsxFiles(dir: string): string[] {
   });
 }
 
+// Same limits as `test/shell-token-audit.test.ts`'s own `stripComments` (line/block comments
+// only, no awareness of `//`/`/*` inside a string literal) — but that precedent's copy only ever
+// runs against a small, manually-reviewed file list, so its author could confirm none of them hit
+// the edge case. This one auto-walks every `.tsx` file under `src/`, an intentionally growing,
+// non-reviewed set (found during independent review, disclosed rather than silently inherited): a
+// future `<Input placeholder="…https://foo…" label="…" />` anywhere under `src/` could have
+// everything after `//` on that line eaten, either swallowing its own `label=`/`aria-label=` or
+// breaking the block out of matching `/>` entirely — a false negative that looks like "no `<Input>`
+// there to check" rather than a caught failure. Zero real files hit this today (confirmed: the one
+// real `<Input>` usage under `src/`, `src/shell/Shell.tsx`, has no `//`/`/*` inside its own
+// strings) — if this ever needs to be robust against it, replace with a real JSX-attribute parse
+// rather than widening the regex further.
 function stripComments(source: string): string {
   return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 }
