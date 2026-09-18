@@ -441,8 +441,9 @@ Full gate suite green at the batch head: `pnpm typecheck`/`lint`/`test`
 by this milestone)/`build:docs` (27 pages)/`check-links` (27/27), `pnpm
 test:browser` (255/255, includes the 2 new tests this review added).
 
-**M10 — Framework scoring round: frozen rubric, Input pilot — in
-progress.** Item 55, issue #24 (`agreed`, project owner, 2026-09-18, via
+**M10 — Framework scoring round: frozen rubric, all 13 components
+scored — named scope complete, awaiting the owner's next direction.**
+Item 55, issue #24 (`agreed`, project owner, 2026-09-18, via
 direct instruction defining the round itself — recorded here rather than a
 separate issue comment, matching the M7–M9 precedent). Framework-only:
 `src/`, `src/shell/`, docs-site conventions. Explicitly NOT `examples/`
@@ -553,6 +554,55 @@ re-render-count test — real, missing evidence, not a rounding footnote.
 Read strictly against the rubric's own gate list, Input clears two of
 three acceptance criteria, not all three; closing the performance-evidence
 gap is real, disclosed, not-yet-started follow-up work.
+
+**Round status (updated through item 66, 2026-09-18): all four of the
+directive's named work streams are now covered at least once.** Color
+scale (item 56), standard layouts (item 57), the doc-specimen theme/
+density toggle that unblocked scoring itself (item 58), the ERP
+component-gap investigation (item 60 — one real finding, `Avatar`), and
+component scoring across all 13 `src/components/*.tsx` files (items 55,
+59, 61–66) — full per-component detail and scores are in the Items list
+below, item 66's own closing paragraph has the complete inventory. Every
+component clears the round's 85/100 threshold; 12 of 13 clear every
+per-dimension floor (`Dropdown` alone falls short, on a real, disclosed,
+deliberately-deferred gap, not smoothed into the same language as the
+rest); every score is reported PROVISIONAL, tracing to one repo-wide gap
+named from the very first pilot score and never claimed fixed — no
+re-render-count test exists anywhere in this repo yet.
+
+This round's own scoring process found and fixed 7 real, previously-
+undisclosed defects in framework code or tests it was never asked to go
+looking for (Shell's command-palette accessible name, item 55; Button's
+frozen light-mode hover-fill literal, item 61; Text's contrast near-miss,
+item 62; Table's missing keyboard contract, item 63; Dropdown's dead CSS
+rule, item 64; `docs/ButtonGroup.md`'s silently-broken live demo, item
+65; Theme's untested nesting claim, item 66) — plus a permanent gate that
+didn't exist before this round (`docs-site/scripts/check-live-demos
+.mjs`, item 65) closing the exact class of failure the sixth of those
+defects was. Independent review caught a real, substantive problem in
+close to every batch this round shipped — a governance gate miss (item
+60), a score-arithmetic error (item 61), an incomplete-scope claim (item
+62), a genuine accessibility gap in a first draft (item 63), two
+overclaims in one item (item 64), a real BLOCKER from an incomplete grep
+(item 65) — each caught and fixed before merge, not after. That review
+layer earning its keep this consistently is itself real evidence for the
+process, not just the components it was scoring.
+
+**Real, disclosed, deliberately not started this round** — named here so
+the next eligible action doesn't have to be rediscovered: a real
+repo-wide re-render-count test (the one gap holding every single
+component's performance dimension at 3/4, not 4/4); `Dropdown`'s (and
+`Modal`'s and `ControlCenter`'s) `glass` token group has no dark-mode
+variant, a real visual-design decision on par with item 56's own
+deferred `neutral`/`accent`/`danger` remap, not something to improvise
+inside a scoring pass; the 4 precompiled "pattern" pages
+(dashboard/list-report/launcher/record-detail) still render through a
+separate build path and never got item 58's own theme/density toggle;
+reclassifying 8+ `examples/*.tsx` screens' `tone="accent"` Chip usage
+onto the new `success`/`warning` tones (item 56's own disclosed
+follow-up, examples/ still out of this round's scope). **This session
+does not have a next agreed milestone — awaiting the owner's direction
+rather than starting any of the above unilaterally.**
 
 ## Items
 
