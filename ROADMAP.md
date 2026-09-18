@@ -2099,6 +2099,101 @@ issues.
     and item 62's scope-of-claim gap, which were text corrections only —
     this one changed the shipped code. Needs: issue #24 (`agreed`,
     project owner, 2026-09-18).
+64. [x] **Card and Dropdown scored: fifth and sixth components.** Card
+    31/36 (86/100) found → 31/32 (96/100) fixed, provisional. Dropdown
+    30/36 (83/100) found → 33/36 (91/100) fixed — **does not clear the
+    per-dimension floor**, a genuinely different, worse outcome than
+    every other component scored so far this round, disclosed as such
+    rather than smoothed over.
+
+    **Card.** Readability 4/4, themes 4/4 (zero raw literals, confirmed
+    by a full source read), interaction/accessibility 4/4 (genuinely
+    exemplary — `selected` carries *both* required state channels,
+    `aria-pressed` AND a real non-colour `✓` badge, unlike `Table`'s own
+    `selected` this same round, which only closed the ARIA half), API
+    simplicity 4/4, maintainability 4/4, relevant security 4/4.
+    Performance 3/4, provisional (repo-wide gap). Density: found 2/4
+    (undisclosed — zero `density.*` usage, and the one real consumer
+    that wraps a `Card` in `<Density>`, `Notifications.tsx`, only
+    affects the Card's children, not the Card itself; `docs/Card.md`
+    said nothing either way), reclassified **N/A** after adding one
+    disclosure sentence stating the real reason (a tile container, not a
+    density-tiered control) — the same legitimate-N/A shape `Text`'s own
+    scoring (item 62) already established, not a way to dodge a low
+    score: the underlying mechanism genuinely doesn't exist, matching
+    Text's own "fixed type scale, not tiered" precedent exactly.
+    Documentation/specimen usability: found 2/4 — `docs/Card.md`'s
+    fenced example showed only a bare static `Card`; `selected`,
+    `disabled`, and interactive (`onClick`) are all described in
+    detailed prose but were never demonstrated. Fixed to 4/4: added all
+    three to the fenced sample. **31/32 → 96/100** (8 applicable
+    dimensions, density excluded from sum and max) — clears the 85
+    threshold and every applicable dimension is ≥3/4, reported
+    PROVISIONAL for the same performance-evidence reason as every prior
+    item this round.
+
+    **Dropdown.** Readability 4/4, interaction/accessibility 4/4
+    (genuinely exemplary — full keyboard support, correct `listbox`/
+    `option`/`aria-activedescendant` pattern, extensively tested live),
+    API simplicity 4/4, relevant security 4/4. Performance 3/4,
+    provisional. Density: found 3/4 (a real mechanism — the trigger
+    genuinely reads `density.fontSize`/`controlHeight`, live-verified
+    directly at 36px comfortable — but zero test anywhere checked it,
+    the same "claimed, never verified" gap class `Button`'s own focus
+    ring was before item 61), fixed to 4/4: a new
+    `test/browser/compact-controls.spec.ts` case asserting the trigger's
+    real height at both ambient (36px) and compact (28px) tiers,
+    red-proofed live. Maintainability: found 3/4 (a real but invisible
+    defect — `Dropdown.tsx`'s menu item carried a dead `:hover:
+    'rgba(15, 23, 42, 0.06)'` rule, masked on every real hover by
+    `itemHighlighted`'s own `bgSubtle`, which `onMouseEnter` sets before
+    the CSS `:hover` pseudo-class could ever paint — verified live, not
+    assumed, that real hover renders the intended color; the leftover
+    was stale code from before that highlight state existed, not a
+    shipped visual bug), fixed to 4/4: removed the dead rule.
+    Documentation/specimen usability: found 3/4 (the most thorough prose
+    of any doc in this repo, but never demonstrated the `active` state
+    and didn't disclose the gap below), fixed to 4/4: added an `active`
+    example and the disclosure.
+
+    **Themes: 2/4, a real gap found, disclosed, deliberately NOT fixed
+    here — the score does not move.** The menu popover reads the
+    `glass.*` token group (`tokens.stylex.ts`) for its background,
+    border, and highlight — confirmed directly: `glass` is a plain
+    `stylex.defineVars` with no `@media (prefers-color-scheme: dark)`
+    branch at all, unlike every `color.*` token. The whole popover stays
+    a frozen light-glass panel regardless of theme (the trigger itself,
+    all `color.*` tokens, re-tints correctly). `docs/Theme.md` already
+    named this gap generically but was stale (still cited `Button`'s
+    danger-hover fill, already fixed by item 61) and imprecise (named
+    "Shell's `glass`" when Shell doesn't actually consume the `glass`
+    token group at all — only `Modal` and `Dropdown` do; `Shell`'s own
+    chrome uses separate hardcoded `rgba()` literals, a related but
+    distinct gap the M10 Text-scoring independent review already
+    surfaced for one instance, item 62). Corrected `docs/Theme.md` to
+    name the real consumers and disclosed the gap explicitly in
+    `docs/Dropdown.md` too — but did **not** design or add real
+    dark-mode `glass` values: picking translucent colors that read
+    correctly against the dark palette is a genuine visual-design
+    decision, the same category item 56 already deferred for the
+    `neutral`/`accent`/`danger` remap, not something to improvise inside
+    a scoring pass. Named as real, disclosed, not-yet-started follow-up.
+
+    **33/36 → 91/100 — clears the score threshold but NOT the
+    per-dimension floor** (themes stays at 2/4): unlike every other
+    component scored this round (Input, Button, Text, Table, Card), all
+    of which cleared every dimension at ≥3 and were only held to
+    PROVISIONAL by the separate evidence-completeness gate, Dropdown
+    fails a harder, more basic bar — a real, known, unfixed theming
+    defect. Reported honestly as such, not smoothed into the same
+    "provisional" language the other items use, since that would
+    understate a difference the rubric's own multi-gate design exists to
+    surface. Serves: this round's component-scoring scope; the second
+    time this round the scoring process has found a real, invisible-in-
+    normal-use code defect purely by reading source rather than testing
+    behavior (after item 55's Shell command-palette gap — Dropdown's own
+    dead `:hover` rule is the same class, verified dead not assumed).
+    Needs: issue #24 (`agreed`, project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
