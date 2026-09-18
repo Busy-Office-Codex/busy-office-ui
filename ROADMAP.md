@@ -1645,24 +1645,45 @@ issues.
     guideline)." New `docs/layouts.md` + `docs-site/src/pages/layouts.astro`
     (`/layouts/`, linked from the nav and the homepage) catalog 3
     structural patterns real `examples/*.tsx` screens already repeat, each
-    with a real consumer count, not invented: list + detail in one route
-    (14 screens use the `selectedId`/`row.id === selectedId` shape —
-    Billing, Companies, Delivery, and more; packaged as `ListReport` when
-    the list is the whole screen), record detail two-column main+sidebar
-    (9 screens — Invoice, Approvals, Inventory, and more; packaged as
-    `RecordDetail`), and a KPI/stat-tile row (5 screens — Dashboard,
-    BuilderReports, and more). Explicitly guidelines, not exported layout
-    components — this package's own boundary rule already refuses
-    screen-specific composition as a package export (`AGENTS.md`); named
-    here so the pattern doesn't have to be rediscovered per screen.
-    `Inbox.tsx`'s own two-pane split (independently-scrolling panes, a
-    real resizable divider) is disclosed as a real but not-yet-standard
-    pattern — one consumer today, short of Objective 3's two-consumer
-    reuse bar, named for visibility rather than claimed proven. Accept:
-    `pnpm build:docs`/`check-links` clean with the new page reachable from
-    both the nav and the homepage (not an orphan); every named consumer
-    count checked directly against real `examples/*.tsx` files, not
-    assumed from memory. No `examples/*.tsx` file touched (out of this
+    with a real consumer count: list + detail in one route (13 screens
+    genuinely click-select a row to reveal detail in the same route — 10
+    via `color.bgSelected` row styling, 3 via `Card`'s own `selected` prop;
+    `Invoice.tsx` holds a `selectedId` but never sets it from a click, so
+    it's excluded here, not double-counted), record detail two-column
+    main+sidebar (8 screens — Invoice, Inventory, Notifications, Help,
+    Profile, Settings, BuilderWorkflow, UsersAndRoles), and a KPI/stat-tile
+    row (3 screens — Dashboard, RolePage, `ListReport`'s own `StatTile`).
+    Explicitly guidelines, not exported layout components — this package's
+    own boundary rule already refuses screen-specific composition as a
+    package export (`AGENTS.md`); named here so the pattern doesn't have
+    to be rediscovered per screen. `Inbox.tsx`'s own two-pane split
+    (independently-scrolling panes, a real resizable divider) is disclosed
+    as a real but not-yet-standard pattern — one consumer today, short of
+    Objective 3's two-consumer reuse bar, named for visibility rather than
+    claimed proven.
+
+    **Correction** (independent review, before merge): the first draft
+    overclaimed two of the three counts precisely by not checking directly
+    — 5 named KPI-row consumers when only 3 were real (`Help.tsx` only
+    mentions "KPI cards" in one text string, no real stat-tile grid
+    anywhere in the file; `BuilderReports.tsx`'s grid is a configurable
+    widget-preview canvas, not a fixed orienting row); 9 named two-column
+    consumers (only 8 actually named) including `Approvals.tsx`, which is
+    genuinely the list+detail pattern (two comparable-width panes, `Card`-
+    styled selection), not this one. Also corrected: `RecordDetail.tsx` was
+    claimed to package the two-column pattern — false, its own top-level
+    layout is a single stacked column; the claim is removed, not softened.
+    Every count in the merged version was re-derived directly against real
+    `examples/*.tsx` source, including a dedicated pass reading each
+    two-column candidate's actual JSX structure (not just a flex-basis
+    regex, which itself produced false positives — e.g. `Users.tsx`'s
+    matches were inline form-field widths, not layout columns).
+
+    Accept: `pnpm build:docs`/`check-links` clean with the new page
+    reachable from both the nav and the homepage (not an orphan); every
+    named consumer count checked directly against real `examples/*.tsx`
+    files and their actual rendered structure, not assumed from memory or
+    a single grep pattern. No `examples/*.tsx` file touched (out of this
     round's scope — the layouts are described from what already exists,
     not built into new compositions). Serves: this round's standard-layout
     scope; Objective 3 (each documented layout cites its real reuse count,
