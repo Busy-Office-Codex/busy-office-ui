@@ -1865,8 +1865,9 @@ issues.
     Serves: Objective 3 (proven reuse — 3 named, verified consumers, not
     manufactured); this round's ERP-gap-investigation scope. Needs: issue
     #25 (`agreed`, project owner, 2026-09-18).
-61. [x] **Button scored: 31/36 (86/100), one real dark-mode bug found and
-    fixed.** Second component scored against the frozen rubric (after
+61. [x] **Button scored: 31/36 (86/100) found → 35/36 (97/100) after
+    fixes, provisional. One real dark-mode bug found and fixed.** Second
+    component scored against the frozen rubric (after
     Input). Readability 4/4, density 4/4 (live-verified,
     `test/browser/compact-controls.spec.ts`), API simplicity 4/4,
     maintainability 4/4, relevant security 4/4 (no
@@ -1905,10 +1906,32 @@ issues.
     the exact gap class `test/docs-contract.test.ts` exists to catch,
     that had gone unnoticed until this round's scoring actually looked).
 
-    **31/36 → 86/100, clears the 85 threshold and every dimension is now
-    ≥3/4 — full acceptance met**, unlike Input's still-provisional 88 (no
-    unresolved evidence gap here beyond the pre-existing, disclosed
-    performance caveat every component in this repo currently shares).
+    **Found 31/36 (86/100); after the 3 fixes above, 35/36 (97/100) —
+    correcting a real arithmetic error independent review caught:** the
+    first draft reported "31/36 → 86/100" as Button's *final* score while
+    also claiming every dimension now sits at its post-fix value (themes
+    4, interaction/accessibility 4, docs 4) — internally inconsistent;
+    31/36 is the pre-fix baseline (it still includes themes at 2, below
+    the dimension floor the same sentence claimed was cleared). The only
+    total consistent with the stated post-fix per-dimension values is
+    4+4+4+4+4+4+3+4+4 = 35/36.
+
+    **Reported PROVISIONAL, not full acceptance — a second correction,
+    for consistency with item 59's own precedent.** The first draft
+    granted Button "full acceptance" on the reasoning that its one
+    remaining sub-4 dimension (performance, 3/4, no re-render-count test)
+    is "a pre-existing, disclosed... caveat every component... shares,"
+    not new here. Item 59's own re-score of Input hit the identical gap
+    (performance 3/4, the same missing test) and explicitly rejected that
+    exact reasoning: "real, missing evidence, not a footnote." Applying
+    the rubric's own "complete required evidence/specimen coverage" gate
+    consistently — the same standard, not a looser one for the second
+    component scored — Button clears the 85 score threshold and every
+    per-dimension floor, but does not yet meet full acceptance for the
+    same disclosed reason Input doesn't. Closing the repo-wide
+    re-render-count gap remains real, disclosed, not-yet-started
+    follow-up work, not something either item's own scoring pass should
+    quietly paper over by treating it as exempt once already known.
     Bundle size unaffected (`pnpm verify:consumer`: 6.99KB minified,
     unchanged — a token reference in place of a literal). Serves: this
     round's component-scoring scope; demonstrates the rubric finding a
