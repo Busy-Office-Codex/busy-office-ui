@@ -1850,9 +1850,21 @@ issues.
     this investigation found, not introduced by it, and one a future
     migration to `Avatar` would automatically close (the component always
     renders it) — named here rather than fixed in `examples/` this round.
+
+    **Governance gate correction, before merge:** the first draft cited
+    only the round-level issue #24 as authorization — independent review
+    correctly caught that a genuinely new package export is a strict
+    one-way decision (`LOOP.md`'s Gate section: "new exports"), and #24's
+    own agreement to *investigate* ERP gaps does not extend to *building*
+    whatever a gap turns out to be, the identical distinction this repo's
+    own history already drew for Icon/Theme/Breadcrumbs (issues #18/#19/
+    #20 — each proposed and separately agreed, not built on the strength
+    of the broader mission agreement alone). Filed issue #25 with the full
+    evidence, `proposed`, left this item out of the merged batch until a
+    real, separate `agreed` came back — not inferred, not assumed.
     Serves: Objective 3 (proven reuse — 3 named, verified consumers, not
     manufactured); this round's ERP-gap-investigation scope. Needs: issue
-    #24 (`agreed`, project owner, 2026-09-18).
+    #25 (`agreed`, project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
