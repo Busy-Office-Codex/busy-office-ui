@@ -479,24 +479,30 @@ verified `docs/*.md` page and at least one browser test. Only the pilot
 (Input, below) is scored against the frozen rubric so far; the remaining
 12 are open, deferred work, not silently assumed passing.
 
-Two real, systemic, framework-level findings surfaced but NOT fixed this
-round (both disclosed, not fixed — out of proportion for a single-target
-pilot):
-- **Color scale**: `src/tokens.stylex.ts` has exactly one neutral scale
-  plus one accent (`accent`) and one status color (`danger`) — no
-  `success`/`warning`/`info` semantic roles; `ChipTone`'s own type
-  (`'neutral' | 'strong' | 'accent' | 'danger'`) confirms the same gap at
-  the API level. Adding roles needs real named consumers (Objective 3),
-  not yet checked.
-- **Documentation/specimen usability**: none of the 13 component doc pages
-  (`docs-site/src/pages/components/[id].astro` + `LiveDemo.tsx`) have a
-  theme or density toggle — every specimen renders exactly one static
-  state. This caps the "themes" and "documentation/specimen usability"
-  dimension score for every component until fixed. Deliberately deferred:
-  it's shared infrastructure bigger than one pilot's "smallest eligible
-  fix," and docs-site currently has zero interactive browser tests at all
-  (only `build:docs` + a structural link check) — standing up its first
-  real browser-test target is its own scoped piece of work.
+Two real, systemic, framework-level findings surfaced during the Input
+pilot — both since closed, each disclosed with real residual follow-up
+named rather than claimed fully done:
+- **Color scale** (closed, item 56): `src/tokens.stylex.ts` had exactly one
+  neutral scale plus one accent (`accent`) and one status color (`danger`)
+  — no `success`/`warning`/`info` semantic roles; `ChipTone`'s own type
+  confirmed the same gap at the API level. A real 24×11 OKLCH-generated
+  palette plus `success`/`warning` roles closed this, with 2 real named
+  consumer scenarios (Objective 3). Not done: remapping the existing
+  `neutral`/`accent`/`danger` values onto the new system (deliberately
+  deferred — high-blast-radius visual-regression risk, named as separate,
+  larger, higher-risk follow-up); reclassifying 8+ `examples/*.tsx`
+  `tone="accent"` call sites onto the new tones (also deliberately
+  deferred — `examples/` out of this round's scope).
+- **Documentation/specimen usability** (closed, item 58): none of the 13
+  component doc pages had a theme or density toggle — every specimen
+  rendered exactly one static state, capping the "themes" and
+  "documentation/specimen usability" dimension for every component. A real
+  `Theme`/`Density`/`ButtonGroup` toggle in `LiveDemo.tsx`, verified
+  against docs-site's first interactive browser-test target, closed this.
+  Not done: the 4 precompiled "pattern" pages (dashboard/list-report/
+  launcher/record-detail) render through a separate build path and don't
+  get this toggle yet (named, not yet started); no component has been
+  re-scored against the now-unblocked dimensions yet (see below).
 
 **Pilot: Input, scored 30/36 → 83/100 — below the 85 threshold, honestly
 reported, not rounded up.** Readability 3/4 (placeholder contrast not
@@ -520,6 +526,17 @@ never demonstrated interactively). The dimension holding Input back below
 3/4 is documentation/specimen usability — the clear next eligible action
 is the shared specimen-toggle fix named above, which would also lift
 themes for every component, not just Input.
+
+**This score (83/100) is not yet updated.** Item 58 has since closed the
+shared specimen-toggle gap that was the stated reason both themes and
+documentation/specimen usability were held down — Input's own live demo is
+now directly verified rendering in dark mode
+(`docs-site/test/browser/live-demo-controls.spec.ts`). Re-scoring Input
+(and starting the remaining 12 components, still entirely open) against
+the now-unblocked dimensions is the next eligible action, not done as part
+of item 58 itself — a score change needs its own verification pass against
+the frozen rubric, not a silent bump alongside the infrastructure fix that
+enabled it.
 
 ## Items
 
@@ -1690,6 +1707,61 @@ issues.
     the not-yet-standard one discloses its single-consumer status rather
     than rounding up). Needs: issue #24 (`agreed`, project owner,
     2026-09-18).
+58. [x] **Doc-specimen theme/density toggle: docs-site's shared static-
+    specimen gap, closed.** Named in the M10 section above as the clear
+    next eligible action (it caps "themes" and "documentation/specimen
+    usability" for all 13 `src/components/*.tsx` docs, not just the Input
+    pilot). `docs-site/src/components/LiveDemo.tsx` now renders real
+    `ButtonGroup` controls wired to the framework's own `Theme`/`Density`
+    components (not new bespoke UI) — every component specimen can be
+    flipped through light/dark/system and compact/comfortable/spacious
+    without leaving the page. Accept, verified live against the actual
+    served site, not assumed: a real computed-style change
+    (`getComputedStyle(...).backgroundColor`) when Theme flips, confirmed
+    reversible (light→dark→light genuinely differ, not a one-way class); a
+    real geometry change (`getBoundingClientRect().height`, 40px
+    comfortable → 32px compact → 48px spacious, matching `docs/Input.md`'s
+    own documented values) when Density flips; "System" (the default)
+    verified to genuinely follow `prefers-color-scheme` before any click,
+    not just default to light; the fix proven as shared infrastructure, not
+    Input-specific, by repeating all of the above on the unrelated Button
+    page (`docs-site/test/browser/live-demo-controls.spec.ts`, 4 tests, all
+    against the real built site).
+
+    Stood up docs-site's first interactive browser-test target to verify
+    this (previously docs-site had zero — only `pnpm build` and a
+    structural link check). That surfaced a real infrastructure defect
+    along the way: `astro preview`, run as a Playwright `webServer`
+    command, daemonizes in this environment even without `--background` —
+    reproduced directly, not assumed (each invocation logs "Preview server
+    already running" against a freshly-spawned PID, yet the port never
+    accepts a connection afterward, even immediately after `astro preview
+    stop`). Worked around, not patched over: `docs-site/scripts/
+    preview-server.mjs`, a small self-contained `node:http` static file
+    server (same "own a small script instead of fighting a black-box CLI"
+    choice this repo already made for `preview/server.mjs` and
+    `scripts/generate-palette.mjs`), serves `docs-site/dist/` directly;
+    `docs-site/playwright.config.ts`'s `webServer.command` now runs it
+    instead of `astro preview`. Wired into CI (`.github/workflows/
+    gates.yml`) as its own step, since it needs a separate port (4321) from
+    the root package's own `test:browser` (4174) and cannot share a
+    `webServer` block with it.
+
+    **Disclosed, not silently expanded:** the 4 "pattern" pages
+    (`/patterns/dashboard/`, `/patterns/list-report/`, `/patterns/
+    launcher/`, `/patterns/record-detail/`) render through a separate,
+    precompiled path (`docs-site/scripts/build-examples.mjs`), not
+    `LiveDemo.tsx` — they do NOT gain this toggle from this item; giving
+    them one is real, named, not-yet-started follow-up work, not claimed
+    done here. Component *scoring* itself (the remaining ~11 of 13
+    `src/components/*.tsx` files) is still open — this item only removes
+    the shared ceiling that was capping every one of them on two
+    dimensions; it does not itself score any additional component. Serves:
+    this round's documentation/specimen-usability scope; directly unblocks
+    re-scoring Input's themes (3/4→ eligible for re-check) and
+    documentation/specimen usability (2/4→ eligible for re-check)
+    dimensions, and every other component's, once scored. Needs: issue #24
+    (`agreed`, project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
