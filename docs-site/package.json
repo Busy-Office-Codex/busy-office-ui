@@ -8,6 +8,7 @@
     "build": "node scripts/build-examples.mjs && astro build",
     "check-links": "node scripts/check-links.mjs",
     "test": "pnpm build && pnpm check-links",
+    "test:browser": "playwright test",
     "preview": "astro preview"
   },
   "dependencies": {
@@ -18,6 +19,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@stylexjs/esbuild-plugin": "0.11.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
