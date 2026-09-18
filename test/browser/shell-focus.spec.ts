@@ -2,6 +2,16 @@ import { expect, test, type Page } from '@playwright/test';
 
 const paletteSearch = (page: Page) => page.getByPlaceholder('Search records, run actions, jump to pages…');
 
+// M10 pilot (framework scoring round, test/input-accessible-name-audit.test.ts): reproduced live,
+// not assumed — before this fix, the palette search field had no aria-label, so a screen reader
+// user got "edit text" with no indication of what it searches. Checking by accessible name (not
+// just placeholder, already covered by `paletteSearch` above) is the actual proof.
+test('the palette search field has a real accessible name, not just a placeholder', async ({ page }) => {
+  await page.goto('/#examples');
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await expect(page.getByRole('textbox', { name: 'Search records, run actions, jump to pages' })).toBeVisible();
+});
+
 test('command trigger opens with native Enter and Space and focuses palette search', async ({ page }) => {
   await page.goto('/#examples');
   const trigger = page.getByRole('button', { name: 'Open command palette', exact: true });

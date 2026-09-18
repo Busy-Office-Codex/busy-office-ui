@@ -441,6 +441,86 @@ Full gate suite green at the batch head: `pnpm typecheck`/`lint`/`test`
 by this milestone)/`build:docs` (27 pages)/`check-links` (27/27), `pnpm
 test:browser` (255/255, includes the 2 new tests this review added).
 
+**M10 — Framework scoring round: frozen rubric, Input pilot — in
+progress.** Item 55, issue #24 (`agreed`, project owner, 2026-09-18, via
+direct instruction defining the round itself — recorded here rather than a
+separate issue comment, matching the M7–M9 precedent). Framework-only:
+`src/`, `src/shell/`, docs-site conventions. Explicitly NOT `examples/`
+source, stores, routes or journeys — those may be read/run for regression
+evidence only. Follows directly from confirming this repo deliberately has
+no scoring system (`docs-site/src/pages/quality.astro`, items 47–48) while
+the *reference* repo (`Busy-Office/busy-office-ui`, selective-reference
+only) has an extensive one (`.roundtable/` scorecards, a "DSA Score") — this
+round does not adopt that apparatus; it defines a smaller, frozen,
+evidence-based rubric of its own, with this file staying the sole record
+(no new work queue, reporting loop or scheduler).
+
+**Frozen rubric** (not revised mid-round; a real counterexample would
+revise it explicitly and comparably, not silently). 9 dimensions —
+readability, density, themes, interaction/accessibility, API simplicity,
+maintainability, performance, relevant security, documentation/specimen
+usability — each scored 0–4 (0 absent/broken, 1 minimal, 2 partial, 3 meets
+the bar, 4 exemplary with real verification), summed (max 36) and
+normalized to /100. A dimension marked N/A (with a stated reason) is
+excluded from both the sum and the max, never silently scored 0 or 4.
+Acceptance per target: all required hard gates pass; score ≥85/100; every
+*applicable* dimension ≥3/4, each capped by its weakest required case, not
+averaged up; complete required evidence/specimen coverage; independent
+review; no unapproved regressions or example-application source changes.
+Missing evidence is recorded PROVISIONAL/UNVERIFIED, never silently passed;
+failures are not averaged away, targets are not lowered, difficult cases
+are not removed, consumers are not manufactured. Full dimension
+definitions and required cases: issue #24.
+
+**Concise inventory**: 13 `src/components/*.tsx` files (Button,
+ButtonGroup, Card, Chart, Chip, Density, Dropdown, Icon, Input, Modal,
+Table, Text, Theme) plus `src/shell/` — each already has a docs-contract-
+verified `docs/*.md` page and at least one browser test. Only the pilot
+(Input, below) is scored against the frozen rubric so far; the remaining
+12 are open, deferred work, not silently assumed passing.
+
+Two real, systemic, framework-level findings surfaced but NOT fixed this
+round (both disclosed, not fixed — out of proportion for a single-target
+pilot):
+- **Color scale**: `src/tokens.stylex.ts` has exactly one neutral scale
+  plus one accent (`accent`) and one status color (`danger`) — no
+  `success`/`warning`/`info` semantic roles; `ChipTone`'s own type
+  (`'neutral' | 'strong' | 'accent' | 'danger'`) confirms the same gap at
+  the API level. Adding roles needs real named consumers (Objective 3),
+  not yet checked.
+- **Documentation/specimen usability**: none of the 13 component doc pages
+  (`docs-site/src/pages/components/[id].astro` + `LiveDemo.tsx`) have a
+  theme or density toggle — every specimen renders exactly one static
+  state. This caps the "themes" and "documentation/specimen usability"
+  dimension score for every component until fixed. Deliberately deferred:
+  it's shared infrastructure bigger than one pilot's "smallest eligible
+  fix," and docs-site currently has zero interactive browser tests at all
+  (only `build:docs` + a structural link check) — standing up its first
+  real browser-test target is its own scoped piece of work.
+
+**Pilot: Input, scored 30/36 → 83/100 — below the 85 threshold, honestly
+reported, not rounded up.** Readability 3/4 (placeholder contrast not
+independently re-verified, disclosed not assumed fine); density 4/4
+(`test/browser/compact-controls.spec.ts`); themes 3/4 (only `color.*`
+tokens, error-state contrast numerically verified both palettes in
+`test/color-contrast.test.ts`, held below 4 by the shared specimen-toggle
+gap — Input's own live demo has never actually been checked rendering in
+dark mode); interaction/accessibility 3/4 (M8's aria-invalid/
+aria-describedby/id-safety fixes hold; this round found and partially
+closed a new real gap — see item 55 — but `Input` itself still ships no
+compile-time or runtime safety net against a nameless render for external
+hosts, considered and rejected this round since it would force-break
+`examples/ListReport.tsx`'s own same gap, out of scope to touch); API
+simplicity 4/4; maintainability 4/4; performance 3/4 (provisional — no
+re-render-count test exists to positively verify); relevant security 4/4
+(all text renders as React children, no `dangerouslySetInnerHTML`
+anywhere); documentation/specimen usability 2/4 (accurate prose, but the
+shared static-specimen gap above, and the error/aria-invalid state is
+never demonstrated interactively). The dimension holding Input back below
+3/4 is documentation/specimen usability — the clear next eligible action
+is the shared specimen-toggle fix named above, which would also lift
+themes for every component, not just Input.
+
 ## Items
 
 Format: `[x]` done · `[ ]` open · `[?]` proposed (needs an agreed issue).
@@ -1498,6 +1578,29 @@ issues.
     owned; only the package's own already-uncontrolled fallback gains a
     sensible default). Needs: issue #23 (`agreed`, project owner,
     2026-09-17).
+55. [x] **Input pilot: close the accessible-name gap in framework usage
+    (M10 rubric round).** Reproduced live, not assumed: `Input` has no
+    accessible-name fallback when `label` is omitted (`aria-label`/
+    `aria-labelledby` pass through natively but nothing requires one).
+    `size="search"` usages commonly omit a visible `label` by design; 2 of
+    6 real repo-wide call sites shipped with neither `label` nor
+    `aria-label`, including `src/shell/Shell.tsx`'s own command palette —
+    the framework's primary navigation mechanism, framework code, in this
+    round's scope (`examples/ListReport.tsx` has the identical gap, found
+    and disclosed, deliberately left unfixed — modifying example
+    applications is out of this round's scope). Accept: a new check
+    (`test/input-accessible-name-audit.test.ts`) scans every `<Input>`
+    usage under `src/` for an accessible-name prop, proven to actually
+    catch the defect (red-proof: ran red against `Shell.tsx`'s
+    then-current code before the fix, confirmed failing for the right
+    reason, then green after); `Shell.tsx`'s command palette gets a real
+    `aria-label`; a live browser test
+    (`test/browser/shell-focus.spec.ts`) confirms the field resolves by
+    accessible name, not just placeholder text. Serves: Objective 2 (an
+    accessibility contract the framework's own navigation depends on);
+    proves the M10 rubric process end to end (reproduce → detect → fix →
+    verify) on one real, contained finding. Needs: issue #24 (`agreed`,
+    project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).

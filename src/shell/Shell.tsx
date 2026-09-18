@@ -229,6 +229,7 @@ function CommandPalette({ commands, onClose }: { commands: readonly ShellCommand
           <div style={{ padding: '10px 16px', borderBottom: `1px solid ${color.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ flex: 1 }}>
               <Input
+                aria-label="Search records, run actions, jump to pages"
                 placeholder="Search records, run actions, jump to pages…"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
