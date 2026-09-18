@@ -40,6 +40,19 @@ export const lightPalette = {
   accentHover: '#1f6fcf',
   focusRing: '#0057b8',
   danger: '#b42318',
+  // Added for M10's color-scale work (owner-directed, 2026-09-18, issue #24): real, evidenced gap
+  // — 8+ real `examples/*.tsx` screens use `Chip`'s `tone="accent"` for status text that isn't
+  // actually accent-colored in meaning (e.g. AdminOverview.tsx's "All systems operational" reads
+  // as success, RecordDetail.tsx's "Awaiting approval" reads as a pending/caution state), because
+  // `accent` was the only non-neutral, non-danger tone available. Sourced from
+  // `src/palette.generated.ts` (the new 24-range OKLCH palette, `scripts/generate-palette.mjs`):
+  // `emerald.600`, chosen over `green.600` for a more vivid/conventional "success" read; verified
+  // 5.38:1 as flat text against `bgSurface` (matches `danger`'s own flat-text usage pattern) —
+  // `test/color-contrast.test.ts` checks the real number, not assumed.
+  success: '#3d7821',
+  // `amber.600` (over `gold.600` — amber's more orange character reads as caution more
+  // conventionally than gold's more yellow one). 5.93:1 as flat text against `bgSurface`.
+  warning: '#a34a0e',
   // Added for the token-standardization sweep (owner-directed, 2026-09-17, issue #21): a single
   // selected-row background wash, the pale-blue tint every list-plus-detail-in-one-route screen
   // uses for `row.id === selectedId ? '<this>' : undefined` (Billing, Companies, Delivery,
@@ -103,6 +116,12 @@ export const darkPalette = {
   accentHover: '#60a5fa',
   focusRing: '#3b82f6',
   danger: '#ef4444',
+  // `emerald.400`/`amber.400` — same reasoning as `lightPalette.success`/`warning` above, a
+  // lighter step for legibility against a dark ground (mirroring `danger`'s own light-step-in-
+  // light-mode/darker... lighter-step-in-dark-mode pattern). 7.32:1 / 6.81:1 as flat text against
+  // `bgSurface`.
+  success: '#81b36e',
+  warning: '#db8d65',
   // Tailwind blue-950 — a dark, blue-HUED wash (not a lightness step: its luminance nearly
   // matches `bgSubtle`'s own slate-800, ~1.0:1 against it) so a selected row reads as distinctly
   // TINTED against the `bgSurface` a Table row actually sits on, rather than just another neutral
@@ -140,6 +159,8 @@ export const color = stylex.defineVars({
   accentHover: { default: lightPalette.accentHover, '@media (prefers-color-scheme: dark)': darkPalette.accentHover },
   focusRing: { default: lightPalette.focusRing, '@media (prefers-color-scheme: dark)': darkPalette.focusRing },
   danger: { default: lightPalette.danger, '@media (prefers-color-scheme: dark)': darkPalette.danger },
+  success: { default: lightPalette.success, '@media (prefers-color-scheme: dark)': darkPalette.success },
+  warning: { default: lightPalette.warning, '@media (prefers-color-scheme: dark)': darkPalette.warning },
   bgSelected: { default: lightPalette.bgSelected, '@media (prefers-color-scheme: dark)': darkPalette.bgSelected },
 });
 

@@ -1601,6 +1601,45 @@ issues.
     proves the M10 rubric process end to end (reproduce → detect → fix →
     verify) on one real, contained finding. Needs: issue #24 (`agreed`,
     project owner, 2026-09-18).
+56. [x] **Color scale: 24-range OKLCH generator; `success`/`warning`
+    semantic roles.** Owner-directed spec (issue #24): "24 ranges × 11
+    steps, generated in OKLCH on a shared lightness ladder." New
+    `scripts/generate-palette.mjs` (self-contained OKLCH↔linear-sRGB math,
+    no new dependency — same reasoning Chart.js→ECharts's own 5-library
+    comparison already established for this repo) generates 24 hue ranges
+    15° apart, anchored at the existing neutral scale's own computed OKLCH
+    hue (257.4°, from `#64748b` — not eyeballed) × 11 shared lightness
+    steps, gamut-clamped per hue+lightness via chroma-reduction binary
+    search; committed to `src/palette.generated.ts` via `pnpm
+    generate:palette`, drift-checked by `test/palette-generator.test.ts`.
+    **Deliberately scoped additive, not a remap:** the existing
+    `neutral`/`accent`/`danger` hex values are byte-for-byte unchanged —
+    regenerating them onto the new system would be a high-blast-radius
+    visual-regression risk across every component, not something to do
+    quietly inside this item; named as a separate, larger, higher-risk
+    follow-up, not started. Real, evidenced gap found instead: 8+
+    `examples/*.tsx` screens use `Chip`'s `tone="accent"` for status text
+    that isn't accent-colored in meaning (AdminOverview.tsx's "All systems
+    operational" reads as success; RecordDetail.tsx's "Awaiting approval"
+    reads as pending/caution) — `accent` was the only non-neutral,
+    non-danger tone available. Added `success` (`emerald.600`/`emerald.400`
+    light/dark) and `warning` (`amber.600`/`amber.400`) to `color.*`,
+    sourced from the new generated palette, each numerically AA-verified
+    as flat text against `bgSurface`/`bgCanvas` in both palettes
+    (`test/color-contrast.test.ts`, mirroring `danger`'s own existing
+    checks — light: 5.38:1/5.93:1, dark: 7.32:1/6.81:1); extended
+    `ChipTone`/`toneStyles` with the same outlined shape `danger` already
+    uses (a status color reads as a status, not the filled `accent`
+    treatment); a new structural test proves the two tones render with
+    genuinely distinct classes, not aliases (`test/components.test.ts`);
+    `docs/Chip.md` updated with real use/avoid guidance (success vs.
+    warning vs. danger vs. accent). Reclassifying the 8+ existing
+    `examples/*.tsx` call sites' own `tone=` values onto the new tones is
+    real, evidenced next-eligible work — deliberately not done here
+    (modifying example applications is out of this round's scope). Serves:
+    Objective 3 (proven reuse — 2+ real, disclosed consumer scenarios
+    named) and this round's color-scale scope. Needs: issue #24 (`agreed`,
+    project owner, 2026-09-18).
 
 Each batch needs an acceptance-to-test mapping and one independent review.
 Loop runs follow [LOOP.md](LOOP.md).
