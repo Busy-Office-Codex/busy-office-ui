@@ -161,3 +161,18 @@ test.describe('prefers-color-scheme: light keeps the existing light palette unch
     await expect(rejectButton).toHaveCSS('background-color', 'rgba(180, 35, 24, 0.08)'); // lightPalette.dangerSubtle
   });
 });
+
+// M10 Theme scoring (issue #24): `Theme.tsx`'s own docstring claims nesting works the same way
+// `Density`'s own already-tested nesting does — "a `dark`-forced region can still contain a
+// `light`-forced region inside it" — but grepped every real Theme usage first: no test anywhere
+// actually nests one `Theme` inside another and checks the inner one wins (`control-center
+// .spec.ts`'s own Theme test forces a single mode app-wide, never nests two explicit overrides).
+// `/#theme-lab` (`preview/ThemeLab.tsx`) exists purely to give this claim a real element to check.
+test('a light Theme nested inside a dark Theme wins over its dark ancestor', async ({ page }) => {
+  await page.goto('/#theme-lab');
+
+  const outer = page.getByTestId('outer-dark');
+  const inner = page.getByTestId('inner-light');
+  await expect(outer).toHaveCSS('background-color', 'rgb(2, 6, 23)'); // darkPalette.bgCanvas, #020617
+  await expect(inner).toHaveCSS('background-color', 'rgb(248, 250, 252)'); // lightPalette.bgCanvas, #f8fafc
+});

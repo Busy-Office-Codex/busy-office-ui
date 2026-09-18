@@ -47,6 +47,7 @@ import { ShellBreadcrumbsLab } from './ShellBreadcrumbsLab.js';
 import { ButtonGroupLab } from './ButtonGroupLab.js';
 import { AppShellFallbackLab } from './AppShellFallbackLab.js';
 import { ChartLab } from './ChartLab.js';
+import { ThemeLab } from './ThemeLab.js';
 import '../fonts/ibm-plex-sans.css';
 
 // ROADMAP M6 (issue #17): grows one route per landed item, not a bulk switch to AppShell's own
@@ -220,8 +221,11 @@ function SamplePreview() {
 // spec.ts's disabled-segment keyboard contract, once wiring real Theme to ControlCenter.tsx's
 // Appearance control left that contract with no enabled/disabled ButtonGroup call site anywhere
 // in `examples/` — see ButtonGroupLab.tsx. `#chart-lab` is the same idea again for
-// test/browser/chart.spec.ts's ROADMAP item 51 (issue #22) coverage — see ChartLab.tsx. `#login`
-// mounts the pre-auth
+// test/browser/chart.spec.ts's ROADMAP item 51 (issue #22) coverage — see ChartLab.tsx.
+// `#theme-lab` is the same idea again, for nesting one `Theme` inside another (M10 Theme scoring,
+// issue #24) — no real `examples/*.tsx` screen ever nests two explicit `Theme` overrides, so this
+// gives that claim, made in `Theme.tsx`'s own docstring, a real element to check against — see
+// ThemeLab.tsx. `#login` mounts the pre-auth
 // Login screen standalone (ROADMAP M6, issue #17) — it precedes the shell conceptually (a real
 // host shows it before Shell ever mounts), so it isn't one of `routes` above. M7 Slice 8
 // (Entry/nav) added the rest of this pre-shell family (password reset, account locked, session
@@ -278,6 +282,7 @@ function App() {
   if (hash === '#button-group-lab') return <ButtonGroupLab />;
   if (hash === '#app-shell-fallback-lab') return <AppShellFallbackLab />;
   if (hash === '#chart-lab') return <ChartLab />;
+  if (hash === '#theme-lab') return <ThemeLab />;
   if (hash === '#password-reset') return <PasswordReset />;
   if (hash === '#account-locked') return <AccountLocked />;
   if (hash === '#session-expired') return <SessionExpired />;
