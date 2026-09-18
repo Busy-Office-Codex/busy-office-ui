@@ -545,12 +545,14 @@ toggled between them on demand: "meets the bar," not "exemplary." All
 other dimensions unchanged (no new evidence): readability 3/4, density
 4/4, interaction/accessibility 3/4, API simplicity 4/4, maintainability
 4/4, performance 3/4, relevant security 4/4. Every applicable dimension is
-now ≥3/4 and the score (88) clears the 85 threshold — but performance
-stays explicitly PROVISIONAL (no re-render-count test exists), per the
-rubric's own "missing evidence is recorded PROVISIONAL/UNVERIFIED, never
-silently passed" rule — so this is reported as a provisional pass, not an
-unqualified one; closing that gap is real, disclosed, not-yet-started
-follow-up work, not required to keep this milestone moving.
+now ≥3/4 and the score (88) clears the 85 threshold — but full acceptance
+is not yet met: the frozen rubric lists "complete required
+evidence/specimen coverage" as its own acceptance gate, separate from the
+score and per-dimension thresholds, and performance (3/4) still has no
+re-render-count test — real, missing evidence, not a rounding footnote.
+Read strictly against the rubric's own gate list, Input clears two of
+three acceptance criteria, not all three; closing the performance-evidence
+gap is real, disclosed, not-yet-started follow-up work.
 
 ## Items
 
@@ -1786,9 +1788,10 @@ issues.
     survives: the error/valid states are two separate static elements
     shown side by side, not one field toggled between them on demand.
     Every other dimension unchanged (no new evidence gathered for them).
-    Score clears the round's 85 threshold, but is reported PROVISIONAL —
-    performance (3/4) still has no re-render-count test, per the rubric's
-    own rule that missing evidence is disclosed, never silently passed.
+    Score clears the round's 85 threshold, but full acceptance is not yet
+    met: the rubric's "complete required evidence/specimen coverage" gate
+    is its own acceptance criterion, and performance (3/4) still has no
+    re-render-count test — real, missing evidence, not a footnote.
     No src/test changes — a documentation-only re-assessment against
     already-existing evidence (item 58's live verification, the
     pre-existing `test/color-contrast.test.ts` numeric checks). Serves:
