@@ -112,6 +112,13 @@ describe.each([
     expect(contrastRatio(palette.textSecondary, palette.bgSubtle)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
   });
 
+  // M10 Chip scoring (issue #24): `Chip`'s `toneStrong` (`Chip.tsx`) uses `border` as its own
+  // background with `textPrimary` text — a real, shipped combination with no prior contrast check
+  // anywhere (grepped this file for `palette.border` as a background: zero hits before this).
+  it('textPrimary on border (Chip toneStrong) clears 4.5:1 (body text)', () => {
+    expect(contrastRatio(palette.textPrimary, palette.border)).toBeGreaterThanOrEqual(AA_BODY_TEXT);
+  });
+
   // `textOnInk` is the text color placed on top of `action`/`accent`/`danger` when any of those
   // three is used as a filled background (Button primary, filter Chip selected, Dropdown active
   // trigger/item, Chip status "accent" tone, Shell's dock badge/active tab, Button danger's

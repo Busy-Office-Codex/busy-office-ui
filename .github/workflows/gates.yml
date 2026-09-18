@@ -32,6 +32,7 @@ jobs:
       - run: pnpm security
       - run: pnpm build:docs
       - run: node docs-site/scripts/check-links.mjs
+      - run: node docs-site/scripts/check-live-demos.mjs
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:browser
       - run: pnpm --filter docs-site test:browser

@@ -113,3 +113,23 @@ test('Dropdown trigger height follows density: 36px ambient, 28px inside a local
   const compactTrigger = page.getByRole('button', { name: /^Role ·/ });
   await expect(compactTrigger).toHaveCSS('height', '28px');
 });
+
+// M10 ButtonGroup scoring (issue #24): docs/ButtonGroup.md and the component's own code comments
+// both claim `density.controlHeight`-driven sizing, but grepped every test file for "ButtonGroup"
+// first — none of the real hits (button-group.spec.ts, control-center.spec.ts, chart.spec.ts,
+// components.test.ts) assert a height at any density tier. Heights below are the segment's own
+// bounding box, not the raw `density.controlHeight` value: the track's 1px border is subtracted
+// from its `box-sizing: border-box` content area, which `align-items: stretch` then fills exactly
+// — measured live, not assumed (34px/26px, not the token's own 36px/28px).
+test('ButtonGroup segment height follows density: 34px ambient, 26px inside a compact region', async ({ page }) => {
+  await page.goto('/#examples');
+  await page.getByRole('button', { name: 'Control center' }).click();
+  const ambientSegment = page.getByRole('radiogroup', { name: 'Density' }).getByRole('radio').first();
+  await expect(ambientSegment).toHaveCSS('height', '34px');
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Open command palette', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('button', { name: /^Pages\s+[A-Z]/ }).click();
+  const compactSegment = page.getByRole('radiogroup', { name: 'View mode' }).getByRole('radio').first();
+  await expect(compactSegment).toHaveCSS('height', '26px');
+});
