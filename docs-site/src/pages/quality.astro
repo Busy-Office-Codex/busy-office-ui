@@ -1,15 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
+import { M10_SCORES, RUBRIC_DIMENSIONS, THRESHOLD, PROVISIONAL_NOTE } from '../data/m10Scores.ts';
 
 const REPO = 'https://github.com/Busy-Office-Codex/busy-office-ui';
 
-// This repo has no scoring/assessment/conformance system anywhere — confirmed by a repo-wide
-// grep, a GitHub-org-wide search, and this exact question being the reason issue #21 (the
-// website/content/sample-app reorganization this page is part of) exists at all: the brief that
-// started that workstream assumed a "scoring work" to reuse, and none was ever found. This page
-// deliberately doesn't invent one. What it surfaces instead is real and already exists: the CI
-// gate suite (below) and ROADMAP.md's own narrated review findings per milestone (linked, not
-// duplicated — this page never restates a finding ROADMAP.md already owns).
+// Until M10 (issue #24), this repo genuinely had no scoring/assessment/conformance system —
+// confirmed by a repo-wide grep, a GitHub-org-wide search, and this exact question being the
+// reason issue #21 (the website/content/sample-app reorganization this page is part of) exists
+// at all. That's no longer true: M10 froze a real 9-dimension rubric and scored all 13 framework
+// components against it (ROADMAP.md items 55, 59, 61-66). This page surfaces that score
+// alongside what always existed here — the CI gate suite (below) and ROADMAP.md's own narrated
+// review findings per milestone (linked, not duplicated — this page never restates a finding
+// ROADMAP.md already owns).
 const GATES = [
   { step: 'pnpm build', checks: 'The package builds: TS declarations, browser ESM, compiled StyleX CSS' },
   { step: 'pnpm lint', checks: 'ESLint across src, examples, preview, test' },
@@ -18,13 +20,36 @@ const GATES = [
   { step: 'pnpm security', checks: 'pnpm audit --prod --audit-level high' },
   { step: 'pnpm build:docs', checks: "docs-site builds against the real, just-built package — added by this workstream (issue #21) after finding docs-site's own build had been red on main for 29 consecutive pushes with nothing acting on it (this workflow didn't exist yet)" },
   { step: 'node docs-site/scripts/check-links.mjs', checks: 'Every internal link in the built docs-site resolves, case-exact (fragment/#anchor links are not checked)' },
+  { step: 'node docs-site/scripts/check-live-demos.mjs', checks: "Every doc page's live demo actually rendered — not a silent runtime error swallowed into a visible-but-unnoticed <pre role=\"alert\"> box" },
+  { step: 'node docs-site/scripts/check-llms-txt.mjs', checks: 'The generated /llms.txt lists every real component doc, and is non-empty' },
   { step: 'pnpm test:browser', checks: 'Playwright, real browser — a dedicated spec file for most sample screens, the rest covered by cross-cutting suites (accessibility/contrast, focus/keyboard, layout/responsiveness, navigation, dark-mode)' },
 ];
+
+const sortedScores = [...M10_SCORES].sort((a, b) => b.score - a.score);
 ---
 <Base title="Quality & Verification">
   <a href="/">&larr; Home</a>
   <h1>Quality &amp; Verification</h1>
-  <p>What actually verifies a change here, and what it doesn't — not a score. There is no scoring, assessment or conformance-record system anywhere in this project or its sibling repositories; a repo-wide and GitHub-org-wide search turned up nothing to reuse or link to. What exists instead: a CI gate suite that runs on every push to <code>main</code>, and a narrated, per-milestone review record already kept in <a href={`${REPO}/blob/main/ROADMAP.md`}><code>ROADMAP.md</code></a> — this page points at both rather than duplicating either.</p>
+  <p>What actually verifies a change here, and what it doesn't. Two things exist: a CI gate suite that runs on every push to <code>main</code> (below), and a real per-component review score from M10's framework-scoring round (<a href={`${REPO}/issues/24`}>issue #24</a>) — the first, and so far only, scoring system this repo has ever had. A narrated, per-milestone review record is kept in <a href={`${REPO}/blob/main/ROADMAP.md`}><code>ROADMAP.md</code></a> — this page points at it rather than duplicating it.</p>
+
+  <h2>Component scores (M10, issue #24)</h2>
+  <p>Every framework component in <code>src/components/*.tsx</code> as of M10 (13 of the 14 files there today — <code>Avatar</code> was added afterward, by <a href={`${REPO}/issues/25`}>issue #25</a>, and hasn't been scored under this rubric yet) was scored 0-4 on each of <strong>{RUBRIC_DIMENSIONS.length} dimensions</strong> — {RUBRIC_DIMENSIONS.join(', ').toLowerCase()} — summed and normalized to a score out of 100. A target had to clear a <strong>{THRESHOLD}/100</strong> threshold, with every applicable dimension at or above its own floor (the score is capped by the weakest dimension, never averaged away). Full dimension definitions live in issue #24; the numbers below are hand-transcribed from <a href={`${REPO}/blob/main/ROADMAP.md`}><code>ROADMAP.md</code></a>'s own item text (there's no structured score store to query live) — each row cites the item it came from so it can be checked against the source.</p>
+  <table>
+    <thead><tr><th>Component</th><th>Score</th><th>Clears {THRESHOLD}?</th><th>Clears every floor?</th><th>ROADMAP item</th><th>Note</th></tr></thead>
+    <tbody>
+      {sortedScores.map((row) => (
+        <tr>
+          <td><a href={`/components/${row.id}/`}>{row.id}</a></td>
+          <td>{row.score}/100</td>
+          <td>{row.score >= THRESHOLD ? 'Yes' : 'No'}</td>
+          <td>{row.clearsFloor ? 'Yes' : 'No'}</td>
+          <td>{row.item}</td>
+          <td>{row.note ?? '—'}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p><strong>{PROVISIONAL_NOTE}</strong> Every score above is the final, post-independent-review number — the round's own summary discloses that review caught and fixed a real defect (a score-arithmetic error, an incomplete-scope claim, two overclaims in one item) in close to every batch it shipped, so the first-drafted numbers were not what shipped.</p>
 
   <h2>The gate suite</h2>
   <p>Every one of these runs on every push to <code>main</code> (<a href={`${REPO}/blob/main/.github/workflows/gates.yml`}><code>.github/workflows/gates.yml</code></a>) — a red run is fixed before any other work, per <a href={`${REPO}/blob/main/AGENTS.md`}><code>AGENTS.md</code></a>. Run the same commands locally, in this order, before handing off a change:</p>

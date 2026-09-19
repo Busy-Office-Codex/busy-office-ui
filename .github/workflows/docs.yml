@@ -36,6 +36,7 @@ jobs:
       - run: pnpm --filter docs-site build
       - run: pnpm --filter docs-site check-links
       - run: pnpm --filter docs-site check-live-demos
+      - run: pnpm --filter docs-site check-llms-txt
 
       - name: Compute lowercase image name
         id: image

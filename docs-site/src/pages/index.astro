@@ -1,32 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
+import { selectComponentEntries, groupByCategory } from '../lib/categories.ts';
 
 // Sample-page compositions (ListReport/RecordDetail/Launcher/Dashboard/AppShell) render as
 // "Patterns" below, not in this list, even though AppShell's own route still lives under
 // /components/ (see docs-site/src/pages/components/[id].astro's comment for why) — the index
 // groups by what a reader is looking for, not by URL shape.
-const PATTERN_DOC_IDS = ['listreport', 'recorddetail', 'launcher', 'dashboard', 'appshell'];
-const CATEGORY_ORDER = ['actions', 'forms', 'data-display', 'feedback', 'layout', 'typography', 'media'];
-const CATEGORY_LABELS: Record<string, string> = {
-  actions: 'Actions',
-  forms: 'Forms',
-  'data-display': 'Data display',
-  feedback: 'Feedback',
-  layout: 'Layout',
-  typography: 'Typography',
-  media: 'Media',
-};
-
-const componentEntries = (await getCollection('docs', (entry) => entry.id !== 'design-conventions' && entry.id !== 'layouts' && !PATTERN_DOC_IDS.includes(entry.id))).sort(
-  (a, b) => a.id.localeCompare(b.id),
-);
-const componentsByCategory = CATEGORY_ORDER.map((category) => ({
-  category,
-  label: CATEGORY_LABELS[category] ?? category,
-  entries: componentEntries.filter((entry) => entry.data.category === category),
-})).filter((group) => group.entries.length > 0);
-const uncategorized = componentEntries.filter((entry) => !CATEGORY_ORDER.includes(entry.data.category ?? ''));
+const componentEntries = selectComponentEntries(await getCollection('docs'));
+const { componentsByCategory, uncategorized } = groupByCategory(componentEntries);
 
 const patterns = [
   { label: 'Launcher', href: '/patterns/launcher/' },
@@ -63,6 +45,7 @@ import { Shell } from '@busyoffice/design-system/shell';`}</code></pre>
   <p><a href="/base-styles/">Elevation, radius, glass, motion and the icon set</a> — the visual primitives every component is built from.</p>
 
   <h2 id="components">Components</h2>
+  <p><a href="/components/">Browse the components gallery</a> — every component below, live and filterable by category in one grid, not just linked one at a time.</p>
   {componentsByCategory.map((group) => (
     <>
       <h3>{group.label}</h3>
@@ -96,7 +79,7 @@ import { Shell } from '@busyoffice/design-system/shell';`}</code></pre>
   <p><a href="/examples/">The full examples gallery</a> — all 47 <code>examples/*.tsx</code> screens catalogued by module, including the entry/state screens (sign-in, session-expired, 404) that aren't reachable from inside the running app today.</p>
 
   <h2>Quality &amp; Verification</h2>
-  <p><a href="/quality/">What actually verifies a change here</a> — the CI gate suite, the review process, and disclosed known limitations. Not a score.</p>
+  <p><a href="/quality/">What actually verifies a change here</a> — the CI gate suite, the review process, disclosed known limitations, and each framework component's own M10 review score.</p>
 
   <h2>Build with AI</h2>
   <p><a href="/build-with-ai/">Scope, the two-way/one-way gate, and common mistakes</a> — for an agent or contributor about to make a change here.</p>
