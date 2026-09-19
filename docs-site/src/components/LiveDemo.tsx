@@ -77,17 +77,31 @@ export function LiveDemo({ code, neutralizeHeadings }: LiveDemoProps) {
   const [theme, setTheme] = React.useState<ThemeChoice>('system');
   const [density, setDensity] = React.useState<DensityChoice>('comfortable');
 
-  const element = React.useMemo<React.ReactNode>(() => {
-    try {
-      // eslint-disable-next-line no-new-func -- compiled at build time from a trusted, in-repo doc file.
-      const factory = new Function(...SCOPE_KEYS, 'React', `return (${code});`);
-      const values = neutralizeHeadings ? NEUTRAL_SCOPE_VALUES : SCOPE_VALUES;
-      return factory(...values, React) as React.ReactNode;
-    } catch (error) {
-      return React.createElement('pre', { role: 'alert' }, error instanceof Error ? error.message : String(error));
-    }
+  // The sample is rendered as its OWN component, not as an element built during this component's
+  // render. That distinction is load-bearing: a doc sample may call hooks (docs/Modal.md and
+  // docs/ButtonGroup.md both use `React.useState` to be self-contained), and evaluating it inside a
+  // `useMemo` here registered those hooks against *LiveDemo's* hook list on the first render only.
+  // The memo never re-ran, so the sample's own `setState` dropped the hook count and React threw
+  // #300 "Rendered fewer hooks than expected", killing the island — found live: clicking the Modal
+  // sample's trigger, or the ButtonGroup sample's own density segments, crashed the demo silently.
+  // Calling the factory inside `DocSample`'s render puts the sample's hooks where they belong, so
+  // its state updates re-render just the sample.
+  const DocSample = React.useMemo(() => {
+    const values = neutralizeHeadings ? NEUTRAL_SCOPE_VALUES : SCOPE_VALUES;
+    return function DocSample() {
+      try {
+        // eslint-disable-next-line no-new-func -- compiled at build time from a trusted, in-repo doc file.
+        const factory = new Function(...SCOPE_KEYS, 'React', `return (${code});`);
+        return factory(...values, React) as React.ReactNode;
+      } catch (error) {
+        // Keeps the visible-alert contract `docs-site/scripts/check-live-demos.mjs` greps for, on
+        // the server-rendered pass as well as in the browser.
+        return React.createElement('pre', { role: 'alert' }, error instanceof Error ? error.message : String(error));
+      }
+    };
   }, [code, neutralizeHeadings]);
 
+  const element = <DocSample />;
   const themed = theme === 'system' ? element : <Theme value={theme}>{element}</Theme>;
 
   return (

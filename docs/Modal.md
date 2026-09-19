@@ -12,16 +12,19 @@ Accessibility: `Modal` renders on the native `<dialog>` element, opened with `sh
 
 ```jsx
 (() => {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   return (
-    <Modal
-      open={open}
-      onClose={() => setOpen(false)}
-      title="Reject SO-1042?"
-      actions={<><Button variant="ghost">Cancel</Button><Button variant="danger">Reject</Button></>}
-    >
-      The requester and Finance will see your comment in the record history.
-    </Modal>
+    <>
+      <Button variant="secondary" onClick={() => setOpen(true)}>Reject order…</Button>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Reject SO-1042?"
+        actions={<><Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button><Button variant="danger" onClick={() => setOpen(false)}>Reject</Button></>}
+      >
+        The requester and Finance will see your comment in the record history.
+      </Modal>
+    </>
   );
 })()
 ```
