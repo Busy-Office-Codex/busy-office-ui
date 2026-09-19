@@ -1,0 +1,145 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { LiveDemo } from '../../components/LiveDemo.tsx';
+import { GalleryControls } from '../../components/GalleryControls.tsx';
+import { extractJsxBlock } from '../../lib/extractDemo.ts';
+import { compileJsxSample } from '../../lib/compileJsx.ts';
+import { selectComponentEntries, groupByCategory } from '../../lib/categories.ts';
+import { Card, Chip, Text } from '@busyoffice/design-system';
+
+// The gallery this docs-site never had: every component in one filterable grid, instead of only
+// a category-grouped link list (index.astro's own "Components" section) plus one page per
+// component ([id].astro). Reuses the exact same extraction/compile pipeline [id].astro already
+// uses for its own live demo — no new demo-rendering logic, just applied to every entry at once.
+const componentEntries = selectComponentEntries(await getCollection('docs'));
+const { componentsByCategory, uncategorized } = groupByCategory(componentEntries);
+
+const filterCategories = componentsByCategory.map((group) => ({ value: group.category, label: group.label }));
+---
+<Base title="Components">
+  <a href="/">&larr; Home</a>
+  <h1>Components</h1>
+  <p>Every component in <code>@busyoffice/design-system</code>, live and filterable by category — each tile is a real, hydrated instance of the actual built package, the same demo its own component page renders, not a screenshot. Open a tile's name for its full docs, prop-shape notes and test list.</p>
+
+  <GalleryControls client:load categories={filterCategories} />
+
+  <div data-gallery-grid class="gallery-grid" data-layout="comfortable">
+    {componentsByCategory.map((group) => (
+      <section data-category-section aria-labelledby={`category-${group.category}`}>
+        <h2 id={`category-${group.category}`}>{group.label}</h2>
+        <div class="gallery-tiles">
+          {group.entries.map((entry) => {
+            const jsxSample = extractJsxBlock(entry.body ?? '');
+            const compiled = jsxSample ? compileJsxSample(jsxSample) : null;
+            return (
+              <div data-gallery-item data-name={entry.id} data-category={group.category} class="gallery-tile">
+                <Card>
+                  <div class="gallery-tile-header">
+                    <a href={`/components/${entry.id}/`}>
+                      <Text variant="title" as="h3">{entry.id}</Text>
+                    </a>
+                    <Chip variant="status" tone="neutral">{group.label}</Chip>
+                  </div>
+                  {compiled ? (
+                    <LiveDemo client:visible code={compiled} neutralizeHeadings />
+                  ) : (
+                    <p>No JSX sample found for this page.</p>
+                  )}
+                </Card>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+
+    {uncategorized.length > 0 && (
+      <section data-category-section aria-labelledby="category-other">
+        <h2 id="category-other">Other</h2>
+        <div class="gallery-tiles">
+          {uncategorized.map((entry) => {
+            const jsxSample = extractJsxBlock(entry.body ?? '');
+            const compiled = jsxSample ? compileJsxSample(jsxSample) : null;
+            return (
+              <div data-gallery-item data-name={entry.id} data-category="" class="gallery-tile">
+                <Card>
+                  <div class="gallery-tile-header">
+                    <a href={`/components/${entry.id}/`}>
+                      <Text variant="title" as="h3">{entry.id}</Text>
+                    </a>
+                  </div>
+                  {compiled ? (
+                    <LiveDemo client:visible code={compiled} neutralizeHeadings />
+                  ) : (
+                    <p>No JSX sample found for this page.</p>
+                  )}
+                </Card>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    )}
+  </div>
+
+  <style>
+    .gallery-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 20px 0 28px;
+    }
+    .gallery-controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .gallery-category-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .gallery-controls-count {
+      margin: 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .gallery-tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      margin: 16px 0 32px;
+    }
+    .gallery-tile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .gallery-tile-header a {
+      text-decoration: none;
+    }
+    .gallery-tile-header a:hover {
+      text-decoration: underline;
+    }
+    .gallery-tile :global(.live-demo) {
+      margin: 8px 0 0;
+    }
+    /* Compact layout (GalleryControls' own ButtonGroup): tighter tiles, more per row — a grid
+       density toggle applied to the gallery's own chrome, distinct from each tile's own
+       Density-tier demo controls inside LiveDemo. */
+    [data-gallery-grid][data-layout='compact'] .gallery-tiles {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    [data-gallery-grid][data-layout='compact'] .gallery-tile {
+      padding: 12px;
+    }
+    @media (prefers-color-scheme: dark) {
+      .gallery-controls-count { color: #94a3b8; }
+    }
+  </style>
+</Base>

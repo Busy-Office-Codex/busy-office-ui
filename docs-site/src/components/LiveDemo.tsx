@@ -11,8 +11,27 @@ import { AppShell } from '@busyoffice/design-system/examples/app-shell';
 // here because their own docs (docs/ListReport.md, docs/RecordDetail.md, docs/AppShell.md) demo
 // the sample-page composition, not a raw package component.
 const SCOPE: Record<string, unknown> = { ...DesignSystem, Shell, ListReport, RecordDetail, AppShell };
+
+// A doc's own fenced sample often renders `Text variant="heading"`/`"title"`/`"display"` with no
+// `as` override, which `Text.tsx`'s own default element map turns into a real `<h1>`/`<h2>`/`<h3>`
+// (see `docs/Card.md`'s "Open orders"/"128" pair). On [id].astro that's harmless — one demo per
+// page, sitting after that page's own "Live demo" heading. On the /components/ gallery, many
+// tiles' demos share one page inside a real category/tile heading structure, and those same demo
+// headings land at the same rank as the page's real navigational headings — a screen reader's
+// heading list (NVDA/JAWS "H", VoiceOver rotor) ends up mixing in sample content like "128"
+// alongside real section titles. `neutralizeHeadings` (below) swaps in a `Text` that keeps every
+// variant's real font styling but renders heading variants as a plain `<span>` instead, for
+// exactly that aggregate context — [id].astro's own single-demo usage doesn't pass it, so its
+// behavior there is unchanged.
+const HEADING_VARIANTS = new Set(['display', 'heading', 'title']);
+function NeutralHeadingText({ variant, as, ...rest }: DesignSystem.TextProps) {
+  const resolvedAs = as ?? (variant && HEADING_VARIANTS.has(variant) ? 'span' : undefined);
+  return <DesignSystem.Text variant={variant} as={resolvedAs} {...rest} />;
+}
+const NEUTRAL_SCOPE: Record<string, unknown> = { ...SCOPE, Text: NeutralHeadingText };
 const SCOPE_KEYS = Object.keys(SCOPE);
 const SCOPE_VALUES = SCOPE_KEYS.map((key) => SCOPE[key]);
+const NEUTRAL_SCOPE_VALUES = SCOPE_KEYS.map((key) => NEUTRAL_SCOPE[key]);
 
 // M10 (issue #24): every component specimen used to render exactly one static state — whatever
 // the doc's own fenced example happened to show, in whatever the browser's OS theme was at load.
@@ -41,6 +60,10 @@ const DENSITY_OPTIONS: { value: DensityChoice; label: string }[] = [
 export type LiveDemoProps = {
   /** A single compiled JS expression (see `src/lib/compileJsx.ts`), not raw JSX. */
   code: string;
+  /** See the comment on `NeutralHeadingText` above — pass `true` on a page that renders more than
+   * one `LiveDemo` sharing a real heading structure (the /components/ gallery); leave it off (the
+   * default) on a page like [id].astro with exactly one demo of its own. */
+  neutralizeHeadings?: boolean;
 };
 
 /**
@@ -50,7 +73,7 @@ export type LiveDemoProps = {
  * means — so `"System"` here renders no `Theme` wrapper at all, mirroring `examples/AppShell.tsx`'s
  * own `ControlCenter`-driven `themed()` helper exactly, not a new pattern invented for docs-site.
  */
-export function LiveDemo({ code }: LiveDemoProps) {
+export function LiveDemo({ code, neutralizeHeadings }: LiveDemoProps) {
   const [theme, setTheme] = React.useState<ThemeChoice>('system');
   const [density, setDensity] = React.useState<DensityChoice>('comfortable');
 
@@ -58,11 +81,12 @@ export function LiveDemo({ code }: LiveDemoProps) {
     try {
       // eslint-disable-next-line no-new-func -- compiled at build time from a trusted, in-repo doc file.
       const factory = new Function(...SCOPE_KEYS, 'React', `return (${code});`);
-      return factory(...SCOPE_VALUES, React) as React.ReactNode;
+      const values = neutralizeHeadings ? NEUTRAL_SCOPE_VALUES : SCOPE_VALUES;
+      return factory(...values, React) as React.ReactNode;
     } catch (error) {
       return React.createElement('pre', { role: 'alert' }, error instanceof Error ? error.message : String(error));
     }
-  }, [code]);
+  }, [code, neutralizeHeadings]);
 
   const themed = theme === 'system' ? element : <Theme value={theme}>{element}</Theme>;
 
