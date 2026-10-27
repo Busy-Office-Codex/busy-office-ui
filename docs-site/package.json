@@ -16,7 +16,7 @@
   "dependencies": {
     "@astrojs/react": "6.0.5",
     "@busyoffice/design-system": "workspace:*",
-    "astro": "7.3.2",
+    "astro": "7.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
